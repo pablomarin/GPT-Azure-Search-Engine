@@ -1,2 +1,5 @@
 .amlignore
-00 - Resource Deployment/.ipynb_aml_checkpoints/00 - Resource Deployment -checkpoint2023-1-28-14-38-32Z.ipynb
+
+.ipynb_aml_checkpoints/ 
+*.amltmp 
+*.amltemp
