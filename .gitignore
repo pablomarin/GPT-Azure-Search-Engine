@@ -1,5 +1,6 @@
 .amlignore
 
+.ipynb_checkpoints/
 .ipynb_aml_checkpoints/ 
 *.amltmp 
 *.amltemp
