@@ -4,6 +4,5 @@ faiss-cpu
 openai
 docx2txt
 pillow
-pypd
+pypdf
 tenacity
-
