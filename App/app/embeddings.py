@@ -42,10 +42,10 @@ class OpenAIEmbeddings(BaseModel, Embeddings):
     def validate_environment(cls, values: Dict) -> Dict:
         """Validate that api key and python package exists in environment."""
         openai_api_key = get_from_dict_or_env(
-            values, "openai_api_key", "OPENAI_API_KEY"
+            values, "openai_api_key", "AZURE_OPENAI_API_KEY"
         )
         openai_api_endpoint = get_from_dict_or_env(
-            values, "openai_api_endpoint", "OPENAI_API_ENDPOINT"
+            values, "openai_api_endpoint", "AZURE_OPENAI_API_KEY"
         )
         try:
             import openai

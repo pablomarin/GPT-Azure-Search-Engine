@@ -83,26 +83,25 @@ def text_to_docs(text: str | List[str]) -> List[Document]:
     return doc_chunks
 
 
-@st.cache(allow_output_mutation=True, show_spinner=False)
+@st.cache_data(allow_output_mutation=True, show_spinner=False)
 def embed_docs(docs: List[Document]) -> VectorStore:
     """Embeds a list of Documents and returns a FAISS index"""
 
-    if not st.session_state.get("OPENAI_API_KEY"):
+    if not st.session_state.get("AZURE_OPENAI_API_KEY"):
         raise AuthenticationError(
-            "Enter your OpenAI API key in the sidebar. You can get a key at"
-            " https://platform.openai.com/account/api-keys."
+            "You need to set the env variable AZURE_OPENAI_API_KEY"
         )
     else:
         # Embed the chunks
         embeddings = OpenAIEmbeddings(
-            openai_api_key=st.session_state.get("OPENAI_API_KEY")
+            openai_api_key=st.session_state.get("AZURE_OPENAI_API_KEY")
         )  # type: ignore
         index = FAISS.from_documents(docs, embeddings)
 
         return index
 
 
-@st.cache(allow_output_mutation=True)
+@st.cache_data(allow_output_mutation=True)
 def search_docs(index: VectorStore, query: str) -> List[Document]:
     """Searches a FAISS index for similar chunks to the query
     and returns a list of Documents."""
@@ -112,7 +111,7 @@ def search_docs(index: VectorStore, query: str) -> List[Document]:
     return docs
 
 
-@st.cache(allow_output_mutation=True)
+@st.cache_data(allow_output_mutation=True)
 def get_answer(docs: List[Document], query: str) -> Dict[str, Any]:
     """Gets an answer to a question from a list of Documents."""
 
@@ -136,7 +135,7 @@ def get_answer(docs: List[Document], query: str) -> Dict[str, Any]:
     return answer
 
 
-@st.cache(allow_output_mutation=True)
+@sst.cache_data(allow_output_mutation=True)
 def get_sources(answer: Dict[str, Any], docs: List[Document]) -> List[Document]:
     """Gets the source documents for an answer."""
 
