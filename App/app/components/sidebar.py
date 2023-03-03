@@ -2,7 +2,7 @@ import streamlit as st
 
 
 
-def set_openai_api_key(api_key: str):
+def set_openai_api_key():
     st.session_state["OPENAI_API_KEY"] = "48e3114b81d1430eb1f3df7fb783f176"
     st.session_state["OPENAI_ENDPOINT"] = "https://pablo.openai.azure.com/"
 
@@ -15,7 +15,7 @@ def sidebar():
             "2. Ask a question about the document💬\n"
         )
         
-        set_openai_api_key(api_key_input)
+        set_openai_api_key()
 
         st.markdown("---")
         st.markdown("# About")
