@@ -33,7 +33,7 @@
             "P3",
             "P4"
         ],
-        "defaultValue": "B1",
+        "defaultValue": "S3",
         "metadata": {
           "description": "The SKU of App Service Plan."
         }
