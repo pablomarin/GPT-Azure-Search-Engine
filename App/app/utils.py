@@ -50,7 +50,7 @@ def parse_txt(file: BytesIO) -> str:
     return text
 
 
-@st.cache_data
+@st.cache(allow_output_mutation=True)
 def text_to_docs(text: str | List[str]) -> List[Document]:
     """Converts a string or list of strings to a list of Documents
     with metadata."""
@@ -84,7 +84,7 @@ def text_to_docs(text: str | List[str]) -> List[Document]:
 
 
 @st.cache_data(show_spinner=False)
-def embed_docs(docs: List[Document]) -> VectorStore:
+def embed_docs(_docs: List[Document]) -> VectorStore:
     """Embeds a list of Documents and returns a FAISS index"""
 
     if not st.session_state.get("AZURE_OPENAI_API_KEY"):
@@ -102,7 +102,7 @@ def embed_docs(docs: List[Document]) -> VectorStore:
 
 
 @st.cache_data
-def search_docs(index: VectorStore, query: str) -> List[Document]:
+def search_docs(_index: VectorStore, query: str) -> List[Document]:
     """Searches a FAISS index for similar chunks to the query
     and returns a list of Documents."""
 
@@ -112,7 +112,7 @@ def search_docs(index: VectorStore, query: str) -> List[Document]:
 
 
 @st.cache_data
-def get_answer(docs: List[Document], query: str) -> Dict[str, Any]:
+def get_answer(_docs: List[Document], query: str) -> Dict[str, Any]:
     """Gets an answer to a question from a list of Documents."""
 
     # Get the answer
@@ -135,8 +135,8 @@ def get_answer(docs: List[Document], query: str) -> Dict[str, Any]:
     return answer
 
 
-@st.cache_data
-def get_sources(answer: Dict[str, Any], docs: List[Document]) -> List[Document]:
+@sst.cache_data
+def get_sources(_answer: Dict[str, Any], docs: List[Document]) -> List[Document]:
     """Gets the source documents for an answer."""
 
     # Get sources for the answer
