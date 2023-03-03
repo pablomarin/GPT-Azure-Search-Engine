@@ -15,8 +15,7 @@ def sidebar():
             "2. Ask a question about the document💬\n"
         )
         
-        if api_key_input:
-            set_openai_api_key(api_key_input)
+        set_openai_api_key(api_key_input)
 
         st.markdown("---")
         st.markdown("# About")
