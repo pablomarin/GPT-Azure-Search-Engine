@@ -135,7 +135,7 @@ def get_answer(docs: List[Document], query: str) -> Dict[str, Any]:
     return answer
 
 
-@sst.cache_data
+@st.cache_data
 def get_sources(answer: Dict[str, Any], docs: List[Document]) -> List[Document]:
     """Gets the source documents for an answer."""
 
