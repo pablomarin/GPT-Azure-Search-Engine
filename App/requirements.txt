@@ -1,0 +1,7 @@
+streamlit
+faiss-cpu
+openai
+docx2txt
+pillow
+pypd
+tenacity

@@ -1,0 +1,21 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.1",
+    "parameters": {
+        "webAppName": {
+            "value": "gtp-smart-search-app"
+        },
+        "sku": {
+            "value": "B1"
+        },
+        "linuxFxVersion": {
+            "value": "PYTHON|3.8"
+        },
+        "repoUrl": {
+            "value": "https://github.com/pablomarin/GPT-Azure-Search-Engine.git"
+        },
+        "repoBranch": {
+            "value": "main"
+        }
+    }
+}
