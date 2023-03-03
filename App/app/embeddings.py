@@ -45,14 +45,14 @@ class OpenAIEmbeddings(BaseModel, Embeddings):
             values, "openai_api_key", "AZURE_OPENAI_API_KEY"
         )
         openai_api_endpoint = get_from_dict_or_env(
-            values, "openai_api_endpoint", "AZURE_OPENAI_API_KEY"
+            values, "openai_api_endpoint", "AZURE_OPENAI_ENDPOINT"
         )
         try:
             import openai
             openai.api_type = "azure"
+            openai.api_key = openai_api_key
             openai.api_base = openai_api_endpoint
             openai.api_version = "2022-12-01"
-            openai.api_key = openai_api_key
             
             values["client"] = openai.Embedding
         except ImportError:
