@@ -116,7 +116,7 @@ def get_answer(docs: List[Document], query: str) -> Dict[str, Any]:
     # Get the answer
 
     chain = load_qa_with_sources_chain(
-        AzureOpenAI(deployment_name="text-davinci-003", model_name="text-davinci-003", 'temperature': 0),
+        AzureOpenAI(deployment_name="text-davinci-003", model_name="text-davinci-003", temperature=0),
         chain_type="stuff",
         prompt=STUFF_PROMPT,
     )
