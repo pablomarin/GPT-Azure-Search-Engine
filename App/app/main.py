@@ -23,10 +23,9 @@ st.header("Smart Search GPT")
 
 sidebar()
 
-uploaded_files = st.file_uploader(
+uploaded_file = st.file_uploader(
     "Upload a pdf, docx, or txt file",
     type=["pdf", "docx", "txt"],
-    accept_multiple_files=True,
     help="Scanned documents are not supported yet!",
     on_change=clear_submit,
 )
@@ -34,11 +33,11 @@ uploaded_files = st.file_uploader(
 index = None
 doc = None
 if uploaded_files is not None:
-    if uploaded_files.name.endswith(".pdf"):
+    if uploaded_file.name.endswith(".pdf"):
         doc = parse_pdf(uploaded_file)
-    elif uploaded_files.name.endswith(".docx"):
+    elif uploaded_file.name.endswith(".docx"):
         doc = parse_docx(uploaded_file)
-    elif uploaded_files.name.endswith(".txt"):
+    elif uploaded_file.name.endswith(".txt"):
         doc = parse_txt(uploaded_file)
     else:
         raise ValueError("File type not supported!")
