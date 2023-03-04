@@ -7,7 +7,7 @@ import streamlit as st
 from embeddings import OpenAIEmbeddings
 from langchain.chains.qa_with_sources import load_qa_with_sources_chain
 from langchain.docstore.document import Document
-from langchain.llms import OpenAI
+from langchain.llms import AzureOpenAI
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import VectorStore
 from langchain.vectorstores.faiss import FAISS
@@ -93,9 +93,7 @@ def embed_docs(docs: List[Document]) -> VectorStore:
         )
     else:
         # Embed the chunks
-        embeddings = OpenAIEmbeddings(
-            openai_api_key=st.session_state.get("AZURE_OPENAI_API_KEY")
-        )  # type: ignore
+        embeddings = OpenAIEmbeddings() 
         index = FAISS.from_documents(docs, embeddings)
 
         return index

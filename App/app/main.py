@@ -45,7 +45,6 @@ if uploaded_file is not None:
     try:
         with st.spinner("Indexing document... This may take a while⏳"):
             index = embed_docs(text)
-        st.session_state["api_key_configured"] = True
     except OpenAIError as e:
         st.error(e._message)
 
@@ -61,9 +60,7 @@ if show_full_doc and doc:
 
 button = st.button("Submit")
 if button or st.session_state.get("submit"):
-    if not st.session_state.get("api_key_configured"):
-        st.error("Please configure your OpenAI API key!")
-    elif not index:
+    if not index:
         st.error("Please upload a document!")
     elif not query:
         st.error("Please enter a question!")
