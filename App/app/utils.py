@@ -116,7 +116,7 @@ def get_answer(docs: List[Document], query: str) -> Dict[str, Any]:
     # Get the answer
 
     chain = load_qa_with_sources_chain(
-        OpenAI(
+        AzureOpenAI(
             temperature=0, openai_api_key=st.session_state.get("OPENAI_API_KEY")
         ),  # type: ignore
         chain_type="stuff",
