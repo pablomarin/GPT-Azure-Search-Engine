@@ -84,7 +84,7 @@ def text_to_docs(text: str | List[str]) -> List[Document]:
 
 
 @st.cache_data(show_spinner=False)
-def embed_docs(docs: List[Document]) -> VectorStore:
+def embed_docs(_docs: List[Document]) -> VectorStore:
     """Embeds a list of Documents and returns a FAISS index"""
 
     if not st.session_state.get("AZURE_OPENAI_API_KEY"):
@@ -94,7 +94,7 @@ def embed_docs(docs: List[Document]) -> VectorStore:
     else:
         # Embed the chunks
         embeddings = OpenAIEmbeddings() 
-        index = FAISS.from_documents(docs, embeddings)
+        index = FAISS.from_documents(_docs, embeddings)
 
         return index
 
