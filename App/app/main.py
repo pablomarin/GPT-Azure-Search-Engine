@@ -23,9 +23,10 @@ st.header("Smart Search GPT")
 
 sidebar()
 
-uploaded_file = st.file_uploader(
+uploaded_files = st.file_uploader(
     "Upload a pdf, docx, or txt file",
     type=["pdf", "docx", "txt"],
+    accept_multiple_files=True,
     help="Scanned documents are not supported yet!",
     on_change=clear_submit,
 )

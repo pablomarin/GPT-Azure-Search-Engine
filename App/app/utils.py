@@ -100,17 +100,17 @@ def embed_docs(_docs: List[Document]) -> VectorStore:
 
 
 @st.cache_data
-def search_docs(index: VectorStore, query: str) -> List[Document]:
+def search_docs(_index: VectorStore, query: str) -> List[Document]:
     """Searches a FAISS index for similar chunks to the query
     and returns a list of Documents."""
 
     # Search for similar chunks
-    docs = index.similarity_search(query, k=5)
+    docs = _index.similarity_search(query, k=5)
     return docs
 
 
 @st.cache_data
-def get_answer(docs: List[Document], query: str) -> Dict[str, Any]:
+def get_answer(_docs: List[Document], query: str) -> Dict[str, Any]:
     """Gets an answer to a question from a list of Documents."""
 
     # Get the answer
@@ -122,7 +122,7 @@ def get_answer(docs: List[Document], query: str) -> Dict[str, Any]:
     )
 
     answer = chain(
-        {"input_documents": docs, "question": query}, return_only_outputs=True
+        {"input_documents": _docs, "question": query}, return_only_outputs=True
     )
     return answer
 
