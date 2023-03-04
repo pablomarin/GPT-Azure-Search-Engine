@@ -128,14 +128,14 @@ def get_answer(_docs: List[Document], query: str) -> Dict[str, Any]:
 
 
 @st.cache_data
-def get_sources(answer: Dict[str, Any], docs: List[Document]) -> List[Document]:
+def get_sources(answer: Dict[str, Any], _docs: List[Document]) -> List[Document]:
     """Gets the source documents for an answer."""
 
     # Get sources for the answer
     source_keys = [s for s in answer["output_text"].split("SOURCES: ")[-1].split(", ")]
 
     source_docs = []
-    for doc in docs:
+    for doc in _docs:
         if doc.metadata["source"] in source_keys:
             source_docs.append(doc)
 
