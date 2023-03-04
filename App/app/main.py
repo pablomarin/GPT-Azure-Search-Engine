@@ -32,7 +32,7 @@ uploaded_file = st.file_uploader(
 
 index = None
 doc = None
-if uploaded_files is not None:
+if uploaded_file is not None:
     if uploaded_file.name.endswith(".pdf"):
         doc = parse_pdf(uploaded_file)
     elif uploaded_file.name.endswith(".docx"):
