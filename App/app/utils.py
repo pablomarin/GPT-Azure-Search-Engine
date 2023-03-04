@@ -16,7 +16,7 @@ from prompts import STUFF_PROMPT
 from pypdf import PdfReader
 
 
-@st.cache_data
+# @st.cache_data
 def parse_docx(file: BytesIO) -> str:
     text = docx2txt.process(file)
     # Remove multiple newlines
@@ -24,7 +24,7 @@ def parse_docx(file: BytesIO) -> str:
     return text
 
 
-@st.cache_data
+# @st.cache_data
 def parse_pdf(file: BytesIO) -> List[str]:
     pdf = PdfReader(file)
     output = []
@@ -42,7 +42,7 @@ def parse_pdf(file: BytesIO) -> List[str]:
     return output
 
 
-@st.cache_data
+# @st.cache_data
 def parse_txt(file: BytesIO) -> str:
     text = file.read().decode("utf-8")
     # Remove multiple newlines
@@ -50,7 +50,7 @@ def parse_txt(file: BytesIO) -> str:
     return text
 
 
-@st.cache_data
+# @st.cache_data
 def text_to_docs(text: str | List[str]) -> List[Document]:
     """Converts a string or list of strings to a list of Documents
     with metadata."""
@@ -83,8 +83,8 @@ def text_to_docs(text: str | List[str]) -> List[Document]:
     return doc_chunks
 
 
-@st.cache_data(show_spinner=False)
-def embed_docs(_docs: List[Document]) -> VectorStore:
+# @st.cache_data(show_spinner=False)
+def embed_docs(docs: List[Document]) -> VectorStore:
     """Embeds a list of Documents and returns a FAISS index"""
 
     if not st.session_state.get("AZURE_OPENAI_API_KEY"):
@@ -94,23 +94,23 @@ def embed_docs(_docs: List[Document]) -> VectorStore:
     else:
         # Embed the chunks
         embeddings = OpenAIEmbeddings() 
-        index = FAISS.from_documents(_docs, embeddings)
+        index = FAISS.from_documents(docs, embeddings)
 
         return index
 
 
-@st.cache_data
-def search_docs(_index: VectorStore, query: str) -> List[Document]:
+# @st.cache_data
+def search_docs(index: VectorStore, query: str) -> List[Document]:
     """Searches a FAISS index for similar chunks to the query
     and returns a list of Documents."""
 
     # Search for similar chunks
-    docs = _index.similarity_search(query, k=5)
+    docs = index.similarity_search(query, k=5)
     return docs
 
 
-@st.cache_data
-def get_answer(_docs: List[Document], query: str) -> Dict[str, Any]:
+# @st.cache_data
+def get_answer(docs: List[Document], query: str) -> Dict[str, Any]:
     """Gets an answer to a question from a list of Documents."""
 
     # Get the answer
@@ -122,20 +122,20 @@ def get_answer(_docs: List[Document], query: str) -> Dict[str, Any]:
     )
 
     answer = chain(
-        {"input_documents": _docs, "question": query}, return_only_outputs=True
+        {"input_documents": docs, "question": query}, return_only_outputs=True
     )
     return answer
 
 
-@st.cache_data
-def get_sources(answer: Dict[str, Any], _docs: List[Document]) -> List[Document]:
+# @st.cache_data
+def get_sources(answer: Dict[str, Any], docs: List[Document]) -> List[Document]:
     """Gets the source documents for an answer."""
 
     # Get sources for the answer
     source_keys = [s for s in answer["output_text"].split("SOURCES: ")[-1].split(", ")]
 
     source_docs = []
-    for doc in _docs:
+    for doc in docs:
         if doc.metadata["source"] in source_keys:
             source_docs.append(doc)
 
