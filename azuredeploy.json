@@ -74,6 +74,23 @@
       "metadata": {
         "description": "Location for all resources."
       }
+    },
+    "cognitiveServiceName": {
+      "type": "string",
+      "defaultValue": "[format('CognitiveService-{0}', uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "That name is the name of our application. It has to be unique.Type a name followed by your resource group name. (<name>-<resourceGroupName>)"
+      }
+    },
+    "sku-cogserv": {
+      "type": "string",
+      "defaultValue": "S0",
+      "allowedValues": [
+        "S0"
+      ],
+      "metadata": {
+        "description": "SKU of Cognitive Services account."
+      }
     }
   },
   "resources": [
@@ -89,6 +106,21 @@
         "replicaCount": "[parameters('replicaCount')]",
         "partitionCount": "[parameters('partitionCount')]",
         "hostingMode": "[parameters('hostingMode')]"
+      }
+    },
+    {
+      "type": "Microsoft.CognitiveServices/accounts",
+      "apiVersion": "2021-10-01",
+      "name": "[parameters('cognitiveServiceName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "[parameters('sku-cogserv')]"
+      },
+      "kind": "CognitiveServices",
+      "properties": {
+        "apiProperties": {
+          "statisticsEnabled": false
+        }
       }
     }
   ]
