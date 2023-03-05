@@ -36,7 +36,7 @@
     },
     "replicaCount": {
       "type": "int",
-      "defaultValue": 2,
+      "defaultValue": 1,
       "maxValue": 12,
       "minValue": 1,
       "metadata": {
