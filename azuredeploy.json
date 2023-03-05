@@ -11,7 +11,7 @@
   "parameters": {
     "name": {
       "type": "string",
-      "defaultValue": "[format('AzureCogSearch-{0}', uniqueString(resourceGroup().id))]",
+      "defaultValue": "[format('azure-cog-search-{0}', uniqueString(resourceGroup().id))]",
       "maxLength": 60,
       "minLength": 2,
       "metadata": {
@@ -78,7 +78,7 @@
     },
     "cognitiveServiceName": {
       "type": "string",
-      "defaultValue": "[format('CognitiveService-{0}', uniqueString(resourceGroup().id))]",
+      "defaultValue": "[format('cognitive-service-{0}', uniqueString(resourceGroup().id))]",
       "metadata": {
         "description": "That name is the name of our application. It has to be unique.Type a name followed by your resource group name. (<name>-<resourceGroupName>)"
       }
