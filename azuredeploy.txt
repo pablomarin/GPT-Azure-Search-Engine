@@ -11,6 +11,7 @@
   "parameters": {
     "name": {
       "type": "string",
+      "defaultValue": "[format('AzureCogSearch-{0}', uniqueString(resourceGroup().id))]",
       "maxLength": 60,
       "minLength": 2,
       "metadata": {
