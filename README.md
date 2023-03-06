@@ -14,8 +14,13 @@ azcopy copy 'https://storage.cloud.google.com/arxiv-dataset/arxiv/cs/pdf/*' 'htt
 3- Create an Azure Cognitive Search Service and Cognitive Services Account by clicking below: (this process takes about 15 mins) <br>
 [![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fpablomarin%2FGPT-Azure-Search-Engine%2Fmain%2Fazuredeploy.json)
 
-4-Load data into Search Engine and create the index with AI skills, by running this notebook:<br>
+4- Enable Semantic Search on your Azure Cognitive Search Service: 
+- On the left-nav pane, select Semantic Search (Preview).
+- Select either the Free plan or the Standard plan. You can switch between the free plan and the standard plan at any time.
+
+
+5-Load data into Search Engine and create the index with AI skills, by running this notebook:<br>
 01-Load-Data-ACogSearch.ipynb
 
-5-
+
 
