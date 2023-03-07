@@ -101,7 +101,8 @@ if button or st.session_state.get("submit"):
                     sources = search_docs(index,query)
                     answer = get_answer(sources, query)
                 else:
-                    answer = {"answer":"No results found", "sources":"" }
+                    #answer = {"answer":"No results found", "sources":"" }
+                    answer = {"output_text":"No results found", "sources":"" }
                 
                 
 
