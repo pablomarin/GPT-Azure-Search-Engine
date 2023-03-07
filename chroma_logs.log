@@ -1,0 +1,30 @@
+DEBUG:Chroma:Logger created
+DEBUG:Chroma:Logger created
+DEBUG:Chroma:Index not found
+DEBUG:Chroma:Index saved to .chroma/index/index.bin
+DEBUG:Chroma:Index saved to .chroma/index/index.bin
+DEBUG:Chroma:Logger created
+DEBUG:Chroma:Index not found
+DEBUG:Chroma:Index saved to .chroma/index/index.bin
+DEBUG:Chroma:Index saved to .chroma/index/index.bin
+DEBUG:Chroma:time to pre process our knn query: 1.3113021850585938e-05
+DEBUG:Chroma:time to run knn query: 0.00022220611572265625
+DEBUG:Chroma:Logger created
+DEBUG:Chroma:Index not found
+DEBUG:Chroma:Index saved to .chroma/index/index.bin
+DEBUG:Chroma:Index saved to .chroma/index/index.bin
+DEBUG:Chroma:time to pre process our knn query: 1.1444091796875e-05
+DEBUG:Chroma:time to run knn query: 0.00012969970703125
+DEBUG:Chroma:time to pre process our knn query: 3.0994415283203125e-06
+DEBUG:Chroma:time to run knn query: 0.00015997886657714844
+DEBUG:Chroma:time to pre process our knn query: 3.337860107421875e-06
+DEBUG:Chroma:time to run knn query: 0.000179290771484375
+DEBUG:Chroma:Logger created
+DEBUG:Chroma:Index not found
+DEBUG:Chroma:Index saved to .chroma/index/index.bin
+DEBUG:Chroma:Index saved to .chroma/index/index.bin
+DEBUG:Chroma:time to pre process our knn query: 1.1444091796875e-05
+DEBUG:Chroma:time to run knn query: 0.00022935867309570312
+DEBUG:Chroma:Index not found
+DEBUG:Chroma:Index saved to .chroma/index/index.bin
+DEBUG:Chroma:Index saved to .chroma/index/index.bin
