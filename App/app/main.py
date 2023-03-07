@@ -58,7 +58,7 @@ if button or st.session_state.get("submit"):
         url += '?api-version={}'.format(api_version)
         url += '&search={}'.format(query)
         url += '&select=pages'
-        url += '&$top=5'
+        url += '&$top=4'
         url += '&queryLanguage=en-us'
         url += '&queryType=semantic'
         url += '&semanticConfiguration=my-semantic-config'
