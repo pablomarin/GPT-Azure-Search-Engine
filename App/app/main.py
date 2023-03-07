@@ -24,7 +24,7 @@ def clear_submit():
 
 
 st.set_page_config(page_title="GPT Smart Search", page_icon="📖", layout="wide")
-st.header("Smart Search GPT")
+st.header("GPT Smart Search Engine")
 
 sidebar()
 
@@ -65,7 +65,7 @@ os.environ["AZURE_OPENAI_ENDPOINT"] = st.session_state["AZURE_OPENAI_ENDPOINT "]
 headers = {'Content-Type': 'application/json','api-key': api_key}
 params = {'api-version': api_version}
 
-query = st.text_area("Ask a question about the document", on_change=clear_submit)
+query = st.text_area("Ask a question to your enterprise data lake", on_change=clear_submit)
 button = st.button("Submit")
 
 if button or st.session_state.get("submit"):
