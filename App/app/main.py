@@ -2,6 +2,9 @@ import streamlit as st
 from components.sidebar import sidebar
 from openai.error import OpenAIError
 from langchain.docstore.document import Document
+from langchain.chains import VectorDBQAWithSourcesChain
+from langchain.llms import AzureOpenAI
+from langchain.vectorstores import FAISS
 from utils import (
     embed_docs,
     get_answer,
@@ -113,13 +116,19 @@ if button or st.session_state.get("submit"):
                     docs.append(Document(page_content=page, metadata={"source": key}))
             
             with st.spinner("Comming up with an answer... ⏳"):
-                index = embed_docs(docs)
-                sources = search_docs(index,query)
-                answer = get_answer(sources, query)
+                db = FAISS.from_documents(docs, OpenAIEmbeddings(document_model_name='text-embedding-ada-002'))
+                chain = VectorDBQAWithSourcesChain.from_chain_type(AzureOpenAI(deployment_name="text-davinci-003", model_name="text-davinci-003", temperature=0),chain_type="stuff", vectorstore=db)
+                answer = chain({"question": query})
+                # index = embed_docs(docs)
+                # sources = search_docs(index,query)
+                # answer = get_answer(sources, query)
+                
 
             with placeholder.container():
                 st.markdown("#### Answer")
-                st.markdown(answer["output_text"].split("SOURCES: ")[0])
+                # st.markdown(answer["output_text"].split("SOURCES: ")[0])
+                st.markdown(answer["answer"])
+                st.markdown('sources: ' + answer["sources"])
                 st.markdown("---")
                 st.markdown("#### Sources")
                 for key, value in file_content.items():
