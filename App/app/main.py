@@ -99,7 +99,6 @@ if button or st.session_state.get("submit"):
         st.session_state["submit"] = True
         # Output Columns
         placeholder = st.empty
-        placeholder.empty()
         
         try:
             docs = []
