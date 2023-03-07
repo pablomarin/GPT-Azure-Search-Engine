@@ -11,7 +11,30 @@ def set_openai_api_key():
 def sidebar():
     from streamlit_extras.app_logo import add_logo
     with st.sidebar:
-        add_logo("https://th.bing.com/th/id/OIP.aMi7vtMNEjacZn7TVMqPogAAAA?pid=ImgDet&rs=1")
+        add_logo("https://fossbytes.com/wp-content/uploads/2019/07/open-AI-microsoft.jpg,)
+    
+        st.markdown(
+            """
+            <style>
+                [data-testid="stSidebarNav"] {
+                    background-image: url(https://fossbytes.com/wp-content/uploads/2019/07/open-AI-microsoft.jpg);
+                    background-repeat: no-repeat;
+                    padding-top: 120px;
+                    background-position: 20px 20px;
+                }
+                [data-testid="stSidebarNav"]::before {
+                    content: "My Company Name";
+                    margin-left: 20px;
+                    margin-top: 20px;
+                    font-size: 30px;
+                    position: relative;
+                    top: 100px;
+                }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
+        
         st.markdown(
             "## How to use\n"
             "1. Upload a pdf, docx, or txt file📄\n"
