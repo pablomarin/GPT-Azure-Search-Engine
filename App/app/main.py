@@ -13,6 +13,7 @@ from utils import (
     wrap_text_in_html,
 )
 import urllib
+import os
 import requests
 from IPython.display import display, HTML
 
@@ -106,10 +107,11 @@ if button or st.session_state.get("submit"):
                 for page in value:
                     docs.append(Document(page_content=page, metadata={"source": key}))
             
-            index = embed_docs(docs)
-            sources = search_docs(index,query)
-            answer = get_answer(sources, query)
-            sources = get_sources(answer, docs)
+            with st.spinner("Comming up with an answer... ⏳"):
+                index = embed_docs(docs)
+                sources = search_docs(index,query)
+                answer = get_answer(sources, query)
+                sources = get_sources(answer, docs)
 
             with placeholder.container():
                 st.markdown("#### Answer")
