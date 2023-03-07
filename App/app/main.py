@@ -46,7 +46,7 @@ os.environ["AZURE_OPENAI_ENDPOINT"] = st.session_state["AZURE_OPENAI_ENDPOINT "]
 headers = {'Content-Type': 'application/json','api-key': api_key}
 params = {'api-version': api_version}
 
-query = st.text_area("Ask a question to your enterprise data lake", on_change=clear_submit)
+query = st.text_area("Ask a question to your enterprise data lake", help="Try questions like: What is Reinforcement learning? or, tell me about Markov chains" , on_change=clear_submit)
 button = st.button("Submit")
 
 if button or st.session_state.get("submit"):
@@ -94,14 +94,10 @@ if button or st.session_state.get("submit"):
             
             with st.spinner("Coming up with an answer... ⏳"):
                 if(len(docs)>1):
-                    # db = FAISS.from_documents(docs, OpenAIEmbeddings(document_model_name='text-embedding-ada-002'))
-                    # chain = VectorDBQAWithSourcesChain.from_chain_type(AzureOpenAI(deployment_name="text-davinci-003", model_name="text-davinci-003", temperature=0),chain_type="stuff", vectorstore=db, chain_type_kwargs = {"prompt":STUFF_PROMPT})
-                    # answer = chain({"question": query})
                     index = embed_docs(docs)
                     sources = search_docs(index,query)
                     answer = get_answer(sources, query)
                 else:
-                    #answer = {"answer":"No results found", "sources":"" }
                     answer = {"output_text":"No results found", "sources":"" }
                 
                 
@@ -110,8 +106,6 @@ if button or st.session_state.get("submit"):
                 st.markdown("#### Answer")
                 st.markdown(answer["output_text"].split("SOURCES: ")[0])
                 st.markdown('sources: ' + answer["output_text"].split("SOURCES: ")[1])
-                # st.markdown(answer["answer"])
-                # st.markdown('sources: ' + answer["sources"])
                 st.markdown("---")
                 st.markdown("#### Search Results")
                 

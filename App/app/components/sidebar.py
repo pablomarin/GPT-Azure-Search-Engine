@@ -11,5 +11,7 @@ def sidebar():
         st.markdown(
             "GPT Smart Search allows you to ask questions about your "
             "documents and get accurate answers with instant citations. "
+            
+            "This engine finds information from ~9700 Computer Science Publications in Arxiv from 2020-2022"
         )
         st.markdown("---")
