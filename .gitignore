@@ -1,5 +1,6 @@
 .amlignore
 
+.chroma/
 .github/
 .ipynb_checkpoints/
 .ipynb_aml_checkpoints/ 
