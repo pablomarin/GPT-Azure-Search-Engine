@@ -3,7 +3,6 @@ import os
 
 
 def sidebar():
-    from streamlit_extras.app_logo import add_logo
     with st.sidebar:
         st.image("https://fossbytes.com/wp-content/uploads/2019/07/open-AI-microsoft.jpg")
         st.markdown(
