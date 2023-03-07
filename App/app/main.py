@@ -5,6 +5,8 @@ from langchain.docstore.document import Document
 from langchain.chains import VectorDBQAWithSourcesChain
 from langchain.llms import AzureOpenAI
 from langchain.vectorstores import FAISS
+from embeddings import OpenAIEmbeddings
+from prompts import STUFF_PROMPT
 from utils import (
     embed_docs,
     get_answer,
@@ -117,7 +119,7 @@ if button or st.session_state.get("submit"):
             
             with st.spinner("Comming up with an answer... ⏳"):
                 db = FAISS.from_documents(docs, OpenAIEmbeddings(document_model_name='text-embedding-ada-002'))
-                chain = VectorDBQAWithSourcesChain.from_chain_type(AzureOpenAI(deployment_name="text-davinci-003", model_name="text-davinci-003", temperature=0),chain_type="stuff", vectorstore=db)
+                chain = VectorDBQAWithSourcesChain.from_chain_type(AzureOpenAI(deployment_name="text-davinci-003", model_name="text-davinci-003", temperature=0),chain_type="stuff", vectorstore=db, chain_type_kwargs = {"prompt":STUFF_PROMPT})
                 answer = chain({"question": query})
                 # index = embed_docs(docs)
                 # sources = search_docs(index,query)
