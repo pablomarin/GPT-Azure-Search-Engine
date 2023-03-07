@@ -105,7 +105,7 @@ def search_docs(index: VectorStore, query: str) -> List[Document]:
     and returns a list of Documents."""
 
     # Search for similar chunks
-    docs = index.similarity_search(query, k=5)
+    docs = index.similarity_search(query, k=2)
     return docs
 
 
