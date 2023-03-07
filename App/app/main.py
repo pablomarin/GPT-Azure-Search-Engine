@@ -118,9 +118,12 @@ if button or st.session_state.get("submit"):
                     docs.append(Document(page_content=page, metadata={"source": key}))
             
             with st.spinner("Comming up with an answer... ⏳"):
-                db = FAISS.from_documents(docs, OpenAIEmbeddings(document_model_name='text-embedding-ada-002'))
-                chain = VectorDBQAWithSourcesChain.from_chain_type(AzureOpenAI(deployment_name="text-davinci-003", model_name="text-davinci-003", temperature=0),chain_type="stuff", vectorstore=db, chain_type_kwargs = {"prompt":STUFF_PROMPT})
-                answer = chain({"question": query})
+                if(len(docs)>1):
+                    db = FAISS.from_documents(docs, OpenAIEmbeddings(document_model_name='text-embedding-ada-002'))
+                    chain = VectorDBQAWithSourcesChain.from_chain_type(AzureOpenAI(deployment_name="text-davinci-003", model_name="text-davinci-003", temperature=0),chain_type="stuff", vectorstore=db, chain_type_kwargs = {"prompt":STUFF_PROMPT})
+                    answer = chain({"question": query})
+                else:
+                    answer = {"answer":"No results found", "sources":"" }
                 # index = embed_docs(docs)
                 # sources = search_docs(index,query)
                 # answer = get_answer(sources, query)
@@ -133,10 +136,12 @@ if button or st.session_state.get("submit"):
                 st.markdown('sources: ' + answer["sources"])
                 st.markdown("---")
                 st.markdown("#### Sources")
-                for key, value in file_content.items():
-                    st.markdown(key + '  (Score: ' + str(round(value["score"],2)*100/4) + '%)')
-                    st.markdown(value["caption"])
-                    st.markdown("---")
+                
+                if(len(docs)>1):
+                    for key, value in file_content.items():
+                        st.markdown(key + '  (Score: ' + str(round(value["score"],2)*100/4) + '%)')
+                        st.markdown(value["caption"])
+                        st.markdown("---")
 
         except OpenAIError as e:
             st.error(e._message)
