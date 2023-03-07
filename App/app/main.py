@@ -1,6 +1,7 @@
 import streamlit as st
 from components.sidebar import sidebar
 from openai.error import OpenAIError
+from langchain.docstore.document import Document
 from utils import (
     embed_docs,
     get_answer,
