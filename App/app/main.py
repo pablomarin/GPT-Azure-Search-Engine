@@ -123,8 +123,7 @@ if button or st.session_state.get("submit"):
                 st.markdown("---")
                 st.markdown("#### Sources")
                 for key, value in file_content.items():
-                    st.markdown(key)
-                    st.markdown(value["score"])
+                    st.markdown(key + '  (Score: ' + str(round(value["score"],2)*100/4) + '%)')
                     st.markdown(value["caption"])
                     st.markdown("---")
 
