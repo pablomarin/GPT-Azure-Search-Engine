@@ -6,4 +6,3 @@ docx2txt
 pillow
 pypdf
 tenacity
-chromadb
