@@ -19,8 +19,11 @@ azcopy copy 'https://storage.cloud.google.com/arxiv-dataset/arxiv/cs/pdf/*' 'htt
 - Select either the Free plan or the Standard plan. You can switch between the free plan and the standard plan at any time.
 
 
-5-Load data into Search Engine and create the index with AI skills, by running this notebook:<br>
+5- Load data into Search Engine and create the index with AI skills, by running this notebook:<br>
 01-Load-Data-ACogSearch.ipynb
 
+6- Run 02-Quering-AOpenAI.ipynb  and see queries directly from Azure Cognitive Search and how they compare with enhancing the experience with Azure OpenAI
+
+7- Go to the App/ folder and Cling the Deploy to Azure function to deploy the App. It takes a few minutes.
 
 
