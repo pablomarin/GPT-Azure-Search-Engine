@@ -6,5 +6,4 @@ docx2txt
 pillow
 pypdf
 tenacity
-streamlit-extras
 chromadb

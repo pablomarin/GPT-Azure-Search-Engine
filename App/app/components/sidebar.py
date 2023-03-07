@@ -2,12 +2,6 @@ import streamlit as st
 import os
 
 
-def set_openai_api_key():
-    os.environ["OPENAI_API_KEY"] = os.environ["AZURE_OPENAI_API_KEY"] = st.session_state["AZURE_OPENAI_API_KEY"] = "48e3114b81d1430eb1f3df7fb783f176"
-    os.environ["AZURE_OPENAI_ENDPOINT"] = st.session_state["AZURE_OPENAI_ENDPOINT "] = "https://pablo.openai.azure.com/"
-    
-
-
 def sidebar():
     from streamlit_extras.app_logo import add_logo
     with st.sidebar:
@@ -17,8 +11,6 @@ def sidebar():
             "1. Upload a pdf, docx, or txt file📄\n"
             "2. Ask a question about the document💬\n"
         )
-        
-        set_openai_api_key()
 
         st.markdown("---")
         st.markdown("# About")

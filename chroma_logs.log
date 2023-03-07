@@ -28,3 +28,9 @@ DEBUG:Chroma:time to run knn query: 0.00022935867309570312
 DEBUG:Chroma:Index not found
 DEBUG:Chroma:Index saved to .chroma/index/index.bin
 DEBUG:Chroma:Index saved to .chroma/index/index.bin
+DEBUG:Chroma:Logger created
+DEBUG:Chroma:Index not found
+DEBUG:Chroma:Index saved to .chroma/index/index.bin
+DEBUG:Chroma:Index saved to .chroma/index/index.bin
+DEBUG:Chroma:time to pre process our knn query: 2.6226043701171875e-06
+DEBUG:Chroma:time to run knn query: 0.00026726722717285156
