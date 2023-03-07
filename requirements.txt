@@ -6,3 +6,4 @@ docx2txt
 pillow
 pypdf
 tenacity
+ipython
