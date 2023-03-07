@@ -92,7 +92,7 @@ if button or st.session_state.get("submit"):
                 for page in value["content"]:
                     docs.append(Document(page_content=page, metadata={"source": key}))
             
-            with st.spinner("Comming up with an answer... ⏳"):
+            with st.spinner("Coming up with an answer... ⏳"):
                 if(len(docs)>1):
                     # db = FAISS.from_documents(docs, OpenAIEmbeddings(document_model_name='text-embedding-ada-002'))
                     # chain = VectorDBQAWithSourcesChain.from_chain_type(AzureOpenAI(deployment_name="text-davinci-003", model_name="text-davinci-003", temperature=0),chain_type="stuff", vectorstore=db, chain_type_kwargs = {"prompt":STUFF_PROMPT})
