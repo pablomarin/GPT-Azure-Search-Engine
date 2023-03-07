@@ -1,5 +1,4 @@
 import streamlit as st
-from streamlit_extras.app_logo import add_logo
 import os
 
 
@@ -10,6 +9,7 @@ def set_openai_api_key():
 
 
 def sidebar():
+    from streamlit_extras.app_logo import add_logo
     with st.sidebar:
         add_logo("https://th.bing.com/th/id/OIP.aMi7vtMNEjacZn7TVMqPogAAAA?pid=ImgDet&rs=1")
         st.markdown(
