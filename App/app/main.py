@@ -17,6 +17,7 @@ import urllib
 import os
 import requests
 from IPython.display import display, HTML
+from collections import OrderedDict
 
 
 def clear_submit():
@@ -91,10 +92,14 @@ if button or st.session_state.get("submit"):
         resp = requests.get(url, headers=headers)
         search_results = resp.json()
 
-        file_content = dict()
+        file_content = OrderedDict()
         for result in search_results['value']:
             if result['@search.rerankerScore'] > 0.3:
-                file_content[result['metadata_storage_path']]=result['pages']
+                file_content[result['metadata_storage_path']]={
+                    "content": result['pages'], 
+                    "score": result['@search.rerankerScore'], 
+                    "caption": result['@search.captions'][0]['text']        
+                }
 
         
         st.session_state["submit"] = True
@@ -104,23 +109,23 @@ if button or st.session_state.get("submit"):
         try:
             docs = []
             for key,value in file_content.items():
-                for page in value:
+                for page in value["content"]:
                     docs.append(Document(page_content=page, metadata={"source": key}))
             
             with st.spinner("Comming up with an answer... ⏳"):
                 index = embed_docs(docs)
                 sources = search_docs(index,query)
                 answer = get_answer(sources, query)
-                sources = get_sources(answer, docs)
 
             with placeholder.container():
                 st.markdown("#### Answer")
                 st.markdown(answer["output_text"].split("SOURCES: ")[0])
                 st.markdown("---")
                 st.markdown("#### Sources")
-                for source in sources:
-                    st.markdown(source.metadata["source"])
-                    st.markdown(source.page_content)
+                for key, value in file_content:
+                    st.markdown(key)
+                    st.markdown(value["score"])
+                    st.markdown(value["caption"])
                     st.markdown("---")
 
         except OpenAIError as e:
