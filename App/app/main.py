@@ -105,7 +105,7 @@ if qbutton or bbutton or st.session_state.get("submit"):
                     docs.append(Document(page_content=value['caption'], metadata={"source": key}))
                     add_text = "Coming up with a quick answer... ⏳"
             
-            if add_text:
+            if add_text in locals():
                 with st.spinner(add_text):
                     if(len(docs)>1):
                         index = embed_docs(docs)
