@@ -79,16 +79,22 @@ if qbutton or bbutton or st.session_state.get("submit"):
         search_results = resp.json()
 
         file_content = OrderedDict()
+        
         for result in search_results['value']:
             if result['@search.rerankerScore'] > 0.3:
-                file_content[result['metadata_storage_path']]={
-                    if bbutton:
-                        "content": result['pages'], 
-                    if qbutton:
-                        "content": rresult['@search.captions'][0]['text'], 
-                    "score": result['@search.rerankerScore'], 
-                    "caption": result['@search.captions'][0]['text']        
-                }
+                if bbutton:
+                    file_content[result['metadata_storage_path']]={
+                            "content": result['pages'],  
+                            "score": result['@search.rerankerScore'], 
+                            "caption": result['@search.captions'][0]['text']        
+                    }
+                if qbutton:
+                    file_content[result['metadata_storage_path']]={
+                            "content": rresult['@search.captions'][0]['text'], 
+                            "score": result['@search.rerankerScore'], 
+                            "caption": result['@search.captions'][0]['text']        
+                    }
+                        
 
         
         st.session_state["submit"] = True
