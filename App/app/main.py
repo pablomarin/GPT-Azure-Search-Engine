@@ -90,7 +90,7 @@ if qbutton or bbutton or st.session_state.get("submit"):
                     }
                 if qbutton:
                     file_content[result['metadata_storage_path']]={
-                            "content": rresult['@search.captions'][0]['text'], 
+                            "content": result['@search.captions'][0]['text'], 
                             "score": result['@search.rerankerScore'], 
                             "caption": result['@search.captions'][0]['text']        
                     }
