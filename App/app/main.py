@@ -47,9 +47,15 @@ headers = {'Content-Type': 'application/json','api-key': api_key}
 params = {'api-version': api_version}
 
 query = st.text_area("Ask a question to your enterprise data lake", help="Try questions like: What is Reinforcement learning? or, tell me about Markov chains" , on_change=clear_submit)
-button = st.button("Submit")
 
-if button or st.session_state.get("submit"):
+col1, col2 = st.columns([1,1])
+
+with col1:
+    qbutton = st.button('Quick Answer')
+with col2:
+    bbutton = st.button('Best Answer')
+
+if qbutton or bbutton or st.session_state.get("submit"):
     if not query:
         st.error("Please enter a question!")
     else:
@@ -76,7 +82,10 @@ if button or st.session_state.get("submit"):
         for result in search_results['value']:
             if result['@search.rerankerScore'] > 0.3:
                 file_content[result['metadata_storage_path']]={
-                    "content": result['pages'], 
+                    if bbutton:
+                        "content": result['pages'], 
+                    if qbutton:
+                        "content": rresult['@search.captions'][0]['text'], 
                     "score": result['@search.rerankerScore'], 
                     "caption": result['@search.captions'][0]['text']        
                 }
@@ -89,8 +98,11 @@ if button or st.session_state.get("submit"):
         try:
             docs = []
             for key,value in file_content.items():
-                for page in value["content"]:
-                    docs.append(Document(page_content=page, metadata={"source": key}))
+                if bbutton:
+                    for page in value["content"]:
+                        docs.append(Document(page_content=page, metadata={"source": key}))
+                if qbutton:
+                    docs.append(Document(page_content=value, metadata={"source": key}))
             
             with st.spinner("Coming up with an answer... ⏳"):
                 if(len(docs)>1):
