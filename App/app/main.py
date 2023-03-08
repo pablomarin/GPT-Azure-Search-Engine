@@ -99,10 +99,12 @@ if qbutton or bbutton or st.session_state.get("submit"):
                 if bbutton:
                     for page in value["content"]:
                         docs.append(Document(page_content=page, metadata={"source": key}))
+                        add_text = "Reading the source documents to provide the best answer... ⏳"
                 if qbutton:
                     docs.append(Document(page_content=value['caption'], metadata={"source": key}))
+                    add_text = "Coming up with a quick answer... ⏳"
             
-            with st.spinner("Coming up with an answer... ⏳"):
+            with st.spinner(add_text):
                 if(len(docs)>1):
                     index = embed_docs(docs)
                     sources = search_docs(index,query)
