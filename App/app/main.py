@@ -106,7 +106,7 @@ if qbutton or bbutton or st.session_state.get("submit"):
                     docs.append(Document(page_content=value['caption'], metadata={"source": key}))
                     for page in value["content"]:
                         docs.append(Document(page_content=page, metadata={"source": key}))
-                        add_text = "Reading the source documents to provide the best answer... ⏳"
+                    add_text = "Reading the source documents to provide the best answer... ⏳"
                 
             if "add_text" in locals():
                 with st.spinner(add_text):
@@ -115,9 +115,9 @@ if qbutton or bbutton or st.session_state.get("submit"):
                         sources = search_docs(index,query)
                         answer = get_answer(sources, query)
                     else:
-                        answer = {"output_text":"No results found", "SOURCES":"N/A" }
+                        answer = {"output_text":"No results found. SOURCES: N/A" }
             else:
-                answer = {"output_text":"No results found", "SOURCES":"N/A" }
+                answer = {"output_text":"No results found. SOURCES: N/A" }
 
 
             with placeholder.container():
