@@ -82,20 +82,12 @@ if qbutton or bbutton or st.session_state.get("submit"):
         
         for result in search_results['value']:
             if result['@search.rerankerScore'] > 0.3:
-                if bbutton:
                     file_content[result['metadata_storage_path']]={
                             "content": result['pages'],  
                             "score": result['@search.rerankerScore'], 
                             "caption": result['@search.captions'][0]['text']        
-                    }
-                if qbutton:
-                    file_content[result['metadata_storage_path']]={
-                            "content": result['@search.captions'][0]['text'], 
-                            "score": result['@search.rerankerScore'], 
-                            "caption": result['@search.captions'][0]['text']        
-                    }
-                        
-
+                            }
+ 
         
         st.session_state["submit"] = True
         # Output Columns
@@ -108,7 +100,7 @@ if qbutton or bbutton or st.session_state.get("submit"):
                     for page in value["content"]:
                         docs.append(Document(page_content=page, metadata={"source": key}))
                 if qbutton:
-                    docs.append(Document(page_content=value, metadata={"source": key}))
+                    docs.append(Document(page_content=value['caption'], metadata={"source": key}))
             
             with st.spinner("Coming up with an answer... ⏳"):
                 if(len(docs)>1):
