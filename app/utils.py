@@ -110,8 +110,10 @@ def search_docs(index: VectorStore, query: str) -> List[Document]:
 
 
 # @st.cache_data
-def get_answer(docs: List[Document], query: str, 
-               language: str, chain_type: str, 
+def get_answer(docs: List[Document], 
+               query: str, 
+               language: str, 
+               chain_type: str, 
                temperature: float, 
                max_tokens: int
               ) -> Dict[str, Any]:
