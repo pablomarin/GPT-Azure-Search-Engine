@@ -38,8 +38,8 @@ refine_template = (
     "------------\n"
     "{context_str}\n"
     "------------\n"
-    "Given the new context, refine the original answer to better"
-    "answer the question (in {language}) and, if available, mention examples."
+    "Given the new context, refine the existing answer to better"
+    "answer the question (in {language}) and, if available in the context, mention some examples."
     "If the context isn't useful, return the original answer."
 )
 REFINE_PROMPT =  PromptTemplate(
