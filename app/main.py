@@ -115,7 +115,10 @@ if qbutton or bbutton or st.session_state.get("submit"):
                     if(len(docs)>1):
                         index = embed_docs(docs)
                         sources = search_docs(index,query)
-                        answer = get_answer(sources, query, language=selected_language, chain_type = "refine", temperature=0.5, max_tokens=500)
+                        if qbutton:
+                            answer = get_answer(sources, query, language=selected_language, chain_type = "stuff", temperature=0.3, max_tokens=256)
+                        if bbutton: 
+                            answer = get_answer(sources, query, language=selected_language, chain_type = "refine", temperature=0.5, max_tokens=500)
                     else:
                         answer = {"output_text":"No results found" }
             else:
