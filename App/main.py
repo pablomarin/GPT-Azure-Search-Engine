@@ -1,12 +1,14 @@
 import streamlit as st
-from components.sidebar import sidebar
+import urllib
+import os
+import time
+import requests
+from IPython.display import display, HTML
+from collections import OrderedDict
 from openai.error import OpenAIError
 from langchain.docstore.document import Document
-# from langchain.chains import VectorDBQAWithSourcesChain
-# from langchain.llms import AzureOpenAI
-# from langchain.vectorstores import FAISS
-# from embeddings import OpenAIEmbeddings
-# from prompts import STUFF_PROMPT
+
+from components.sidebar import sidebar
 from utils import (
     embed_docs,
     get_answer,
@@ -18,12 +20,16 @@ from utils import (
     text_to_docs,
     wrap_text_in_html,
 )
-import urllib
-import os
-import time
-import requests
-from IPython.display import display, HTML
-from collections import OrderedDict
+from credentials import (
+    API_VERSION,
+    DATASOURCE_CONNECTION_STRING,
+    AZURE_SEARCH_ENDPOINT,
+    AZURE_SEARCH_KEY,
+    COG_SERVICES_NAME,
+    COG_SERVICES_KEY,
+    AZURE_OPENAI_ENDPOINT,
+    AZURE_OPENAI_KEY
+)
 
 
 def clear_submit():
@@ -35,21 +41,17 @@ st.header("GPT Smart Search Engine")
 
 sidebar()
 
-api_version = '2021-04-30-Preview'
-endpoint = "https://azure-cog-search-pabdyosydd7ta.search.windows.net"
-api_key = "DDDUwtXOCSOjm1fPBRLNFofKEEvxXDpGF0Sy4S3ktjAzSeAgbz9Q"
 index_name = "cogsrch-index"
-api_version = '2021-04-30-Preview'
 
-os.environ["OPENAI_API_KEY"] = os.environ["AZURE_OPENAI_API_KEY"] = st.session_state["AZURE_OPENAI_API_KEY"] = "48e3114b81d1430eb1f3df7fb783f176"
-os.environ["AZURE_OPENAI_ENDPOINT"] = st.session_state["AZURE_OPENAI_ENDPOINT "] = "https://pablo.openai.azure.com/"
+os.environ["AZURE_OPENAI_ENDPOINT"] = st.session_state["AZURE_OPENAI_ENDPOINT "] = AZURE_OPENAI_ENDPOINT
+os.environ["OPENAI_API_KEY"] = os.environ["AZURE_OPENAI_API_KEY"] = st.session_state["AZURE_OPENAI_API_KEY"] = AZURE_OPENAI_KEY
 
-headers = {'Content-Type': 'application/json','api-key': api_key}
-params = {'api-version': api_version}
+headers = {'Content-Type': 'application/json','api-key': AZURE_SEARCH_KEY}
+params = {'api-version': API_VERSION}
 
 query = st.text_area("Ask a question to your enterprise data lake", help="Try questions like: What is Reinforcement learning? or, tell me about Markov chains" , on_change=clear_submit)
 
-col1, col2 = st.columns([1,1])
+col1, col2, col3 = st.columns([1,1,2])
 
 with col1:
     qbutton = st.button('Quick Answer')
@@ -60,9 +62,8 @@ if qbutton or bbutton or st.session_state.get("submit"):
     if not query:
         st.error("Please enter a question!")
     else:
-        
         url = endpoint + '/indexes/'+ index_name + '/docs'
-        url += '?api-version={}'.format(api_version)
+        url += '?api-version={}'.format(API_VERSION)
         url += '&search={}'.format(query)
         url += '&select=pages'
         url += '&$top=5'
@@ -82,7 +83,7 @@ if qbutton or bbutton or st.session_state.get("submit"):
         file_content = OrderedDict()
         
         for result in search_results['value']:
-            if result['@search.rerankerScore'] > 0.3:
+            if result['@search.rerankerScore'] > 0.4:
                     file_content[result['metadata_storage_path']]={
                             "content": result['pages'],  
                             "score": result['@search.rerankerScore'], 
@@ -103,7 +104,6 @@ if qbutton or bbutton or st.session_state.get("submit"):
                     add_text = "Coming up with a quick answer... ⏳"
                 
                 if bbutton:
-                    docs.append(Document(page_content=value['caption'], metadata={"source": key}))
                     for page in value["content"]:
                         docs.append(Document(page_content=page, metadata={"source": key}))
                     add_text = "Reading the source documents to provide the best answer... ⏳"
@@ -113,17 +113,16 @@ if qbutton or bbutton or st.session_state.get("submit"):
                     if(len(docs)>1):
                         index = embed_docs(docs)
                         sources = search_docs(index,query)
-                        answer = get_answer(sources, query)
+                        answer = get_answer(sources, query, language="English", temperature=0.5, max_tokens=500)
                     else:
-                        answer = {"output_text":"No results found. SOURCES: N/A" }
+                        answer = {"output_text":"No results found" }
             else:
-                answer = {"output_text":"No results found. SOURCES: N/A" }
+                answer = {"output_text":"No results found" }
 
 
             with placeholder.container():
                 st.markdown("#### Answer")
-                st.markdown(answer["output_text"].split("SOURCES: ")[0])
-                st.markdown('sources: ' + answer["output_text"].split("SOURCES: ")[1])
+                st.markdown(answer["output_text"])
                 st.markdown("---")
                 st.markdown("#### Search Results")
 

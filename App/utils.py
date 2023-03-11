@@ -12,7 +12,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import VectorStore
 from langchain.vectorstores.faiss import FAISS
 from openai.error import AuthenticationError
-from prompts import STUFF_PROMPT
+from prompts import STUFF_PROMPT, REFINE_PROMPT, REFINE_QUESTION_PROMPT
 from pypdf import PdfReader
 
 
@@ -110,20 +110,26 @@ def search_docs(index: VectorStore, query: str) -> List[Document]:
 
 
 # @st.cache_data
-def get_answer(docs: List[Document], query: str) -> Dict[str, Any]:
+def get_answer(docs: List[Document], query: str, 
+               language: str, chain_type: str, 
+               temperature: float, 
+               max_tokens: int
+              ) -> Dict[str, Any]:
+    
     """Gets an answer to a question from a list of Documents."""
 
     # Get the answer
-
-    chain = load_qa_with_sources_chain(
-        AzureOpenAI(deployment_name="text-davinci-003", model_name="text-davinci-003", temperature=0),
-        chain_type="stuff",
-        prompt=STUFF_PROMPT,
-    )
-
-    answer = chain(
-        {"input_documents": docs, "question": query}, return_only_outputs=True
-    )
+    
+    llm = AzureOpenAI(deployment_name="text-davinci-003", model_name="text-davinci-003", 
+                      temperature=temperature, max_tokens=max_tokens)
+    
+    if chain_type=="refine":
+        chain = load_qa_chain(llm, chain_type=chain_type, question_prompt=REFINE_QUESTION_PROMPT, refine_prompt=REFINE_PROMPT)    
+    if chain_type=="stuff":
+        chain = load_qa_chain(llm, chain_type=chain_type, prompt=STUFF_PROMPT)
+    
+    answer = chain( {"input_documents": docs, "question": query, "language": language}, return_only_outputs=True)
+    
     return answer
 
 

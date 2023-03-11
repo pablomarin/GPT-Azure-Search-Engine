@@ -47,7 +47,7 @@
       },
       "repoUrl": {
         "type": "string",
-        "defaultValue": "https://github.com/pablomarin/GPT-Azure-Search-Engine.git",
+        "defaultValue": "https://github.com/<YOUR_GITHUB_NAME>/GPT-Azure-Search-Engine.git",
         "metadata": {
           "description": "Git Repo URL"
         }
