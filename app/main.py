@@ -57,6 +57,9 @@ with col1:
     qbutton = st.button('Quick Answer')
 with col2:
     bbutton = st.button('Best Answer')
+with col3:
+    options = ['English', 'Spanish', 'Portuguese', 'French', 'Russian']
+    selected_language = st.selectbox('Answer Language:', options, index=0)
 
 if qbutton or bbutton or st.session_state.get("submit"):
     if not query:
@@ -113,7 +116,7 @@ if qbutton or bbutton or st.session_state.get("submit"):
                     if(len(docs)>1):
                         index = embed_docs(docs)
                         sources = search_docs(index,query)
-                        answer = get_answer(sources, query, language="English", chain_type = "refine", temperature=0.5, max_tokens=500)
+                        answer = get_answer(sources, query, language=selected_language, chain_type = "refine", temperature=0.5, max_tokens=500)
                     else:
                         answer = {"output_text":"No results found" }
             else:
