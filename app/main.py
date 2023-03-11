@@ -51,7 +51,7 @@ params = {'api-version': API_VERSION}
 
 query = st.text_area("Ask a question to your enterprise data lake", help="Try questions like: What is Reinforcement learning? or, tell me about Markov chains" , on_change=clear_submit)
 
-col1, col2, col3 = st.columns([1,1,2])
+col1, col2, col3 = st.columns([1,1,3])
 
 with col1:
     qbutton = st.button('Quick Answer')
