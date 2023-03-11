@@ -20,12 +20,13 @@ _Note: If you have never created a cognitive service before, please create one m
 '''
 pip install -r ./requirements.txt
 '''
+6- Edit app/credentials.py with your environment information
 
-5- Load data into Search Engine and create the index with AI skills, by running this notebook:<br>
+7- Load data into Search Engine and create the index with AI skills, by running this notebook:<br>
 01-Load-Data-ACogSearch.ipynb
 
-6- Run 02-Quering-AOpenAI.ipynb  and see queries directly from Azure Cognitive Search and how they compare with enhancing the experience with Azure OpenAI
+8- Run 02-Quering-AOpenAI.ipynb  and see queries directly from Azure Cognitive Search and how they compare with enhancing the experience with Azure OpenAI
 
-7- Go to the App/ folder and Cling the Deploy to Azure function to deploy the App. It takes a few minutes.
+9- Go to the App/ folder and Cling the Deploy to Azure function to deploy the App. It takes a few minutes.
 
 

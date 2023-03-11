@@ -5,7 +5,7 @@ from typing import Any, Dict, List
 import docx2txt
 import streamlit as st
 from embeddings import OpenAIEmbeddings
-from langchain.chains.qa_with_sources import load_qa_with_sources_chain
+from langchain.chains.qa_with_sources import load_qa_chain
 from langchain.docstore.document import Document
 from langchain.llms import AzureOpenAI
 from langchain.text_splitter import RecursiveCharacterTextSplitter
