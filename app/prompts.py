@@ -21,12 +21,12 @@ FINAL ANSWER: The purpose of ARPA-H is to drive breakthroughs in cancer, Alzheim
 
 QUESTION: {question}
 =========
-{summaries}
+{context}
 =========
 FINAL ANSWER:"""
 
 STUFF_PROMPT = PromptTemplate(
-    input_variables=["summaries", "question", "language"],
+    input_variables=["context", "question", "language"],
     template=stuff_template
 )
 
@@ -57,5 +57,6 @@ refine_question_template = (
     "answer the question (in {language}): {question}\n"
 )
 REFINE_QUESTION_PROMPT = PromptTemplate(
-    input_variables=["context_str", "question", "language"], template=refine_question_template,
+    input_variables=["context_str", "question", "language"], 
+    template=refine_question_template,
 )
