@@ -118,7 +118,7 @@ if qbutton or bbutton or st.session_state.get("submit"):
                         if qbutton:
                             answer = get_answer(sources, query, language=selected_language, chain_type = "stuff", temperature=0.3, max_tokens=256)
                         if bbutton: 
-                            answer = get_answer(sources, query, language=selected_language, chain_type = "refine", temperature=0.5, max_tokens=500)
+                            answer = get_answer(sources, query, language=selected_language, chain_type = "refine", temperature=0.3, max_tokens=500)
                     else:
                         answer = {"output_text":"No results found" }
             else:
