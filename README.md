@@ -1,8 +1,10 @@
 # GPT-Azure-Search-Engine
 Azure Cognitive Search + Azure OpenAI Accelerator
 
-0- Dataset: ~10k pdfs from the Arxiv dataset, specifically computer science
+As the data lake we have ~9.8k Computer Science pdfs from the Arxiv dataset. They are on a public Azure Blob Storage Container.
 https://www.kaggle.com/datasets/Cornell-University/arxiv
+
+***Steps to run the Accelerator***:
 
 1- Create a Resource Group were all the assets of this accelerator are going to be.
 
