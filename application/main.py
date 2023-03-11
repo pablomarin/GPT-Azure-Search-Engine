@@ -62,7 +62,7 @@ if qbutton or bbutton or st.session_state.get("submit"):
     if not query:
         st.error("Please enter a question!")
     else:
-        url = endpoint + '/indexes/'+ index_name + '/docs'
+        url = AZURE_SEARCH_ENDPOINT + '/indexes/'+ index_name + '/docs'
         url += '?api-version={}'.format(API_VERSION)
         url += '&search={}'.format(query)
         url += '&select=pages'
