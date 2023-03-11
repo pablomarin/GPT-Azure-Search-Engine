@@ -118,7 +118,7 @@
             "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
         ],
         "properties": {
-            "appCommandLine": "python -m streamlit run App/app/main.py --server.port 8000 --server.address 0.0.0.0"
+            "appCommandLine": "python -m streamlit run app/main.py --server.port 8000 --server.address 0.0.0.0"
         }
     }
     ]
