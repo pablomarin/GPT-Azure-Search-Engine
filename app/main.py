@@ -63,8 +63,8 @@ with st.expander("Instructions"):
                 
                 You will notice that the answers to these questions are diferent from the open ChatGPT, since they only have these papers as the context. This search engine does not look at the open internet to answer these questions. If the context doesn't contain information, the engine will respond: I don't know.
                 
-                Quick Answer: GPT models only uses as context the captions of the results coming from Azure Search
-                Best Answer: GPT models uses as context all of the content of the documents coming from Azure Search
+                - Quick Answer: GPT models only uses as context the captions of the results coming from Azure Search
+                - Best Answer: GPT models uses as context all of the content of the documents coming from Azure Search
                 """)
 
 query = st.text_area("Ask a question to your enterprise data lake", help="Try questions like: What is Reinforcement learning? or, tell me about Markov chains" , on_change=clear_submit)
