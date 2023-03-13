@@ -1,10 +1,12 @@
 # GPT-Azure-Search-Engine
 Azure Cognitive Search + Azure OpenAI Accelerator
 
-[!Architecture](GPT-Smart-Search-Architecture.jpg)
+![Architecture](GPT-Smart-Search-Architecture.jpg "Architecture")
 
 
 ***Steps to run the Accelerator***:
+
+_Note: (Pre-requisite) You need have an Azure OpenAI service already created._
 
 1- Create a Resource Group were all the assets of this accelerator are going to be.
 

@@ -1,3 +1,5 @@
+
+# We recommend leaving these two variables as below. The DATASOURCE_CONNECTION_STRING contains 9800 PDFs from Arxiv Computer Science publications. Change it if you want to use your own data.
 API_VERSION = '2021-04-30-Preview'
 DATASOURCE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=demodatasetsp;AccountKey=K9rLf3hFmKN4oZunp3xIIqjlxkyqtOfcdJQgDk65cHSYAY29rvoTx2S1x2t+mJ5tv+3LRN/FES3Q+AStuqGYIg==;EndpointSuffix=core.windows.net"
 
