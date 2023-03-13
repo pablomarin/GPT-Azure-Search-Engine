@@ -1,9 +1,18 @@
-# GPT-Azure-Search-Engine
-Azure Cognitive Search + Azure OpenAI Accelerator
+# GPT-Azure-Search-Engine (Azure Cognitive Search + Azure OpenAI Accelerator)
 
 ![Architecture](GPT-Smart-Search-Architecture.jpg "Architecture")
 
-**Steps to Run the Accelerator**
+## **Features**
+
+- Shows how you can use [Azure OpenAI](https://azure.microsoft.com/en-us/products/cognitive-services/openai-service/) + [Azure Cognitive Search](https://azure.microsoft.com/en-us/products/search) to have a Smart and Multilingual Search engine that not only provides links of the search results, but also answers the question.
+- ***Solve 80% of the use cases where companies want to use OpenAI to provide answers from their knowledge base to customers or employees, without the need of retraining and hosting the models.***
+- All Azure services and configuration are deployed via python code.
+- Uses [Azure Cognitive Services](https://azure.microsoft.com/en-us/products/cognitive-services/) to enrich documents: Detect Language, OCR images, Key-phrases extraction, entity recognition (persons, emails, addresses, organizations, urls).
+- Uses [LanChain](https://langchain.readthedocs.io/en/latest/) as a wrapper for interacting with Azure OpenAI , vector stores and constructing prompts.
+- Uses [Streamlit](https://streamlit.io/) to build the web application in python.
+- (Coming soon) recommends new searches based on users' history.
+
+## **Steps to Run the Accelerator**
 
 Note: (Pre-requisite) You need to have an Azure OpenAI service already created
 
@@ -32,14 +41,4 @@ pip install -r ./requirements.txt
   - Run queries in Azure Cognitive Search and see how they compare with enhancing the experience with Azure OpenAI
 10. Go to the app/ folder and click the Deploy to Azure function to deploy the Web Application in Azure Web App Service. It takes a few minutes.
   - The deployment automatically comes with CI/CD, so any change that you commit/push to the code will automatically trigger a deployment in the Application.
-
-**Features**
-
-- Shows how you can use [Azure OpenAI](https://azure.microsoft.com/en-us/products/cognitive-services/openai-service/) + [Azure Cognitive Search](https://azure.microsoft.com/en-us/products/search) to have a Smart and Multilingual Search engine that not only provides links of the search results, but also answers the question.
-- Solve 80% of the use cases where companies want to use OpenAI to provide answers from their knowledge base to customers or employees, without the need of retraining and hosting the models.
-- All Azure services and configuration are deployed via python code.
-- Uses [Azure Cognitive Services](https://azure.microsoft.com/en-us/products/cognitive-services/) to enrich documents: Detect Language, OCR images, Key-phrases extraction, entity recognition (persons, emails, addresses, organizations, urls).
-- Uses [LanChain](https://langchain.readthedocs.io/en/latest/) as a wrapper for interacting with Azure OpenAI , vector stores and constructing prompts.
-- Uses [Streamlit](https://streamlit.io/) to build the web application in python.
-- (Coming soon) recommends new searches based on users' history.
 
