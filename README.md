@@ -3,7 +3,7 @@
 
 ![Architecture](GPT-Smart-Search-Architecture.jpg "Architecture")
 
-## *** Demo ***
+## ** Demo **
 
 https://webapp-bbuqqkw6y2eee.azurewebsites.net/
 
