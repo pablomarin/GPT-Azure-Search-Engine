@@ -1,7 +1,7 @@
 # GPT-Azure-Search-Engine 
 ### (Azure Cognitive Search + Azure OpenAI Accelerator)
 
-![Architecture](GPT-Smart-Search-Architecture.png "Architecture")
+![Architecture](GPT-Smart-Search-Architecture.jpg "Architecture")
 
 ## 🔧**Features**
 
@@ -19,8 +19,8 @@ Note: (Pre-requisite) You need to have an Azure OpenAI service already created
 
 1. Clone this repo to your Github account.
 2. In Azure OpenAI studio, deploy these two models: Make sure that the deployment name is the same as the model name.
-  - "text-davinci-003"
-  - "text-embedding-ada-002"
+   - "text-davinci-003"
+   - "text-embedding-ada-002"
 3. Create a Resource Group where all the assets of this accelerator are going to be.
 4. Create an Azure Cognitive Search Service and Cognitive Services Account by clicking below: \<br\>
 
@@ -29,17 +29,17 @@ Note: (Pre-requisite) You need to have an Azure OpenAI service already created
 _Note: If you have never created a cognitive multi-service account before, please create one manually in the azure portal to read and accept the Responsible AI terms. Once this is deployed, delete this and then use the above deployment button._
 
 5. Enable Semantic Search on your Azure Cognitive Search Service:
-  - On the left-nav pane, select Semantic Search (Preview).
-  - Select either the Free plan or the Standard plan. You can switch between the free plan and the standard plan at any time.
+   - On the left-nav pane, select Semantic Search (Preview).
+   - Select either the Free plan or the Standard plan. You can switch between the free plan and the standard plan at any time.
 6. Install the dependencies on your machine:
 ```
 pip install -r ./requirements.txt
 ```
 7. Edit app/credentials.py with your azure services information
 8. Run 01-Load-Data-ACogSearch.ipynb:
-  - Loads data into your Search Engine and create the index with AI skills
+   - Loads data into your Search Engine and create the index with AI skills
 9. Run 02-Quering-AOpenAI.ipynb and:
-  - Run queries in Azure Cognitive Search and see how they compare with enhancing the experience with Azure OpenAI
+   - Run queries in Azure Cognitive Search and see how they compare with enhancing the experience with Azure OpenAI
 10. Go to the app/ folder and click the Deploy to Azure function to deploy the Web Application in Azure Web App Service. It takes a few minutes.
-  - The deployment automatically comes with CI/CD, so any change that you commit/push to the code will automatically trigger a deployment in the Application.
+   - The deployment automatically comes with CI/CD, so any change that you commit/push to the code will automatically trigger a deployment in the Application.
 
