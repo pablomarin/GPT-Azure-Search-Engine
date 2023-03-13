@@ -1,8 +1,8 @@
 # GPT-Azure-Search-Engine
 Azure Cognitive Search + Azure OpenAI Accelerator
 
-As the data lake we have ~9.8k Computer Science pdfs from the Arxiv dataset. They are on a public Azure Blob Storage Container.
-https://www.kaggle.com/datasets/Cornell-University/arxiv
+[!Architecture](GPT-Smart-Search-Architecture.jpg)
+
 
 ***Steps to run the Accelerator***:
 
@@ -18,17 +18,16 @@ _Note: If you have never created a cognitive multi-service account before, pleas
 - Select either the Free plan or the Standard plan. You can switch between the free plan and the standard plan at any time.
 
 5- Install the dependendies on your machine:
-
 ```
 pip install -r ./requirements.txt
 ```
 6- Edit app/credentials.py with your environment information
 
-7- Load data into Search Engine and create the index with AI skills, by running this notebook:<br>
+7- Load data into your Search Engine and create the index with AI skills, by running this notebook:<br>
 01-Load-Data-ACogSearch.ipynb
 
 8- Run 02-Quering-AOpenAI.ipynb  and see queries directly from Azure Cognitive Search and how they compare with enhancing the experience with Azure OpenAI
 
-9- Go to the App/ folder and click the Deploy to Azure function to deploy the App. It takes a few minutes.
+9- Go to the app/ folder and click the Deploy to Azure function to deploy the App. It takes a few minutes.
 
 
