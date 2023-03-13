@@ -3,7 +3,7 @@
 
 ![Architecture](GPT-Smart-Search-Architecture.jpg "Architecture")
 
-## **Features**
+## 🔧**Features**
 
 - Shows how you can use [Azure OpenAI](https://azure.microsoft.com/en-us/products/cognitive-services/openai-service/) + [Azure Cognitive Search](https://azure.microsoft.com/en-us/products/search) to have a Smart and Multilingual Search engine that not only provides links of the search results, but also answers the question.
 - ***Solve 80% of the use cases where companies want to use OpenAI to provide answers from their knowledge base to customers or employees, without the need of retraining and hosting the models.***
