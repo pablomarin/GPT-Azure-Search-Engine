@@ -61,8 +61,7 @@ with st.expander("Instructions"):
                 - Give me an example of a Reinforcement learning problem
                 - What kind of problems Turing Machines solve?
                 
-                
-                You will notice that the answers to these questions are diferent from the open ChatGPT, since they only have these papers as the context. This search engine does not look at the open internet to answer these questions. If the context doesn't contain information, the engine will respond: I don't know.
+                You will notice that the answers to these questions are diferent from the open ChatGPT, since these papers are the only possible context. This search engine does not look at the open internet to answer these questions. If the context doesn't contain information, the engine will respond: I don't know.
                 
                 - Quick Answer: GPT model only uses, as context, the captions of the results coming from Azure Search
                 - Best Answer: GPT model uses, as context. all of the content of the documents coming from Azure Search
