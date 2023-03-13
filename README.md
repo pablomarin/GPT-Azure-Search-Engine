@@ -1,4 +1,5 @@
-# GPT-Azure-Search-Engine (Azure Cognitive Search + Azure OpenAI Accelerator)
+# GPT-Azure-Search-Engine 
+### (Azure Cognitive Search + Azure OpenAI Accelerator)
 
 ![Architecture](GPT-Smart-Search-Architecture.jpg "Architecture")
 
