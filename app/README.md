@@ -28,8 +28,8 @@ streamlit run main.py
 
 [![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fpablomarin%2FGPT-Azure-Search-Engine%2Fmain%2Fapp%2Fazuredeploy.json)
 
-1. Make Sure that once the ARM template is ready to be created in the Azure portal, you change the Repo variable to your own repo:
-"https://github.com/<YOUR_GITHUB_NAME>/GPT-Azure-Search-Engine.git" to your own repo
+1. Make Sure that once the ARM template is ready to be created in the Azure portal, you change the ***Repo Url*** variable to your own repo:
+"https://github.com/<YOUR_GITHUB_NAME>/GPT-Azure-Search-Engine.git"
 
 2. Everytime you commit changes to your branch it will kick in CI/CD and deploy your changes to the web app
 
