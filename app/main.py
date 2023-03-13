@@ -49,6 +49,23 @@ os.environ["OPENAI_API_KEY"] = os.environ["AZURE_OPENAI_API_KEY"] = st.session_s
 headers = {'Content-Type': 'application/json','api-key': AZURE_SEARCH_KEY}
 params = {'api-version': API_VERSION}
 
+with st.expander("Instructions"):
+    st.markdown("""
+                Ask questions that you think that will be answer in about 10k Computer Science publications from 2020-2021.
+                
+                For example:
+                - What are markov chains?
+                - List the authors that talk about Gradient Boosting Machines
+                - What is CLP?
+                - How does random forest work?
+                - What kind of problems Turing Machines solve?
+                
+                You will notice that the answers to these questions are diferent from the open ChatGPT, since they only have these papers as the context. This search engine does not look at the open internet to answer these questions. If the context doesn't contain information, the engine will respond: I don't know.
+                
+                Quick Answer: GPT models only uses as context the captions of the results coming from Azure Search
+                Best Answer: GPT models uses as context all of the content of the documents coming from Azure Search
+                """)
+
 query = st.text_area("Ask a question to your enterprise data lake", help="Try questions like: What is Reinforcement learning? or, tell me about Markov chains" , on_change=clear_submit)
 
 options = ['English', 'Spanish', 'Portuguese', 'French', 'Russian']
