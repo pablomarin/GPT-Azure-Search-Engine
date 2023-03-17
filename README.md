@@ -7,6 +7,8 @@
 
 https://webapp-bbuqqkw6y2eee.azurewebsites.net/
 
+---
+
 ## 🔧**Features**
 
    - Shows how you can use [Azure OpenAI](https://azure.microsoft.com/en-us/products/cognitive-services/openai-service/) + [Azure Cognitive Search](https://azure.microsoft.com/en-us/products/search) to have a Smart and Multilingual Search engine that not only provides links of the search results, but also answers the question.
@@ -16,6 +18,8 @@ https://webapp-bbuqqkw6y2eee.azurewebsites.net/
    - Uses [LangChain](https://langchain.readthedocs.io/en/latest/) as a wrapper for interacting with Azure OpenAI , vector stores and constructing prompts.
    - Uses [Streamlit](https://streamlit.io/) to build the web application in python.
    - (Coming soon) recommends new searches based on users' history.
+
+---
 
 ## **Steps to Run the Accelerator**
 
@@ -47,6 +51,8 @@ pip install -r ./requirements.txt
 10. Go to the app/ folder and click the Deploy to Azure function to deploy the Web Application in Azure Web App Service. It takes a few minutes.
    - The deployment automatically comes with CI/CD, so any change that you commit/push to the code will automatically trigger a deployment in the Application.
 
+---
+
 ## **FAQs**
 
 1. **Why the vector similarity is done in memory using FAISS versus having a separate vector database like RedisSearch or Pinecone?**
@@ -63,6 +69,8 @@ A: Quoting the [OpenAI documentation](https://platform.openai.com/docs/guides/fi
 Fine-tuning improves on few-shot learning by training on many more examples than can fit in the prompt, letting you achieve better results on a wide number of tasks. Once a model has been fine-tuned, you won't need to provide examples in the prompt anymore. This saves costs and enables lower-latency requests"
 
 So training/fine tunning the model requires that we provide hundreds/thousands of Prompt and Completion tuples, or in other words we need to provide samples of query-responses. For a company knowledge base of Terabytes of information this is not feasible. To come up with all the possible tuples that users my request, is simply not possible. So the search engine is absolutely necessary for a company data search engine using OpenAI.
+
+---
 
 ## **Known Issues**
 
