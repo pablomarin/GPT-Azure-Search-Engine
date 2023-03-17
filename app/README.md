@@ -33,3 +33,14 @@ streamlit run main.py
 
 2. Everytime you commit changes to your branch it will kick in CI/CD and deploy your changes to the web app
 
+## Troubleshoot
+
+- If deployment fails with error "Cannot find SourceControlToken with name Github" you can try the following
+1. Wait 20 mins and Retry
+2. Delete the browser cache and retry
+3. Go to the deployed WebApp and Authorize azure to deploy and build code directly from Github 
+
+![Authorize Github](Authorize%20Github.jpeg "Authorize Github" )
+
+
+
