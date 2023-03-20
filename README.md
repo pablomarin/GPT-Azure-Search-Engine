@@ -45,7 +45,7 @@ https://webapp-bbuqqkw6y2eee.azurewebsites.net/
 Note: (Pre-requisite) You need to have an Azure OpenAI service already created
 
 1. Clone this repo to your Github account.
-2. In Azure OpenAI studio, deploy these two models: Make sure that the deployment name is the same as the model name.
+2. In Azure OpenAI studio, deploy these two models: **Make sure that the deployment name is the same as the model name.**
    - "text-davinci-003"
    - "text-embedding-ada-002"
 3. Create a Resource Group where all the assets of this accelerator are going to be.
