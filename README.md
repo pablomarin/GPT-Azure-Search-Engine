@@ -49,7 +49,7 @@ Note: (Pre-requisite) You need to have an Azure OpenAI service already created
    - "text-davinci-003"
    - "text-embedding-ada-002"
 3. Create a Resource Group where all the assets of this accelerator are going to be.
-4. Create an Azure Cognitive Search Service and Cognitive Services Account by clicking below: \<br\>
+4. Create an Azure Cognitive Search Service and Cognitive Services Account by clicking below:
 
 [![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fpablomarin%2FGPT-Azure-Search-Engine%2Fmain%2Fazuredeploy.json) 
 
