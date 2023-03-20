@@ -2,24 +2,20 @@
 
 # Accelerator powered by Azure Cognitive Search + Azure OpenAI 
 Your organization needs a search engine that can make sense of all kinds of types of data, stored in different locations, and that can return the links of similar documents, but more importantly, provide the answer to the question! In other words, you want private and secured ChatGPT for your organization that can interpret, comprehend, and answer questions about your business.
-The goal of the MVP workshop is to show/prove the value of a Smart Search System built with the Azure Retail Recommender team, with your own data in your own environment. For more information on the 2 day workshop, click the powerpoint presentation below:
+The goal of the MVP workshop is to show/prove the value of a Smart Search Engine built with the Azure Services, with your own data in your own environment. For more information on the 2 day workshop, click the powerpoint presentation below:
 
 [Accelerator Pitch Deck](https://github.com/pablomarin/GPT-Azure-Search-Engine/blob/main/Azure%20Open%20AI%20GPT-3%20Smart%20Search%20-%20Pitch%20Deck.pptx)
 
 **Click "*view raw*" to view powerpoint presentation**
 
-# The Prerequisites
+**Prerequisites Client 2-Day Workshop**
 * Azure subscription
-* Azure Machine Learning dedicated workspace
 * Accepted Application to Azure Open AI
-* *Optional* Databricks workspace
-
-**Prerequisites Client 2 Day Workshop**
 * Microsoft members need to be added as Guests in clients Azure AD
 * A Resource Group (RG)  needs to be set for this Workshop POC, in the customer Azure tenant
 * The customer team and the Microsoft team must have Contributor permissions to this resource group
 * A storage account must be set in place in the RG
-* Datasets must be uploaded as CSV or Parquet files to the blob storage account, at least one week prior to the workshop date
+* Data/Documents must be uploaded to the blob storage account, at least one week prior to the workshop date
 * Azure Machine Learning Workspace must be deployed in the RG
 * Optional but recommended – Databricks Workspace deployed in the RG
 
