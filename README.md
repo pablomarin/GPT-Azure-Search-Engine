@@ -1,4 +1,4 @@
-![image](https://user-images.githubusercontent.com/113465005/226203101-00e44d66-f930-4df6-b502-c59f1660e8d1.png)
+![image](https://user-images.githubusercontent.com/113465005/226238596-cc76039e-67c2-46b6-b0bb-35d037ae66e1.png)
 
 # Accelerator powered by Azure Cognitive Search + Azure OpenAI 
 Your organization needs a search engine that can make sense of all kinds of types of data, stored in different locations, and that can return the links of similar documents, but more importantly, provide the answer to the question! In other words, you want private and secured ChatGPT for your organization that can interpret, comprehend, and answer questions about your business.
