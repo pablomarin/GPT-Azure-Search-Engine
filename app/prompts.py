@@ -15,6 +15,7 @@ STUFF_PROMPT = PromptTemplate(
     template=stuff_template
 )
 
+
 refine_template = (
     "The original question is as follows: {question}\n"
     "We have provided an existing answer: {existing_answer}\n"
@@ -25,8 +26,10 @@ refine_template = (
     "------------\n"
     "Given the new context, refine the existing answer to better"
     "answer the question (in {language}) and, if available in the context, mention some examples."
-    "If the context isn't useful, return the original answer."
+#    "If the context isn't useful,  return the original answer."
+    "If the context isn't useful, just return the original answer, and nothing else"
 )
+
 REFINE_PROMPT =  PromptTemplate(
     input_variables=["question", "existing_answer", "context_str", "language"],
     template=refine_template,
