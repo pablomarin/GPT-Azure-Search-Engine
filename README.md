@@ -73,7 +73,8 @@ pip install -r ./requirements.txt
 ---
 
 ## **Use your own data**
-To use your own storage account/container with your own documents (DOCX,PDF,HTML,TXT,PST,EML,etc) you just have to edit app/credentials.py and replace the variable DATASOURCE_CONNECTION_STRING with your own blob connection string. ![Instructions](https://learn.microsoft.com/en-us/azure/storage/common/storage-account-get-info?tabs=portal)
+
+To use your own storage account/container with your own documents (DOCX,PDF,HTML,TXT,PST,EML,etc) you just have to edit app/credentials.py and replace the variable DATASOURCE_CONNECTION_STRING with your own blob connection string. [Instructions](https://learn.microsoft.com/en-us/azure/storage/common/storage-account-get-info?tabs=portal)
 ---
 
 ## **FAQs**
