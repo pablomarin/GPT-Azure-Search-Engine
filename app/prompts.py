@@ -37,7 +37,8 @@ refine_template = (
     "------------\n"
     "Given the new context, refine the existing answer to better"
     "answer the question (in {language}) and, if available in the context, mention some examples."
-    "If the context isn't useful, just return the original answer and nothing else. In your answer just provide the answer without any additional context"    
+    "If the context isn't useful, just return the original answer and nothing else. Just provide the answer without any additional context."    
+
 )
 
 REFINE_PROMPT =  PromptTemplate(
