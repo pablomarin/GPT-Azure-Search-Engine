@@ -69,7 +69,7 @@ with st.expander("Instructions"):
 
 query = st.text_area("Ask a question to your enterprise data lake", on_change=clear_submit)
 
-options = ['English', 'Spanish', 'Portuguese', 'French', 'Russian']
+options = ['English', 'Spanish', 'Portuguese', 'French', 'Russian', 'Chinese', 'Korean', 'Italian']
 selected_language = st.selectbox('Answer Language:', options, index=0)
 
 col1, col2, col3 = st.columns([1,1,3])
