@@ -151,7 +151,6 @@ def get_answer_turbo(docs: List[Document],
     #TURBO gpt-35-turbo
     # In Azure OpenAI create a deployment named "gpt-35-turbo" for the model "gpt-35-turbo (0301)"
     llm = AzureChatOpenAI(deployment_name="gpt-35-turbo", model_name="gpt-3.5-turbo-0301", temperature=0.5, max_tokens=500)
-    chain = load_qa_chain(llm, chain_type="refine", return_refine_steps=True, question_prompt=REFINE_QUESTION_PROMPT, refine_prompt=REFINE_PROMPT)
  
     if chain_type=="refine":
         chain = load_qa_chain(llm, chain_type=chain_type, question_prompt=REFINE_QUESTION_PROMPT, refine_prompt=REFINE_PROMPT)    
@@ -159,11 +158,10 @@ def get_answer_turbo(docs: List[Document],
 
         #passing answer again to openai to remove any additional leftover wording from chatgpt
         answer = chain({"input_documents": [Document(page_content=answer['output_text'])], "question": query, "language": "English"}, return_only_outputs=False)
-
-    else:
-        #if chain_type=="stuff":
+    
+    if chain_type=="stuff":
         chain = load_qa_chain(llm, chain_type=chain_type, prompt=STUFF_PROMPT)
-        answer = chain( {"input_documents": docs, "question": query, "language": language}, return_only_outputs=True)       
+        answer = chain( {"input_documents": docs, "question": query, "language": language}, return_only_outputs=False)       
 
     return answer
 
