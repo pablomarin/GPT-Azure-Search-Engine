@@ -20,7 +20,7 @@ The goal of the MVP workshop is to show/prove the value of a Smart Search Engine
 * Optional but recommended – Databricks Workspace deployed in the RG
 
 # Architecture 
-![Architecture](GPT-Smart-Search-Architecture.jpg "Architecture")
+![Architecture](./images/GPT-Smart-Search-Architecture.jpg "Architecture")
 
 ## Demo
 
