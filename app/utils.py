@@ -148,9 +148,8 @@ def get_answer_turbo(docs: List[Document],
 
     # Get the answer
    
-    #TURBO gpt-35-turbo
     # In Azure OpenAI create a deployment named "gpt-35-turbo" for the model "gpt-35-turbo (0301)"
-    llm = AzureChatOpenAI(deployment_name="gpt-35-turbo", model_name="gpt-3.5-turbo-0301", temperature=0.5, max_tokens=500)
+    llm = AzureChatOpenAI(deployment_name="gpt-35-turbo", model_name="gpt-3.5-turbo-0301", temperature=temperature, max_tokens=max_tokens)
  
     if chain_type=="refine":
         chain = load_qa_chain(llm, chain_type=chain_type, question_prompt=REFINE_QUESTION_PROMPT, refine_prompt=REFINE_PROMPT)    
