@@ -39,7 +39,7 @@ from credentials import (
 def clear_submit():
     st.session_state["submit"] = False
 
-@st.cache_data()
+#@st.cache_data()
 def get_search_results(query):
     url = AZURE_SEARCH_ENDPOINT + '/indexes/'+ index_name + '/docs'
     url += '?api-version={}'.format(API_VERSION)
