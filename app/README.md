@@ -44,7 +44,7 @@ streamlit run main.py
 2. Delete the browser cache and retry
 3. Go to the deployed WebApp and Authorize azure to deploy and build code directly from Github 
 
-![Authorize Github](Authorize%20Github.jpeg "Authorize Github" )
+![Authorize Github](../images/error-authorize-github.jpeg "Authorize Github" )
 
 
 
