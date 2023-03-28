@@ -39,6 +39,27 @@ from credentials import (
 def clear_submit():
     st.session_state["submit"] = False
 
+@st.cache_data()
+def get_search_results(query):
+    url = AZURE_SEARCH_ENDPOINT + '/indexes/'+ index_name + '/docs'
+    url += '?api-version={}'.format(API_VERSION)
+    url += '&search={}'.format(query)
+    url += '&select=pages'
+    url += '&$top=5'
+    url += '&queryLanguage=en-us'
+    url += '&queryType=semantic'
+    url += '&semanticConfiguration=my-semantic-config'
+    url += '&$count=true'
+    url += '&speller=lexicon'
+    url += '&answers=extractive|count-3'
+    url += '&captions=extractive|highlight-true'
+    url += '&highlightPreTag=' + urllib.parse.quote('<span style="background-color: #f5e8a3">', safe='')
+    url += '&highlightPostTag=' + urllib.parse.quote('</span>', safe='')
+
+    resp = requests.get(url, headers=headers)
+
+    search_results = resp.json()
+    return search_results
 
 st.set_page_config(page_title="GPT Smart Search", page_icon="📖", layout="wide")
 st.header("GPT Smart Search Engine")
@@ -75,7 +96,7 @@ with st.expander("Instructions"):
                 - Best Answer: GPT model uses, as context. all of the content of the documents coming from Azure Search
                 """)
 
-query = st.text_area("Ask a question to your enterprise data lake", on_change=clear_submit)
+query = st.text_area("Ask a question to your enterprise data lake", value= "What is CLP?", on_change=clear_submit)
 
 options = ['English', 'Spanish', 'Portuguese', 'French', 'Russian']
 selected_language = st.selectbox('Answer Language:', options, index=0)
@@ -92,23 +113,8 @@ if qbutton or bbutton or st.session_state.get("submit"):
     if not query:
         st.error("Please enter a question!")
     else:
-        url = AZURE_SEARCH_ENDPOINT + '/indexes/'+ index_name + '/docs'
-        url += '?api-version={}'.format(API_VERSION)
-        url += '&search={}'.format(query)
-        url += '&select=pages'
-        url += '&$top=5'
-        url += '&queryLanguage=en-us'
-        url += '&queryType=semantic'
-        url += '&semanticConfiguration=my-semantic-config'
-        url += '&$count=true'
-        url += '&speller=lexicon'
-        url += '&answers=extractive|count-3'
-        url += '&captions=extractive|highlight-true'
-        url += '&highlightPreTag=' + urllib.parse.quote('<span style="background-color: #f5e8a3">', safe='')
-        url += '&highlightPostTag=' + urllib.parse.quote('</span>', safe='')
-
-        resp = requests.get(url, headers=headers)
-        search_results = resp.json()
+        # Azure Search
+        search_results = get_search_results(query)
 
         file_content = OrderedDict()
         
@@ -174,3 +180,4 @@ if qbutton or bbutton or st.session_state.get("submit"):
 
         except OpenAIError as e:
             st.error(e._message)
+            st.error(e._status_code)
