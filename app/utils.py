@@ -129,7 +129,7 @@ def get_answer(docs: List[Document],
     else:
         llm = AzureOpenAI(deployment_name=deployment, temperature=temperature, max_tokens=max_tokens)
     
-    chain = load_qa_with_sources_chain(llm, chain_type=chain_type, return_intermediate_steps=True)
+    chain = load_qa_with_sources_chain(llm, chain_type=chain_type)
     
     answer = chain( {"input_documents": docs, "question": query}, return_only_outputs=True)
     
