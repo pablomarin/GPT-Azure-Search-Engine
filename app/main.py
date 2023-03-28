@@ -71,8 +71,8 @@ index_name = "cogsrch-index"
 os.environ["OPENAI_API_BASE"] = os.environ["AZURE_OPENAI_ENDPOINT"] = st.session_state["AZURE_OPENAI_ENDPOINT "] = AZURE_OPENAI_ENDPOINT
 os.environ["OPENAI_API_KEY"] = os.environ["AZURE_OPENAI_API_KEY"] = st.session_state["AZURE_OPENAI_API_KEY"] = AZURE_OPENAI_KEY
 
-os.environ["OPENAI_API_VERSION"] = os.environ["AZURE_OPENAI_API_VERSION"] = "2022-12-01"
-os.environ["OPENAI_API_TYPE"] = os.environ["AZURE_OPENAI_API_TYPE"] = "azure"
+os.environ["OPENAI_API_VERSION"] = os.environ["AZURE_OPENAI_API_VERSION"] = AZURE_OPENAI_API_VERSION
+os.environ["OPENAI_API_TYPE"] = os.environ["AZURE_OPENAI_API_TYPE"] = AZURE_OPENAI_TYPE
 
 
 headers = {'Content-Type': 'application/json','api-key': AZURE_SEARCH_KEY}

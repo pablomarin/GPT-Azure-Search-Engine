@@ -10,5 +10,7 @@ DATASOURCE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=demod
 # AZURE_OPENAI_ENDPOINT = "Enter your Azure OpenAI Endpoint ..."
 # AZURE_OPENAI_KEY = "Enter your Azure OpenAI Key ..."
 
-AZURE_OPENAI_API_VERSION = "2022-12-01"
+
+
+AZURE_OPENAI_API_VERSION = "2023-03-15-preview"
 AZURE_OPENAI_TYPE = "azure"
