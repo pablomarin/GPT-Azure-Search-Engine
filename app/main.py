@@ -129,9 +129,9 @@ if qbutton or bbutton or st.session_state.get("submit"):
                         index = embed_docs(docs)
                         sources = search_docs(index,query)
                         if qbutton:
-                            answer = get_answer(sources, query, chain_type = "stuff", temperature=0.3, max_tokens=256)
+                            answer = get_answer(sources, query, deployment="gpt-35-turbo", chain_type = "stuff", temperature=0.3, max_tokens=256)
                         if bbutton: 
-                            answer = get_answer(sources, query, chain_type = "map_reduce", temperature=0.3, max_tokens=500)
+                            answer = get_answer(sources, query, deployment="gpt-35-turbo", chain_type = "map_reduce", temperature=0.3, max_tokens=500)
                     else:
                         answer = {"output_text":"No results found" }
             else:
