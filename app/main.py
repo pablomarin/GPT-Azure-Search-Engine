@@ -69,9 +69,6 @@ with st.expander("Instructions"):
 
 query = st.text_area("Ask a question to your enterprise data lake", on_change=clear_submit)
 
-options = ['English', 'Spanish', 'Portuguese', 'French', 'Russian', 'Chinese', 'Korean', 'Italian']
-selected_language = st.selectbox('Answer Language:', options, index=0)
-
 col1, col2, col3 = st.columns([1,1,3])
 with col1:
     qbutton = st.button('Quick Answer')
@@ -93,9 +90,7 @@ if qbutton or bbutton or st.session_state.get("submit"):
         url += '&$count=true'
         url += '&speller=lexicon'
         url += '&answers=extractive|count-3'
-        url += '&captions=extractive|highlight-true'
-        url += '&highlightPreTag=' + urllib.parse.quote('<span style="background-color: #f5e8a3">', safe='')
-        url += '&highlightPostTag=' + urllib.parse.quote('</span>', safe='')
+        url += '&captions=extractive|highlight-false'
 
         resp = requests.get(url, headers=headers)
         search_results = resp.json()
@@ -134,9 +129,9 @@ if qbutton or bbutton or st.session_state.get("submit"):
                         index = embed_docs(docs)
                         sources = search_docs(index,query)
                         if qbutton:
-                            answer = get_answer(sources, query, language=selected_language, chain_type = "stuff", temperature=0.3, max_tokens=256)
+                            answer = get_answer(sources, query, chain_type = "stuff", temperature=0.3, max_tokens=256)
                         if bbutton: 
-                            answer = get_answer(sources, query, language=selected_language, chain_type = "refine", temperature=0.3, max_tokens=500)
+                            answer = get_answer(sources, query, chain_type = "map_reduce", temperature=0.3, max_tokens=500)
                     else:
                         answer = {"output_text":"No results found" }
             else:
@@ -151,7 +146,7 @@ if qbutton or bbutton or st.session_state.get("submit"):
 
                 if(len(docs)>1):
                     for key, value in file_content.items():
-                        st.markdown(key + '  (Score: ' + str(round(value["score"],2)*100/4) + '%)')
+                        st.markdown(key + '  (Score: ' + str(round(value["score"]*100/4,2)) + '%)')
                         st.markdown(value["caption"])
                         st.markdown("---")
 

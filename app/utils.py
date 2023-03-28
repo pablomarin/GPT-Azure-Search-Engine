@@ -6,8 +6,10 @@ import docx2txt
 import streamlit as st
 from embeddings import OpenAIEmbeddings
 from langchain.chains.question_answering import load_qa_chain
+from langchain.chains.qa_with_sources import load_qa_with_sources_chain
 from langchain.docstore.document import Document
 from langchain.llms import AzureOpenAI
+from langchain.chat_models import AzureChatOpenAI
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import VectorStore
 from langchain.vectorstores.faiss import FAISS
@@ -112,7 +114,7 @@ def search_docs(index: VectorStore, query: str) -> List[Document]:
 # @st.cache_data
 def get_answer(docs: List[Document], 
                query: str, 
-               language: str, 
+               deployment: str, 
                chain_type: str, 
                temperature: float, 
                max_tokens: int
@@ -122,15 +124,14 @@ def get_answer(docs: List[Document],
 
     # Get the answer
     
-    llm = AzureOpenAI(deployment_name="text-davinci-003", model_name="text-davinci-003", 
-                      temperature=temperature, max_tokens=max_tokens)
+    if deployment == "gpt-35-turbo":
+        llm = AzureChatOpenAI(deployment_name=deployment, temperature=temperature max_tokens=max_tokens)
+    else:
+        llm = AzureOpenAI(deployment_name=deployment, temperature=temperature, max_tokens=max_tokens)
     
-    if chain_type=="refine":
-        chain = load_qa_chain(llm, chain_type=chain_type, question_prompt=REFINE_QUESTION_PROMPT, refine_prompt=REFINE_PROMPT)    
-    if chain_type=="stuff":
-        chain = load_qa_chain(llm, chain_type=chain_type, prompt=STUFF_PROMPT)
+    chain = load_qa_with_sources_chain(llm, chain_type=chain_type, return_intermediate_steps=True)
     
-    answer = chain( {"input_documents": docs, "question": query, "language": language}, return_only_outputs=True)
+    answer = chain( {"input_documents": docs, "question": query}, return_only_outputs=True)
     
     return answer
 
