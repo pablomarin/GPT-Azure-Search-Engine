@@ -111,9 +111,8 @@
       },
       {
         "type": "Microsoft.Web/sites/config",
-        "apiVersion": "2021-03-01",
+        "apiVersion": "2022-03-01",
         "name": "[concat(parameters('webAppName'), '/web')]",
-        "location": "[parameters('location')]",
         "dependsOn": [
             "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
         ],

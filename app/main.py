@@ -28,7 +28,8 @@ from credentials import (
     COG_SERVICES_NAME,
     COG_SERVICES_KEY,
     AZURE_OPENAI_ENDPOINT,
-    AZURE_OPENAI_KEY
+    AZURE_OPENAI_KEY,
+    AZURE_OPENAI_API_VERSION
 )
 
 
@@ -43,8 +44,9 @@ sidebar()
 
 index_name = "cogsrch-index"
 
-os.environ["AZURE_OPENAI_ENDPOINT"] = st.session_state["AZURE_OPENAI_ENDPOINT "] = AZURE_OPENAI_ENDPOINT
+os.environ["OPENAI_API_BASE"] = os.environ["AZURE_OPENAI_ENDPOINT"] = st.session_state["AZURE_OPENAI_ENDPOINT "] = AZURE_OPENAI_ENDPOINT
 os.environ["OPENAI_API_KEY"] = os.environ["AZURE_OPENAI_API_KEY"] = st.session_state["AZURE_OPENAI_API_KEY"] = AZURE_OPENAI_KEY
+os.environ["OPENAI_API_VERSION"] = os.environ["AZURE_OPENAI_API_VERSION"] = AZURE_OPENAI_API_VERSION
 
 headers = {'Content-Type': 'application/json','api-key': AZURE_SEARCH_KEY}
 params = {'api-version': API_VERSION}

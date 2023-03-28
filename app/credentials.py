@@ -9,6 +9,7 @@ DATASOURCE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=demod
 # COG_SERVICES_KEY = "Enter your Azure Cognitive services multi-service Key ..."
 # AZURE_OPENAI_ENDPOINT = "Enter your Azure OpenAI Endpoint ..."
 # AZURE_OPENAI_KEY = "Enter your Azure OpenAI Key ..."
+# AZURE_OPENAI_API_VERSION = "2023-03-15-preview"
 
 AZURE_SEARCH_ENDPOINT = "https://azure-cog-search-cstevuxaqrxcm.search.windows.net"
 AZURE_SEARCH_KEY = "fET2lKwQ4akc6sFLF1YQ376eNRyrpJmspxSqMiB7eZAzSeBJZG43"
@@ -16,3 +17,4 @@ COG_SERVICES_NAME = "cognitive-service-cstevuxaqrxcm"
 COG_SERVICES_KEY = "2caf5192ac464dabacbf7a99d3f23cac"
 AZURE_OPENAI_ENDPOINT = "https://open-ai-pinternal.openai.azure.com/"
 AZURE_OPENAI_KEY = "6848da60869d4b319161ebf6ea61e643"
+AZURE_OPENAI_API_VERSION = "2023-03-15-preview"
