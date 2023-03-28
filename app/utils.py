@@ -125,7 +125,7 @@ def get_answer(docs: List[Document],
     # Get the answer
     
     if deployment == "gpt-35-turbo":
-        llm = AzureChatOpenAI(deployment_name=deployment, temperature=temperature max_tokens=max_tokens)
+        llm = AzureChatOpenAI(deployment_name=deployment, temperature=temperature, max_tokens=max_tokens)
     else:
         llm = AzureOpenAI(deployment_name=deployment, temperature=temperature, max_tokens=max_tokens)
     
