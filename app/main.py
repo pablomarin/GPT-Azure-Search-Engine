@@ -12,6 +12,7 @@ from components.sidebar import sidebar
 from utils import (
     embed_docs,
     get_answer,
+    get_answer_turbo,
     get_sources,
     parse_docx,
     parse_pdf,
@@ -29,13 +30,36 @@ from credentials import (
     COG_SERVICES_KEY,
     AZURE_OPENAI_ENDPOINT,
     AZURE_OPENAI_KEY,
-    AZURE_OPENAI_API_VERSION
+    AZURE_OPENAI_API_VERSION,
+    AZURE_OPENAI_TYPE
+
 )
 
 
 def clear_submit():
     st.session_state["submit"] = False
 
+#@st.cache_data()
+def get_search_results(query):
+    url = AZURE_SEARCH_ENDPOINT + '/indexes/'+ index_name + '/docs'
+    url += '?api-version={}'.format(API_VERSION)
+    url += '&search={}'.format(query)
+    url += '&select=pages'
+    url += '&$top=5'
+    url += '&queryLanguage=en-us'
+    url += '&queryType=semantic'
+    url += '&semanticConfiguration=my-semantic-config'
+    url += '&$count=true'
+    url += '&speller=lexicon'
+    url += '&answers=extractive|count-3'
+    url += '&captions=extractive|highlight-true'
+    url += '&highlightPreTag=' + urllib.parse.quote('<span style="background-color: #f5e8a3">', safe='')
+    url += '&highlightPostTag=' + urllib.parse.quote('</span>', safe='')
+
+    resp = requests.get(url, headers=headers)
+
+    search_results = resp.json()
+    return search_results
 
 st.set_page_config(page_title="GPT Smart Search", page_icon="📖", layout="wide")
 st.header("GPT Smart Search Engine")
@@ -47,6 +71,10 @@ index_name = "cogsrch-index"
 os.environ["OPENAI_API_BASE"] = os.environ["AZURE_OPENAI_ENDPOINT"] = st.session_state["AZURE_OPENAI_ENDPOINT "] = AZURE_OPENAI_ENDPOINT
 os.environ["OPENAI_API_KEY"] = os.environ["AZURE_OPENAI_API_KEY"] = st.session_state["AZURE_OPENAI_API_KEY"] = AZURE_OPENAI_KEY
 os.environ["OPENAI_API_VERSION"] = os.environ["AZURE_OPENAI_API_VERSION"] = AZURE_OPENAI_API_VERSION
+
+os.environ["OPENAI_API_VERSION"] = os.environ["AZURE_OPENAI_API_VERSION"] = AZURE_OPENAI_API_VERSION
+os.environ["OPENAI_API_TYPE"] = os.environ["AZURE_OPENAI_API_TYPE"] = AZURE_OPENAI_TYPE
+
 
 headers = {'Content-Type': 'application/json','api-key': AZURE_SEARCH_KEY}
 params = {'api-version': API_VERSION}
@@ -69,7 +97,12 @@ with st.expander("Instructions"):
                 - Best Answer: GPT model uses, as context. all of the content of the documents coming from Azure Search
                 """)
 
-query = st.text_area("Ask a question to your enterprise data lake", on_change=clear_submit)
+query = st.text_area("Ask a question to your enterprise data lake", value= "What is CLP?", on_change=clear_submit)
+
+# options = ['English', 'Spanish', 'Portuguese', 'French', 'Russian']
+# selected_language = st.selectbox('Answer Language:', options, index=0)
+# is_turbo_selected = st.checkbox('Enable GPT 3.5 Turbo (ChatGPT)?:')
+
 
 col1, col2, col3 = st.columns([1,1,3])
 with col1:
@@ -81,21 +114,8 @@ if qbutton or bbutton or st.session_state.get("submit"):
     if not query:
         st.error("Please enter a question!")
     else:
-        url = AZURE_SEARCH_ENDPOINT + '/indexes/'+ index_name + '/docs'
-        url += '?api-version={}'.format(API_VERSION)
-        url += '&search={}'.format(query)
-        url += '&select=pages'
-        url += '&$top=5'
-        url += '&queryLanguage=en-us'
-        url += '&queryType=semantic'
-        url += '&semanticConfiguration=my-semantic-config'
-        url += '&$count=true'
-        url += '&speller=lexicon'
-        url += '&answers=extractive|count-3'
-        url += '&captions=extractive|highlight-false'
-
-        resp = requests.get(url, headers=headers)
-        search_results = resp.json()
+        # Azure Search
+        search_results = get_search_results(query)
 
         file_content = OrderedDict()
         
@@ -134,6 +154,17 @@ if qbutton or bbutton or st.session_state.get("submit"):
                             answer = get_answer(sources, query, deployment="gpt-35-turbo", chain_type = "stuff", temperature=0.3, max_tokens=256)
                         if bbutton: 
                             answer = get_answer(sources, query, deployment="gpt-35-turbo", chain_type = "map_reduce", temperature=0.3, max_tokens=500)
+                        # if is_turbo_selected:
+                        #     if qbutton:
+                        #         answer = get_answer_turbo(sources, query, language=selected_language, chain_type = "stuff", temperature=0.3, max_tokens=256)
+                        #     if bbutton: 
+                        #         answer = get_answer_turbo(sources, query, language=selected_language, chain_type = "refine", temperature=0.3, max_tokens=500)
+                        # else:
+                        #     if qbutton:
+                        #         answer = get_answer(sources, query, language=selected_language, chain_type = "stuff", temperature=0.3, max_tokens=256)
+                        #     if bbutton: 
+                        #         answer = get_answer(sources, query, language=selected_language, chain_type = "refine", temperature=0.3, max_tokens=500)
+
                     else:
                         answer = {"output_text":"No results found" }
             else:
@@ -156,3 +187,4 @@ if qbutton or bbutton or st.session_state.get("submit"):
 
         except OpenAIError as e:
             st.error(e._message)
+            st.error(e._status_code)

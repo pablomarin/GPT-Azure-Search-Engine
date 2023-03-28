@@ -1,5 +1,5 @@
 streamlit
-langchain
+langchain==0.0.123
 faiss-cpu
 openai
 docx2txt
