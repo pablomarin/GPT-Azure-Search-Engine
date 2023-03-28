@@ -20,7 +20,7 @@ The goal of the MVP workshop is to show/prove the value of a Smart Search Engine
 * Optional but recommended – Databricks Workspace deployed in the RG
 
 # Architecture 
-![Architecture](GPT-Smart-Search-Architecture.jpg "Architecture")
+![Architecture](./images/GPT-Smart-Search-Architecture.jpg "Architecture")
 
 ## Demo
 
@@ -69,6 +69,12 @@ pip install -r ./requirements.txt
    - Run queries in Azure Cognitive Search and see how they compare with enhancing the experience with Azure OpenAI
 10. Go to the app/ folder and click the Deploy to Azure function to deploy the Web Application in Azure Web App Service. It takes a few minutes.
    - The deployment automatically comes with CI/CD, so any change that you commit/push to the code will automatically trigger a deployment in the Application.
+
+---
+
+## **Use your own data**
+
+To use your own storage account/container with your own documents (DOCX,PDF,HTML,TXT,PST,EML,etc) you just have to edit app/credentials.py and replace the variable DATASOURCE_CONNECTION_STRING with your own blob connection string. [Instructions](https://learn.microsoft.com/en-us/azure/storage/common/storage-account-get-info?tabs=portal)
 
 ---
 
