@@ -159,7 +159,8 @@ if qbutton or bbutton or st.session_state.get("submit"):
                 st.markdown("#### Answer")
                 st.markdown(answer["output_text"].split("SOURCES:")[0])
                 st.markdown("Sources:")
-                st.markdown(print (s+"<br>") for s in answer["output_text"].split("SOURCES:")[1].replace(" ","").split(","))
+                for s in answer["output_text"].split("SOURCES:")[1].replace(" ","").split(","):
+                    st.markdown(s) 
                 st.markdown("---")
                 st.markdown("#### Search Results")
 
