@@ -132,7 +132,70 @@ def get_answer(docs: List[Document],
     chain = load_qa_with_sources_chain(llm, chain_type=chain_type)
     
     answer = chain( {"input_documents": docs, "question": query}, return_only_outputs=True)
+    #answer = chain( {"input_documents": docs, "question": query, "language": language}, return_only_outputs=True)
+
+    return answer
+
+# @st.cache_data
+def get_answer_turbo(docs: List[Document], 
+               query: str, 
+               deployment: str, 
+               language: str, 
+               chain_type: str, 
+               temperature: float, 
+               max_tokens: int
+              ) -> Dict[str, Any]:
     
+    """Gets an answer to a question from a list of Documents."""
+        # In Azure OpenAI create a deployment named "gpt-35-turbo" for the model "gpt-35-turbo (0301)"
+
+    # Get the answer
+    if deployment == "gpt-35-turbo":
+        llm = AzureChatOpenAI(deployment_name=deployment, temperature=temperature, max_tokens=max_tokens)
+    else:
+        llm = AzureChatOpenAI(deployment_name="gpt-35-turbo", model_name="gpt-3.5-turbo-0301", temperature=temperature, max_tokens=max_tokens)
+ 
+    if chain_type=="refine":
+        chain = load_qa_chain(llm, chain_type=chain_type, question_prompt=REFINE_QUESTION_PROMPT, refine_prompt=REFINE_PROMPT)    
+        answer = chain( {"input_documents": docs, "question": query, "language": language}, return_only_outputs=True)
+
+        #passing answer again to openai to remove any additional leftover wording from chatgpt
+        answer = chain({"input_documents": [Document(page_content=answer['output_text'])], "question": query, "language": "English"}, return_only_outputs=False)
+    
+    if chain_type=="stuff":
+        chain = load_qa_chain(llm, chain_type=chain_type, prompt=STUFF_PROMPT)
+    
+    answer = chain( {"input_documents": docs, "question": query}, return_only_outputs=True)
+
+    return answer
+
+# @st.cache_data
+def get_answer_turbo(docs: List[Document], 
+               query: str, 
+               language: str, 
+               chain_type: str, 
+               temperature: float, 
+               max_tokens: int
+              ) -> Dict[str, Any]:
+    
+    """Gets an answer to a question from a list of Documents."""
+
+    # Get the answer
+   
+    # In Azure OpenAI create a deployment named "gpt-35-turbo" for the model "gpt-35-turbo (0301)"
+    llm = AzureChatOpenAI(deployment_name="gpt-35-turbo", model_name="gpt-3.5-turbo-0301", temperature=temperature, max_tokens=max_tokens)
+ 
+    if chain_type=="refine":
+        chain = load_qa_chain(llm, chain_type=chain_type, question_prompt=REFINE_QUESTION_PROMPT, refine_prompt=REFINE_PROMPT)    
+        answer = chain( {"input_documents": docs, "question": query, "language": language}, return_only_outputs=True)
+
+        #passing answer again to openai to remove any additional leftover wording from chatgpt
+        answer = chain({"input_documents": [Document(page_content=answer['output_text'])], "question": query, "language": "English"}, return_only_outputs=False)
+    
+    if chain_type=="stuff":
+        chain = load_qa_chain(llm, chain_type=chain_type, prompt=STUFF_PROMPT)
+        answer = chain( {"input_documents": docs, "question": query, "language": language}, return_only_outputs=False)       
+
     return answer
 
 
