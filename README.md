@@ -80,7 +80,7 @@ A: True, doing the embeddings of the documents pages everytime that there is a q
 
 2. **Why use the MAP_REDUCE type in LangChaing versus STUFF type?**
 
-A: Because using STUFF type with all the content of the pages as context, uses too many tokens. So the best way to deal with large documents is to find the answer by going trough all of the search results and doing many calls to the LLM looking for summarized answer. For more information of the difference between STUFF and MAP_REDUCE, see [HERE](https://langchain.readthedocs.io/en/latest/modules/indexes/combine_docs.html)
+A: Because using STUFF type with all the content of the pages as context, uses too many tokens. So the best way to deal with large documents is to find the answer by going trough all of the search results and doing many calls to the LLM looking for summarized answer. For more information of the difference between STUFF and MAP_REDUCE, see [HERE](https://github.com/hwchase17/langchain/tree/master/langchain/chains/question_answering)
 
 3. **Why use Azure Cognitive Search engine to provide the context for the LLM and not fine tune the LLM instead?**
 
