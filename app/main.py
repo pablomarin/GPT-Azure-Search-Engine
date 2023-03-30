@@ -22,8 +22,8 @@ from utils import (
     wrap_text_in_html,
 )
 from credentials import (
-    API_VERSION,
     DATASOURCE_CONNECTION_STRING,
+    AZURE_SEARCH_API_VERSION,
     AZURE_SEARCH_ENDPOINT,
     AZURE_SEARCH_KEY,
     COG_SERVICES_NAME,
@@ -72,10 +72,6 @@ os.environ["OPENAI_API_BASE"] = os.environ["AZURE_OPENAI_ENDPOINT"] = st.session
 os.environ["OPENAI_API_KEY"] = os.environ["AZURE_OPENAI_API_KEY"] = st.session_state["AZURE_OPENAI_API_KEY"] = AZURE_OPENAI_KEY
 os.environ["OPENAI_API_VERSION"] = os.environ["AZURE_OPENAI_API_VERSION"] = AZURE_OPENAI_API_VERSION
 
-os.environ["OPENAI_API_VERSION"] = os.environ["AZURE_OPENAI_API_VERSION"] = AZURE_OPENAI_API_VERSION
-os.environ["OPENAI_API_TYPE"] = os.environ["AZURE_OPENAI_API_TYPE"] = AZURE_OPENAI_TYPE
-
-
 headers = {'Content-Type': 'application/json','api-key': AZURE_SEARCH_KEY}
 params = {'api-version': API_VERSION}
 
@@ -101,7 +97,6 @@ query = st.text_area("Ask a question to your enterprise data lake", value= "What
 
 # options = ['English', 'Spanish', 'Portuguese', 'French', 'Russian']
 # selected_language = st.selectbox('Answer Language:', options, index=0)
-# is_turbo_selected = st.checkbox('Enable GPT 3.5 Turbo (ChatGPT)?:')
 
 
 col1, col2, col3 = st.columns([1,1,3])
@@ -154,16 +149,6 @@ if qbutton or bbutton or st.session_state.get("submit"):
                             answer = get_answer(sources, query, deployment="gpt-35-turbo", chain_type = "stuff", temperature=0.3, max_tokens=256)
                         if bbutton: 
                             answer = get_answer(sources, query, deployment="gpt-35-turbo", chain_type = "map_reduce", temperature=0.3, max_tokens=500)
-                        # if is_turbo_selected:
-                        #     if qbutton:
-                        #         answer = get_answer_turbo(sources, query, language=selected_language, chain_type = "stuff", temperature=0.3, max_tokens=256)
-                        #     if bbutton: 
-                        #         answer = get_answer_turbo(sources, query, language=selected_language, chain_type = "refine", temperature=0.3, max_tokens=500)
-                        # else:
-                        #     if qbutton:
-                        #         answer = get_answer(sources, query, language=selected_language, chain_type = "stuff", temperature=0.3, max_tokens=256)
-                        #     if bbutton: 
-                        #         answer = get_answer(sources, query, language=selected_language, chain_type = "refine", temperature=0.3, max_tokens=500)
 
                     else:
                         answer = {"output_text":"No results found" }

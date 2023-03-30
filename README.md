@@ -2,7 +2,7 @@
 
 # Accelerator powered by Azure Cognitive Search + Azure OpenAI 
 Your organization needs a search engine that can make sense of all kinds of types of data, stored in different locations, and that can return the links of similar documents, but more importantly, provide the answer to the question! In other words, you want private and secured ChatGPT for your organization that can interpret, comprehend, and answer questions about your business.
-The goal of the MVP workshop is to show/prove the value of a GPT Smart Search Engine built with the Azure Services, with your own data in your own environment. For more information on the 2 day workshop, click the powerpoint presentation below:
+The goal of the MVP workshop is to show/prove the value of a Smart Search Engine built with the Azure Services, with your own data in your own environment. For more information on the 2 day workshop, click the powerpoint presentation below:
 
 [Accelerator Pitch Deck](https://github.com/pablomarin/GPT-Azure-Search-Engine/blob/main/Azure%20Open%20AI%20GPT-3%20Smart%20Search%20-%20Pitch%20Deck.pptx)
 
@@ -20,7 +20,7 @@ The goal of the MVP workshop is to show/prove the value of a GPT Smart Search En
 * Optional but recommended – Databricks Workspace deployed in the RG
 
 # Architecture 
-![Architecture](./images/GPT-Smart-Search-Architecture.jpg "Architecture")
+![Architecture](GPT-Smart-Search-Architecture.jpg "Architecture")
 
 ## Demo
 
@@ -48,7 +48,7 @@ Note: (Pre-requisite) You need to have an Azure OpenAI service already created
 2. In Azure OpenAI studio, deploy these two models: **Make sure that the deployment name is the same as the model name.**
    - "gpt-35-turbo" for the model "gpt-35-turbo (0301)"
    - "text-embedding-ada-002"
-3. Create a Resource Group where all the assets of this accelerator are going to be. (Azure OpenAI doesn't need to be in this RG)
+3. Create a Resource Group where all the assets of this accelerator are going to be.
 4. Create an Azure Cognitive Search Service and Cognitive Services Account by clicking below:
 
 [![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fpablomarin%2FGPT-Azure-Search-Engine%2Fmain%2Fazuredeploy.json) 
@@ -58,7 +58,7 @@ _Note: If you have never created a cognitive multi-service account before, pleas
 5. Enable Semantic Search on your Azure Cognitive Search Service:
    - On the left-nav pane, select Semantic Search (Preview).
    - Select either the Free plan or the Standard plan. You can switch between the free plan and the standard plan at any time.
-6. Install the dependencies on your machine:
+6. Install the dependencies on your machine (make sure you do the below comand on the same conda environment that you are going to run the notebooks:
 ```
 pip install -r ./requirements.txt
 ```
@@ -76,11 +76,11 @@ pip install -r ./requirements.txt
 
 1. **Why the vector similarity is done in memory using FAISS versus having a separate vector database like RedisSearch or Pinecone?**
 
-A: True, doing the embeddings of the documents pages everytime that there is a query is not efficient. The ideal scenario is to vectorize the docs pages once (first time they are needed) and then retrieve them from a database the next time they are needed. For this a special vector database is necessary. The ideal scenario though, is Azure Search to retreive the vectors as part of the search results, along with the document pages. Azure Search will soon allow this in a few months, let's wait for it. As of right now the embedding process doesn't take that much time or money, so it is worth the wait versus using another database just for vectors.
+A: True, doing the embeddings of the documents pages everytime that there is a query is not efficient. The ideal scenario is to vectorize the docs pages once (first time they are needed) and then retrieve them from a database the next time they are needed. For this a special vector database is necessary. The ideal scenario though, is Azure Search to retreive the vectors as part of the search results, along with the document pages/chunks. Azure Search will soon allow this in a few months, let's wait for it. As of right now the embedding process doesn't take that much time or money, so it is worth the wait versus using another database just for vectors.
 
-2. **Why use the MAP REDUCE type in LangChaing versus STUFF type?**
+2. **Why use the MAP_REDUCE type in LangChaing versus STUFF type?**
 
-A: Because using STUFF type with all the content of the pages as context, uses too many tokens. So the best way to deal with large documents is to refine the answers by going trough all of the search results and do many calls to the LLM looking for the best answer. For more information of the difference between STUFF and MAP REDUCE, see [HERE](https://langchain.readthedocs.io/en/latest/modules/indexes/combine_docs.html)
+A: Because using STUFF type with all the content of the pages as context, uses too many tokens. So the best way to deal with large documents is to find the answer by going trough all of the search results and doing many calls to the LLM looking for summarized answer. For more information of the difference between STUFF and MAP_REDUCE, see [HERE](https://langchain.readthedocs.io/en/latest/modules/indexes/combine_docs.html)
 
 3. **Why use Azure Cognitive Search engine to provide the context for the LLM and not fine tune the LLM instead?**
 
