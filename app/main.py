@@ -41,7 +41,7 @@ def clear_submit():
 #@st.cache_data()
 def get_search_results(query):
     url = AZURE_SEARCH_ENDPOINT + '/indexes/'+ index_name + '/docs'
-    url += '?api-version={}'.format(AZURE_OPENAI_API_VERSION)
+    url += '?api-version={}'.format(AZURE_SEARCH_API_VERSION)
     url += '&search={}'.format(query)
     url += '&select=pages'
     url += '&$top=5'
@@ -72,7 +72,7 @@ os.environ["OPENAI_API_KEY"] = os.environ["AZURE_OPENAI_API_KEY"] = st.session_s
 os.environ["OPENAI_API_VERSION"] = os.environ["AZURE_OPENAI_API_VERSION"] = AZURE_OPENAI_API_VERSION
 
 headers = {'Content-Type': 'application/json','api-key': AZURE_SEARCH_KEY}
-params = {'api-version': AZURE_OPENAI_API_VERSION}
+params = {'api-version': AZURE_SEARCH_API_VERSION}
 
 with st.expander("Instructions"):
     st.markdown("""
