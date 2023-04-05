@@ -124,6 +124,7 @@ if qbutton or bbutton or st.session_state.get("submit"):
             for result in search_results['value']:
                 if result['@search.rerankerScore'] > 0.4: # Show results that are at least 10% of the max possible score=4
                     file_content[result['id']]={
+                                            "title": result['title'],
                                             "content": result['pages'],  # result['chunks'] can be used here as well
                                             "caption": result['@search.captions'][0]['text'],
                                             "score": result['@search.rerankerScore'],
