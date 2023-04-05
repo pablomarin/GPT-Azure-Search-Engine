@@ -17,7 +17,7 @@ Accurate answers and instant citations from documents in your Azure Data Lake.
 pip install -r requirements.txt
 ```
 
-3. Run the Streamlit server🚀
+2. Run the Streamlit server🚀
 
 ```bash
 cd app
@@ -45,6 +45,14 @@ streamlit run main.py
 3. Go to the deployed WebApp and Authorize azure to deploy and build code directly from Github 
 
 ![Authorize Github](../images/error-authorize-github.jpeg "Authorize Github" )
+
+- If running locally fails with error "TypeError: unsupported operand type(s) for |: 'type' and '_GenericAlias'"
+In AML Compute Instance terminal check your list of conda environments and activate one with Python 3.10 or higher
+```
+conda env list
+conda activate azureml_py310_sdkv2
+```
+
 
 
 
