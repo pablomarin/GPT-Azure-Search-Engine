@@ -11,7 +11,7 @@ from langchain.docstore.document import Document
 from components.sidebar import sidebar
 from utils import (
     embed_docs,
-    get_answer
+    get_answer,
     get_sources,
     search_docs
 )
