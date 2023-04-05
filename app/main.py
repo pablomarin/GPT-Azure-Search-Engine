@@ -73,8 +73,6 @@ st.header("GPT Smart Search Engine")
 
 sidebar()
 
-
-
 with st.expander("Instructions"):
     st.markdown("""
                 Ask a question that you think can be answered with the information in about 10k Arxiv Computer Science publications from 2020-2021 or in 52k Medical Covid-19 Publications from 2020.
@@ -89,7 +87,7 @@ with st.expander("Instructions"):
                 - What medicine reduces inflamation in the lungs?
                 - Why Covid doesn't affect kids that much compared to adults?
                 
-                You will notice that the answers to these questions are diferent from the open ChatGPT, since these papers are the only possible context. This search engine does not look at the open internet to answer these questions. If the context doesn't contain information, the engine will respond: I don't know.
+                \nYou will notice that the answers to these questions are diferent from the open ChatGPT, since these papers are the only possible context. This search engine does not look at the open internet to answer these questions. If the context doesn't contain information, the engine will respond: I don't know.
                 
                 - Quick Answer: GPT model only uses, as context, the captions of the results coming from Azure Search
                 - Best Answer: GPT model uses, as context. all of the content of the documents coming from Azure Search
@@ -176,7 +174,7 @@ if qbutton or bbutton or st.session_state.get("submit"):
 
                 if(len(docs)>1):
                     for key, value in file_content.items():
-                        st.markdown(value["title"] + '  (Score: ' + str(round(value["score"]*100/4,2)) + '%)')
+                        st.markdown(str(value["title"]) + '  (Score: ' + str(round(value["score"]*100/4,2)) + '%)')
                         st.markdown(value["caption"])
                         st.markdown("---")
 
