@@ -23,7 +23,9 @@ pip install -r requirements.txt
 cd app
 streamlit run main.py
 ```
-
+3. Go to https://{Your-AMLCompute-Name}-{port}.{your-region}.instances.azureml.ms/ to test  
+Example: https://myComputeInstance-8501.southcentralus.instances.azureml.ms/ 
+ 
 ## To Deploy in Azure Web App Service
 
 [![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fpablomarin%2FGPT-Azure-Search-Engine%2Fmain%2Fapp%2Fazuredeploy.json)
