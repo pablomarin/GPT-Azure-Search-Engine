@@ -173,7 +173,7 @@ if qbutton or bbutton or st.session_state.get("submit"):
 
                 if(len(docs)>1):
                     for key, value in file_content.items():
-                        st.markdown(key + '  (Score: ' + str(round(value["score"]*100/4,2)) + '%)')
+                        st.markdown(value["location"] + '  (Score: ' + str(round(value["score"]*100/4,2)) + '%)')
                         st.markdown(value["caption"])
                         st.markdown("---")
 
