@@ -11,15 +11,9 @@ from langchain.docstore.document import Document
 from components.sidebar import sidebar
 from utils import (
     embed_docs,
-    get_answer,
-    get_answer_turbo,
+    get_answer
     get_sources,
-    parse_docx,
-    parse_pdf,
-    parse_txt,
-    search_docs,
-    text_to_docs,
-    wrap_text_in_html,
+    search_docs
 )
 from credentials import (
     DATASOURCE_CONNECTION_STRING,
@@ -34,45 +28,52 @@ from credentials import (
 
 )
 
+os.environ["OPENAI_API_BASE"] = os.environ["AZURE_OPENAI_ENDPOINT"] = st.session_state["AZURE_OPENAI_ENDPOINT "] = AZURE_OPENAI_ENDPOINT
+os.environ["OPENAI_API_KEY"] = os.environ["AZURE_OPENAI_API_KEY"] = st.session_state["AZURE_OPENAI_API_KEY"] = AZURE_OPENAI_KEY
+os.environ["OPENAI_API_VERSION"] = os.environ["AZURE_OPENAI_API_VERSION"] = AZURE_OPENAI_API_VERSION
+
+
 
 def clear_submit():
     st.session_state["submit"] = False
 
 #@st.cache_data()
-def get_search_results(query):
-    url = AZURE_SEARCH_ENDPOINT + '/indexes/'+ index_name + '/docs'
-    url += '?api-version={}'.format(AZURE_SEARCH_API_VERSION)
-    url += '&search={}'.format(query)
-    url += '&select=pages'
-    url += '&$top=5'
-    url += '&queryLanguage=en-us'
-    url += '&queryType=semantic'
-    url += '&semanticConfiguration=my-semantic-config'
-    url += '&$count=true'
-    url += '&speller=lexicon'
-    url += '&answers=extractive|count-3'
-    url += '&captions=extractive|highlight-true'
-    url += '&highlightPreTag=' + urllib.parse.quote('<span style="background-color: #f5e8a3">', safe='')
-    url += '&highlightPostTag=' + urllib.parse.quote('</span>', safe='')
+def get_search_results(query, indexes):
+    
+    headers = {'Content-Type': 'application/json','api-key': AZURE_SEARCH_KEY}
+    params = {'api-version': AZURE_SEARCH_API_VERSION}
 
-    resp = requests.get(url, headers=headers)
+    agg_search_results = []
+    for index in indexes:
+        url = AZURE_SEARCH_ENDPOINT + '/indexes/'+ index + '/docs'
+        url += '?api-version={}'.format(AZURE_SEARCH_API_VERSION)
+        url += '&search={}'.format(query)
+        url += '&select=*'
+        url += '&$top=5'  # You can change this to anything you need/want
+        url += '&queryLanguage=en-us'
+        url += '&queryType=semantic'
+        url += '&semanticConfiguration=my-semantic-config'
+        url += '&$count=true'
+        url += '&speller=lexicon'
+        url += '&answers=extractive|count-3'
+        url += '&captions=extractive|highlight-false'
 
-    search_results = resp.json()
-    return search_results
+        resp = requests.get(url, headers=headers)
+        print(url)
+        print(resp.status_code)
+
+        search_results = resp.json()
+        agg_search_results.append(search_results)
+    
+    return agg_search_results
+    
 
 st.set_page_config(page_title="GPT Smart Search", page_icon="📖", layout="wide")
 st.header("GPT Smart Search Engine")
 
 sidebar()
 
-index_name = "cogsrch-index"
 
-os.environ["OPENAI_API_BASE"] = os.environ["AZURE_OPENAI_ENDPOINT"] = st.session_state["AZURE_OPENAI_ENDPOINT "] = AZURE_OPENAI_ENDPOINT
-os.environ["OPENAI_API_KEY"] = os.environ["AZURE_OPENAI_API_KEY"] = st.session_state["AZURE_OPENAI_API_KEY"] = AZURE_OPENAI_KEY
-os.environ["OPENAI_API_VERSION"] = os.environ["AZURE_OPENAI_API_VERSION"] = AZURE_OPENAI_API_VERSION
-
-headers = {'Content-Type': 'application/json','api-key': AZURE_SEARCH_KEY}
-params = {'api-version': AZURE_SEARCH_API_VERSION}
 
 with st.expander("Instructions"):
     st.markdown("""
@@ -109,7 +110,11 @@ if qbutton or bbutton or st.session_state.get("submit"):
         st.error("Please enter a question!")
     else:
         # Azure Search
-        search_results = get_search_results(query)
+        
+        index1_name = "cogsrch-index-files"
+        index2_name = "cogsrch-index-csv"
+        indexes = [index1_name, index2_name]
+        agg_search_results = get_search_results(query, indexes)
 
         file_content = OrderedDict()
         
@@ -120,7 +125,17 @@ if qbutton or bbutton or st.session_state.get("submit"):
                             "score": result['@search.rerankerScore'], 
                             "caption": result['@search.captions'][0]['text']        
                             }
- 
+                    
+        for search_results in agg_search_results:
+            for result in search_results['value']:
+                if result['@search.rerankerScore'] > 0.4: # Show results that are at least 10% of the max possible score=4
+                    file_content[result['id']]={
+                                            "content": result['pages'],  # result['chunks'] can be used here as well
+                                            "caption": result['@search.captions'][0]['text'],
+                                            "score": result['@search.rerankerScore'],
+                                            "location": result['metadata_storage_path']                  
+                                        }
+
         
         st.session_state["submit"] = True
         # Output Columns
@@ -131,12 +146,12 @@ if qbutton or bbutton or st.session_state.get("submit"):
             for key,value in file_content.items():
                 
                 if qbutton:
-                    docs.append(Document(page_content=value['caption'], metadata={"source": key}))
+                    docs.append(Document(page_content=value['caption'], metadata={"source": value["location"]}))
                     add_text = "Coming up with a quick answer... ⏳"
                 
                 if bbutton:
                     for page in value["content"]:
-                        docs.append(Document(page_content=page, metadata={"source": key}))
+                        docs.append(Document(page_content=page, metadata={"source": value["location"]}))
                     add_text = "Reading the source documents to provide the best answer... ⏳"
                 
             if "add_text" in locals():
