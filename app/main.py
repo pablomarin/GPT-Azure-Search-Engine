@@ -117,14 +117,6 @@ if qbutton or bbutton or st.session_state.get("submit"):
         agg_search_results = get_search_results(query, indexes)
 
         file_content = OrderedDict()
-        
-        for result in search_results['value']:
-            if result['@search.rerankerScore'] > 0.4:
-                    file_content[result['metadata_storage_path']]={
-                            "content": result['pages'],  
-                            "score": result['@search.rerankerScore'], 
-                            "caption": result['@search.captions'][0]['text']        
-                            }
                     
         for search_results in agg_search_results:
             for result in search_results['value']:
