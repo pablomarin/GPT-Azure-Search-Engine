@@ -7,3 +7,4 @@ docx2txt
 pillow
 pypdf
 tenacity
+sentence_transformers
