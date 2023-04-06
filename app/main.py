@@ -105,7 +105,7 @@ with col1:
 with col2:
     bbutton = st.button('Best Answer')
 with col3:
-    temp = st.slider('Temperature', 0, 1, 0.1)
+    temp = st.slider('Temperature :thermometer:', min_value=0, max_value=1, step=0.1, value=0.5)
 
 if qbutton or bbutton or st.session_state.get("submit"):
     if not query:
