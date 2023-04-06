@@ -17,7 +17,6 @@ The goal of the MVP workshop is to show/prove the value of a GPT Smart Search En
 * A storage account must be set in place in the RG
 * Data/Documents must be uploaded to the blob storage account, at least one week prior to the workshop date
 * Azure Machine Learning Workspace must be deployed in the RG
-* Optional but recommended – Databricks Workspace deployed in the RG
 
 # Architecture 
 ![Architecture](./images/GPT-Smart-Search-Architecture.jpg "Architecture")
@@ -30,19 +29,19 @@ https://webapp-cstevuxaqrxcm.azurewebsites.net/
 
 ## 🔧**Features**
 
-   - Shows how you can use [Azure OpenAI](https://azure.microsoft.com/en-us/products/cognitive-services/openai-service/) + [Azure Cognitive Search](https://azure.microsoft.com/en-us/products/search) to have a Smart and Multilingual Search engine that not only provides links of the search results, but also answers the question.
+   - Shows how you can use [Azure OpenAI](https://azure.microsoft.com/en-us/products/cognitive-services/openai-service/) + [Azure Cognitive Search](https://azure.microsoft.com/en-us/products/search) to have a GPT powered Smart Search engine that not only provides links of the search results, but also answers the question by reading and understanding those search results.
    - ***Solve 80% of the use cases where companies want to use OpenAI to provide answers from their knowledge base to customers or employees, without the need of retraining/fine tuning and hosting the models.***
    - All Azure services and configuration are deployed via python code.
    - Uses [Azure Cognitive Services](https://azure.microsoft.com/en-us/products/cognitive-services/) to enrich documents: Detect Language, OCR images, Key-phrases extraction, entity recognition (persons, emails, addresses, organizations, urls).
    - Uses [LangChain](https://langchain.readthedocs.io/en/latest/) as a wrapper for interacting with Azure OpenAI , vector stores and constructing prompts.
    - Uses [Streamlit](https://streamlit.io/) to build the web application in python.
-      - (Coming soon) Multi-Source
-   - Multi-lingual
+   - Multi-Lingual (ingests, indexes and understand any language)
    - Multi-Index -> multiple search indexes
    - Parses CSVs -> one-to-many documents (one row is an indexed document)
    - (Coming soon) Chat Interface
    - (Coming soon) Recommends new searches based on users' history.
-   - (Coming soon) Understands tabular data
+   - (Coming soon) Multi-Source (Blob Storage + SQL DB, CosmosDB, Sharepoint, etc)
+   - (Coming soon) Responds questions from tabular data files
 
 
 ---
@@ -53,9 +52,9 @@ Note: (Pre-requisite) You need to have an Azure OpenAI service already created
 
 1. Fork this repo to your Github account.
 2. In Azure OpenAI studio, deploy these two models: **Make sure that the deployment name is the same as the model name.**
-   - "gpt-35-turbo" for the model "gpt-35-turbo (0301)" if you have GPT-4, use it (it is definitely better)
+   - "gpt-35-turbo" for the model "gpt-35-turbo (0301)". If you have "gpt-4", use it (it is definitely better)
    - "text-embedding-ada-002"
-3. Create a Resource Group where all the assets of this accelerator are going to be Azure OpenAI can be in different RG or a different Subscription.
+3. Create a Resource Group where all the assets of this accelerator are going to be. Azure OpenAI can be in different RG or a different Subscription.
 4. ClICK BELOW to create an Azure Cognitive Search Service and Cognitive Services Account:
 
 [![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fpablomarin%2FGPT-Azure-Search-Engine%2Fmain%2Fazuredeploy.json) 
@@ -65,7 +64,7 @@ _Note: If you have never created a cognitive multi-service account before, pleas
 5. Enable Semantic Search on your Azure Cognitive Search Service:
    - On the left-nav pane, select Semantic Search (Preview).
    - Select either the Free plan or the Standard plan. You can switch between the free plan and the standard plan at any time.
-6. Make sure you run the notebooks on Python 3.10
+6. Make sure you run the notebooks on a Python 3.10 conda enviroment
 7. Install the dependencies on your machine (make sure you do the below comand on the same conda environment that you are going to run the notebooks:
 ```
 pip install -r ./requirements.txt
@@ -86,7 +85,7 @@ pip install -r ./requirements.txt
 
 1. **Why the vector similarity is done in memory using FAISS versus having a separate vector database like RedisSearch or Pinecone?**
 
-A: True, doing the embeddings of the documents pages everytime that there is a query is not efficient. The ideal scenario is to vectorize the docs pages once (first time they are needed) and then retrieve them from a database the next time they are needed. For this a special vector database is necessary. The ideal scenario though, is Azure Search to retreive the vectors as part of the search results, along with the document pages/chunks. Azure Search will soon allow this in a few months, let's wait for it. As of right now the embedding process doesn't take that much time or money, so it is worth the wait versus using another database just for vectors.
+A: True, doing the embeddings of the documents pages everytime that there is a query is not efficient. The ideal scenario is to vectorize the docs chunks once (first time they are needed) and then retrieve them from a database the next time they are needed. For this a special vector database is necessary. The ideal scenario though, is Azure Search to retreive the vectors as part of the search results, along with the document chunks. Azure Search will soon allow this in a few months, let's wait for it. As of right now the embedding process doesn't take that much time or money, so it is worth the wait versus using another database just for vectors.
 
 2. **Why use the MAP_REDUCE type in LangChaing versus STUFF type?**
 

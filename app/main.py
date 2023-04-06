@@ -104,6 +104,8 @@ with col1:
     qbutton = st.button('Quick Answer')
 with col2:
     bbutton = st.button('Best Answer')
+with col3:
+    temp = st.slider('Temperature', 0, 1, 0.1)
 
 if qbutton or bbutton or st.session_state.get("submit"):
     if not query:
@@ -158,9 +160,9 @@ if qbutton or bbutton or st.session_state.get("submit"):
                         index = embed_docs(docs, language)
                         sources = search_docs(index,query)
                         if qbutton:
-                            answer = get_answer(sources, query, deployment="gpt-35-turbo", chain_type = "stuff", temperature=0.3, max_tokens=256)
+                            answer = get_answer(sources, query, deployment="gpt-35-turbo", chain_type = "stuff", temperature=temp, max_tokens=256)
                         if bbutton: 
-                            answer = get_answer(sources, query, deployment="gpt-35-turbo", chain_type = "map_reduce", temperature=0.3, max_tokens=500)
+                            answer = get_answer(sources, query, deployment="gpt-35-turbo", chain_type = "map_reduce", temperature=temp, max_tokens=500)
 
                     else:
                         answer = {"output_text":"No results found" }
