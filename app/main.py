@@ -4,7 +4,6 @@ import os
 import time
 import requests
 import random
-from IPython.display import display, HTML
 from collections import OrderedDict
 from openai.error import OpenAIError
 from langchain.docstore.document import Document
