@@ -94,7 +94,7 @@ with st.expander("Instructions"):
                 - ***Best Answer***: GPT model uses, as context. all of the content of the documents coming from Azure Search
                 """)
 
-query = sttext_input("Ask a question to your enterprise data lake", value= "What is CLP?", on_change=clear_submit)
+query = st.text_input("Ask a question to your enterprise data lake", value= "What is CLP?", on_change=clear_submit)
 
 # options = ['English', 'Spanish', 'Portuguese', 'French', 'Russian']
 # selected_language = st.selectbox('Answer Language:', options, index=0)
