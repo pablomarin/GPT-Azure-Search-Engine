@@ -5,6 +5,7 @@ from typing import Any, Dict, List
 import docx2txt
 import streamlit as st
 from embeddings import OpenAIEmbeddings
+from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.chains.question_answering import load_qa_chain
 from langchain.chains.qa_with_sources import load_qa_with_sources_chain
 from langchain.docstore.document import Document
@@ -86,18 +87,29 @@ def text_to_docs(text: str | List[str]) -> List[Document]:
 
 
 # @st.cache_data(show_spinner=False)
-def embed_docs(docs: List[Document]) -> VectorStore:
+def embed_docs(docs: List[Document], language: str) -> VectorStore:
     """Embeds a list of Documents and returns a FAISS index"""
 
     if not st.session_state.get("AZURE_OPENAI_API_KEY"):
         raise AuthenticationError(
             "You need to set the env variable AZURE_OPENAI_API_KEY"
         )
-    else:
-        # Embed the chunks
-        embeddings = OpenAIEmbeddings() 
-        index = FAISS.from_documents(docs, embeddings)
+    else:   
+        # Select the Embedder model
+        if len(docs) < 50:
+            # OpenAI models are accurate but slower
+            embedder = OpenAIEmbeddings(document_model_name="text-embedding-ada-002", query_model_name="text-embedding-ada-002") 
+        else:
+            # Bert based models are faster (3x-10x) but not as accurate
+            # For Multiple language support we need to use a multilingual model. But if English only is the requirement, use "multi-qa-MiniLM-L6-cos-v1" for a good trade-off between quality and speed
+            # The fastest english model though is "all-MiniLM-L12-v2"
+            if language == "en":
+                embedder = HuggingFaceEmbeddings(model_name = 'multi-qa-MiniLM-L6-cos-v1')
+            else:
+                embedder = HuggingFaceEmbeddings(model_name = 'distiluse-base-multilingual-cased-v2')
 
+        index = FAISS.from_documents(docs, embedder)
+        
         return index
 
 
@@ -124,7 +136,7 @@ def get_answer(docs: List[Document],
 
     # Get the answer
     
-    if deployment == "gpt-35-turbo":
+    if (deployment in ["gpt-35-turbo", "gpt-4", "gpt-4-32k"]) :
         llm = AzureChatOpenAI(deployment_name=deployment, temperature=temperature, max_tokens=max_tokens)
     else:
         llm = AzureOpenAI(deployment_name=deployment, temperature=temperature, max_tokens=max_tokens)
@@ -136,67 +148,6 @@ def get_answer(docs: List[Document],
 
     return answer
 
-# @st.cache_data
-def get_answer_turbo(docs: List[Document], 
-               query: str, 
-               deployment: str, 
-               language: str, 
-               chain_type: str, 
-               temperature: float, 
-               max_tokens: int
-              ) -> Dict[str, Any]:
-    
-    """Gets an answer to a question from a list of Documents."""
-        # In Azure OpenAI create a deployment named "gpt-35-turbo" for the model "gpt-35-turbo (0301)"
-
-    # Get the answer
-    if deployment == "gpt-35-turbo":
-        llm = AzureChatOpenAI(deployment_name=deployment, temperature=temperature, max_tokens=max_tokens)
-    else:
-        llm = AzureChatOpenAI(deployment_name="gpt-35-turbo", model_name="gpt-3.5-turbo-0301", temperature=temperature, max_tokens=max_tokens)
- 
-    if chain_type=="refine":
-        chain = load_qa_chain(llm, chain_type=chain_type, question_prompt=REFINE_QUESTION_PROMPT, refine_prompt=REFINE_PROMPT)    
-        answer = chain( {"input_documents": docs, "question": query, "language": language}, return_only_outputs=True)
-
-        #passing answer again to openai to remove any additional leftover wording from chatgpt
-        answer = chain({"input_documents": [Document(page_content=answer['output_text'])], "question": query, "language": "English"}, return_only_outputs=False)
-    
-    if chain_type=="stuff":
-        chain = load_qa_chain(llm, chain_type=chain_type, prompt=STUFF_PROMPT)
-    
-    answer = chain( {"input_documents": docs, "question": query}, return_only_outputs=True)
-
-    return answer
-
-# @st.cache_data
-def get_answer_turbo(docs: List[Document], 
-               query: str, 
-               language: str, 
-               chain_type: str, 
-               temperature: float, 
-               max_tokens: int
-              ) -> Dict[str, Any]:
-    
-    """Gets an answer to a question from a list of Documents."""
-
-    # Get the answer
-   
-    # In Azure OpenAI create a deployment named "gpt-35-turbo" for the model "gpt-35-turbo (0301)"
-    llm = AzureChatOpenAI(deployment_name="gpt-35-turbo", model_name="gpt-3.5-turbo-0301", temperature=temperature, max_tokens=max_tokens)
- 
-    if chain_type=="refine":
-        chain = load_qa_chain(llm, chain_type=chain_type, question_prompt=REFINE_QUESTION_PROMPT, refine_prompt=REFINE_PROMPT)    
-        answer = chain( {"input_documents": docs, "question": query, "language": language}, return_only_outputs=True)
-
-        #passing answer again to openai to remove any additional leftover wording from chatgpt
-        answer = chain({"input_documents": [Document(page_content=answer['output_text'])], "question": query, "language": "English"}, return_only_outputs=False)
-    
-    if chain_type=="stuff":
-        chain = load_qa_chain(llm, chain_type=chain_type, prompt=STUFF_PROMPT)
-        answer = chain( {"input_documents": docs, "question": query, "language": language}, return_only_outputs=False)       
-
-    return answer
 
 
 # @st.cache_data

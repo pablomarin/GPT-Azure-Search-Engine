@@ -3,6 +3,7 @@ import urllib
 import os
 import time
 import requests
+import random
 from IPython.display import display, HTML
 from collections import OrderedDict
 from openai.error import OpenAIError
@@ -117,17 +118,21 @@ if qbutton or bbutton or st.session_state.get("submit"):
         agg_search_results = get_search_results(query, indexes)
 
         file_content = OrderedDict()
-                    
-        for search_results in agg_search_results:
-            for result in search_results['value']:
-                if result['@search.rerankerScore'] > 0.4: # Show results that are at least 10% of the max possible score=4
-                    file_content[result['id']]={
-                                            "title": result['title'],
-                                            "content": result['pages'],  # result['chunks'] can be used here as well
-                                            "caption": result['@search.captions'][0]['text'],
-                                            "score": result['@search.rerankerScore'],
-                                            "location": result['metadata_storage_path']                  
-                                        }
+        
+        try:
+            for search_results in agg_search_results:
+                for result in search_results['value']:
+                    if result['@search.rerankerScore'] > 0.4: # Show results that are at least 10% of the max possible score=4
+                        file_content[result['id']]={
+                                                "title": result['title'],
+                                                "chunks": result['pages'],
+                                                "language": result['language'],
+                                                "caption": result['@search.captions'][0]['text'],
+                                                "score": result['@search.rerankerScore'],
+                                                "location": result['metadata_storage_path']                  
+                                            }
+        except:
+            st.markdown("Not data returned from Azure Search, check connection..")
 
         
         st.session_state["submit"] = True
@@ -143,14 +148,15 @@ if qbutton or bbutton or st.session_state.get("submit"):
                     add_text = "Coming up with a quick answer... ⏳"
                 
                 if bbutton:
-                    for page in value["content"]:
+                    for page in value["chunks"]:
                         docs.append(Document(page_content=page, metadata={"source": value["location"]}))
                     add_text = "Reading the source documents to provide the best answer... ⏳"
                 
             if "add_text" in locals():
                 with st.spinner(add_text):
                     if(len(docs)>1):
-                        index = embed_docs(docs)
+                        language = random.choice(list(file_content.items()))[1]["language"]
+                        index = embed_docs(docs, language)
                         sources = search_docs(index,query)
                         if qbutton:
                             answer = get_answer(sources, query, deployment="gpt-35-turbo", chain_type = "stuff", temperature=0.3, max_tokens=256)
