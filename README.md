@@ -76,8 +76,8 @@ pip install -r ./requirements.txt
   - Ingests 52k documents into your Search Engine coming from 1 CSV file
 11. Run 03-Quering-AOpenAI.ipynb:
    - Run queries in Azure Cognitive Search and see how they compare with enhancing the experience with Azure OpenAI
-12. Go to the app/ folder and click the Deploy to Azure function to deploy the Web Application in Azure Web App Service. It takes a few minutes.
-   - The deployment automatically comes with CI/CD, so any change that you commit/push to your github forked repo will automatically trigger a deployment in the Application.
+12. Go to the app/ folder and click the Deploy to Azure function to deploy the Web Application in Azure Web App Service. It takes about 15-20 minutes.
+   - The deployment automatically comes with CI/CD, so any change that you commit/push to your github forked repo will automatically trigger a deployment in the web application.
 
 ---
 
