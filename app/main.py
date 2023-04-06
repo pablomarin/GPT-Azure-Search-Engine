@@ -88,9 +88,10 @@ with st.expander("Instructions"):
                 - Why Covid doesn't affect kids that much compared to adults?
                 
                 \nYou will notice that the answers to these questions are diferent from the open ChatGPT, since these papers are the only possible context. This search engine does not look at the open internet to answer these questions. If the context doesn't contain information, the engine will respond: I don't know.
-                
-                - Quick Answer: GPT model only uses, as context, the captions of the results coming from Azure Search
-                - Best Answer: GPT model uses, as context. all of the content of the documents coming from Azure Search
+                """)
+    st.markdown("""
+                - ***Quick Answer***: GPT model only uses, as context, the captions of the results coming from Azure Search
+                - ***Best Answer***: GPT model uses, as context. all of the content of the documents coming from Azure Search
                 """)
 
 query = st.text_area("Ask a question to your enterprise data lake", value= "What is CLP?", on_change=clear_submit)
@@ -105,7 +106,7 @@ with col1:
 with col2:
     bbutton = st.button('Best Answer')
 with col3:
-    temp = st.slider('Temperature :thermometer:', min_value=0, max_value=1, step=0.1, value=0.5)
+    temp = st.slider('Temperature :thermometer:', min_value=0.0, max_value=1.0, step=0.1, value=0.5)
 
 if qbutton or bbutton or st.session_state.get("submit"):
     if not query:
