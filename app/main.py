@@ -81,7 +81,7 @@ with st.expander("Instructions"):
                 - What are markov chains?
                 - List the authors that talk about Gradient Boosting Machines
                 - How does random forest work?
-                - Give me an example of a Reinforcement learning problem
+                - What kind of problems can I solve with reinforcement learning? Give me some real life examples
                 - What kind of problems Turing Machines solve?
                 - What are the main risk factors for Covid-19?
                 - What medicine reduces inflamation in the lungs?
@@ -94,7 +94,7 @@ with st.expander("Instructions"):
                 - ***Best Answer***: GPT model uses, as context. all of the content of the documents coming from Azure Search
                 """)
 
-query = st.text_area("Ask a question to your enterprise data lake", value= "What is CLP?", on_change=clear_submit)
+query = sttext_input("Ask a question to your enterprise data lake", value= "What is CLP?", on_change=clear_submit)
 
 # options = ['English', 'Spanish', 'Portuguese', 'French', 'Russian']
 # selected_language = st.selectbox('Answer Language:', options, index=0)
@@ -175,8 +175,11 @@ if qbutton or bbutton or st.session_state.get("submit"):
                 st.markdown("#### Answer")
                 st.markdown(answer["output_text"].split("SOURCES:")[0])
                 st.markdown("Sources:")
-                for s in answer["output_text"].split("SOURCES:")[1].replace(" ","").split(","):
-                    st.markdown(s) 
+                try: 
+                    for s in answer["output_text"].split("SOURCES:")[1].replace(" ","").split(","):
+                        st.markdown(s) 
+                except:
+                    st.markdown("N/A")
                 st.markdown("---")
                 st.markdown("#### Search Results")
 
