@@ -36,9 +36,9 @@ def clear_submit():
     st.session_state["submit"] = False
     
     
-# col1, col2 = st.columns([1,1])
-# with col1:
-#     uploaded_file  = st.file_uploader(label = "Upload your tabular CSV file", type="csv", accept_multiple_files=False, key=None, help="Upload your CSV file that contains tabular data, make sure that the first row corresponds to the columns", on_change=None, disabled=False)
+col1, col2 = st.columns([1,1])
+with col1:
+    uploaded_file  = st.file_uploader(label = "Upload your tabular CSV file", type="csv", accept_multiple_files=False, key=None, help="Upload your CSV file that contains tabular data, make sure that the first row corresponds to the columns", on_change=None, disabled=False)
 # with col2:
 #     st.markdown("Or pick from these sample datasets:")
 #     st.markdown("[Covid Tracking Project](https://learn.microsoft.com/en-us/azure/open-datasets/dataset-covid-tracking?tabs=azure-storage) ")
