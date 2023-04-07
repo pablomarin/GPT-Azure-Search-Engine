@@ -36,16 +36,16 @@ def clear_submit():
     st.session_state["submit"] = False
     
     
-col1, col2 = st.columns([1,1])
-with col1:
-    uploaded_file  = st.file_uploader(label = "Upload your tabular CSV file", type="csv", accept_multiple_files=False, key=None, help="Upload your CSV file that contains tabular data, make sure that the first row corresponds to the columns", on_change=None, disabled=False)
-with col2:
-    st.markdown("Or pick from these sample datasets:")
-    st.markdown("[Covid Tracking Project](https://learn.microsoft.com/en-us/azure/open-datasets/dataset-covid-tracking?tabs=azure-storage) ")
-    ingest_button = st.button("Load Sample CSV") # Give button a variable name
+# col1, col2 = st.columns([1,1])
+# with col1:
+#     uploaded_file  = st.file_uploader(label = "Upload your tabular CSV file", type="csv", accept_multiple_files=False, key=None, help="Upload your CSV file that contains tabular data, make sure that the first row corresponds to the columns", on_change=None, disabled=False)
+# with col2:
+#     st.markdown("Or pick from these sample datasets:")
+#     st.markdown("[Covid Tracking Project](https://learn.microsoft.com/en-us/azure/open-datasets/dataset-covid-tracking?tabs=azure-storage) ")
+#     ingest_button = st.button("Load Sample CSV") # Give button a variable name
 
-if ingest_button: # Make button a condition.
-    uploaded_file = "https://pandemicdatalake.blob.core.windows.net/public/curated/covid-19/covid_tracking/latest/covid_tracking.csv"
+# if ingest_button: # Make button a condition.
+#     uploaded_file = "https://pandemicdatalake.blob.core.windows.net/public/curated/covid-19/covid_tracking/latest/covid_tracking.csv"
 
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
@@ -72,12 +72,13 @@ if uploaded_file is not None:
             
             else:
                 
-                llm = AzureChatOpenAI(deployment_name=os.environ["AZURE_OPENAI_GPT4_NAME"], temperature=0.5, max_tokens=999)
-                agent = create_pandas_dataframe_agent(llm, df, verbose=True)
-    
                 os.environ["OPENAI_API_BASE"] = os.environ["AZURE_OPENAI_ENDPOINT"] = st.session_state["AZURE_OPENAI_ENDPOINT"]
                 os.environ["OPENAI_API_KEY"] = os.environ["AZURE_OPENAI_API_KEY"] = st.session_state["AZURE_OPENAI_API_KEY"]
                 os.environ["OPENAI_API_VERSION"] = os.environ["AZURE_OPENAI_API_VERSION"] = "2023-03-15-preview"
+                
+                llm = AzureChatOpenAI(deployment_name=st.session_state["AZURE_OPENAI_GPT4_NAME"], temperature=0.5, max_tokens=999)
+                agent = create_pandas_dataframe_agent(llm, df, verbose=True)
+
 
                 try:
                     
