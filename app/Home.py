@@ -55,7 +55,9 @@ st.markdown("""
     ### Want to learn more?
     - Check out [Github Repo](https://github.com/pablomarin/GPT-Azure-Search-Engine/)
     - Jump into [Azure OpenAI documentation](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/)
-    - Ask a question or submit issues directly via [GitHub](https://github.com/pablomarin/GPT-Azure-Search-Engine/issues/new)
+    - Ask a question or submit a [GitHub Issue!](https://github.com/pablomarin/GPT-Azure-Search-Engine/issues/new)
+
+
     
 """
 )
