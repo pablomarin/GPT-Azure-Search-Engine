@@ -25,11 +25,11 @@ def clear_submit():
 #@st.cache_data()
 def get_search_results(query, indexes):
     
-    headers = {'Content-Type': 'application/json','api-key': AZURE_SEARCH_KEY}
+    headers = {'Content-Type': 'application/json','api-key': os.environ["AZURE_SEARCH_KEY"]}
 
     agg_search_results = []
     for index in indexes:
-        url = AZURE_SEARCH_ENDPOINT + '/indexes/'+ index + '/docs'
+        url = os.environ["AZURE_SEARCH_ENDPOINT"] + '/indexes/'+ index + '/docs'
         url += '?api-version={}'.format(AZURE_SEARCH_API_VERSION)
         url += '&search={}'.format(query)
         url += '&select=*'
