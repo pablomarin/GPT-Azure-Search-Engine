@@ -93,19 +93,21 @@ For example:
             - ***Best Answer***: GPT model uses, as context. all of the content of the documents coming from Azure Search
             """)
 
-query = st.text_input("Ask a question to your enterprise data lake", value= "What is CLP?", on_change=clear_submit)
+coli1, coli2 = st.columns([2,1])
+with coli1
+    query = st.text_input("Ask a question to your enterprise data lake", value= "What is CLP?", on_change=clear_submit)
+with coli2:
+    temp = st.slider('Temperature :thermometer:', min_value=0.0, max_value=1.0, step=0.1, value=0.5)
 
 # options = ['English', 'Spanish', 'Portuguese', 'French', 'Russian']
 # selected_language = st.selectbox('Answer Language:', options, index=0)
-
 
 col1, col2, col3 = st.columns([1,1,3])
 with col1:
     qbutton = st.button('Quick Answer')
 with col2:
     bbutton = st.button('Best Answer')
-with col3:
-    temp = st.slider('Temperature :thermometer:', min_value=0.0, max_value=1.0, step=0.1, value=0.5)
+
 
 if qbutton or bbutton or st.session_state.get("submit"):
     if not query:

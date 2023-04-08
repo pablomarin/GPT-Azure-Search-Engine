@@ -9,13 +9,11 @@ from langchain.agents import create_csv_agent
 
 def sidebar():
     with st.sidebar:
-        st.markdown("""# Instructions""")
-        st.markdown("---")
         st.markdown("""
-            **GPT GPT Tabular data Q&A** allows you to ask questions to your Tabular CSV files.
+            **GPT-4 Tabular data Q&A** allows you to ask questions to your Tabular CSV files.
         """
         )
-        st.markdown("**Note**: GPT-4 is in preview and with limited availability. There is a lot of limitation on the API, so it takes longer than needed and it fails some times. Retry if it fails.")
+        st.markdown("**Note**: GPT-4 is in preview and with limited availability. There is a lot of limitation on the API, so it takes longer than needed and it fails some times. Retry if it fails. ")
         st.markdown("---")
         
         st.session_state["AZURE_OPENAI_GPT4_NAME"] = st.text_input("Enter your GPT-4 deployment name:")
