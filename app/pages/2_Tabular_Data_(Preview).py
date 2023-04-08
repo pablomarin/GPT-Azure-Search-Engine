@@ -92,7 +92,7 @@ if uploaded_file is not None:
 
                     with placeholder.container():
                         st.markdown("#### Answer")
-                        st.markdown(">[!WARNING]<br>>"response.replace("$","\$"))
+                        st.markdown(">[!WARNING]<br>>" + response.replace("$","\$"))
 
                 except Exception as e:
                     st.error(e)
