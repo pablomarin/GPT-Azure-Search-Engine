@@ -16,14 +16,19 @@ Accurate answers and instant citations from documents in your Azure Data Lake.
 ```bash
 pip install -r requirements.txt
 ```
-
-2. Run the Streamlit server🚀
-
+2. Set the environmental variales needed by the app
+```bash
+export AZURE_SEARCH_ENDPOINT=<Enter your value>
+export AZURE_SEARCH_KEY=<Enter your value>
+export AZURE_OPENAI_ENDPOINT=<Enter your value>
+export AZURE_OPENAI_API_KEY=<Enter your value>
+```
+3. Run the Streamlit server🚀
 ```bash
 cd app
 streamlit run main.py
 ```
-3. If you are working on an Azure ML compute instance, go to:<br>
+4. If you are working on an Azure ML compute instance, go to:<br>
 https://{Your-AMLCompute-Name}-{port}.{your-region}.instances.azureml.ms/ 
   
 Example: https://myComputeInstance-8501.southcentralus.instances.azureml.ms/ 
@@ -35,7 +40,11 @@ Example: https://myComputeInstance-8501.southcentralus.instances.azureml.ms/
 1. Make Sure that once the ARM template is ready to be created in the Azure portal, you change the ***Repo Url*** variable to your own repo:
 "https://github.com/<YOUR_GITHUB_NAME>/GPT-Azure-Search-Engine.git"
 
-2. Everytime you commit changes to your branch it will kick in CI/CD and deploy your changes to the web app
+2. Once the deployment is done, go to **Azure Portal -> Your Web App Service -> Settings -> Congiguration -> Application Settings** and set the values of the enviromental variables needed. **Don't forget to click the SAVE button on the top**.
+
+3. Your App should be working now.
+
+3. Everytime you commit changes to your branch it will kick in CI/CD and deploy your changes to the web app
 
 ## Troubleshoot
 
@@ -51,7 +60,8 @@ Example: https://myComputeInstance-8501.southcentralus.instances.azureml.ms/
 ![Authorize Github](../images/error-authorize-github.jpeg "Authorize Github" )
 
 - If running locally fails with error "TypeError: unsupported operand type(s) for |: 'type' and '_GenericAlias'"
-In AML Compute Instance terminal check your list of conda environments and activate one with Python 3.10 or higher
+Check your list of conda environments and activate one with Python 3.10 or higher
+For example, if you are running the app on an Azure ML compute instance:
 ```
 conda env list
 conda activate azureml_py310_sdkv2

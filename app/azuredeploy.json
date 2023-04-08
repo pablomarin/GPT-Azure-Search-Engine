@@ -89,7 +89,25 @@
         "properties": {
           "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanPortalName'))]",
           "siteConfig": {
-            "linuxFxVersion": "[parameters('linuxFxVersion')]"
+            "linuxFxVersion": "[parameters('linuxFxVersion')]",
+            "appSettings": [
+                {
+                  "name": "AZURE_SEARCH_ENDPOINT",
+                  "value": ""
+                },
+                {
+                  "name": "AZURE_SEARCH_KEY",
+                  "value": ""
+                },
+                {
+                  "name": "AZURE_OPENAI_ENDPOINT",
+                  "value": ""
+                },
+                {
+                  "name": "AZURE_OPENAI_KEY",
+                  "value": ""
+                }
+            ]
           }
         },
         "resources": [

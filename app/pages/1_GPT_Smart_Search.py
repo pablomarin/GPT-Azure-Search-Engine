@@ -15,23 +15,16 @@ from utils import (
     get_sources,
     search_docs
 )
-from credentials import (
-    DATASOURCE_CONNECTION_STRING,
-    AZURE_SEARCH_API_VERSION,
-    AZURE_SEARCH_ENDPOINT,
-    AZURE_SEARCH_KEY,
-    COG_SERVICES_NAME,
-    COG_SERVICES_KEY,
-    AZURE_OPENAI_ENDPOINT,
-    AZURE_OPENAI_KEY,
-    AZURE_OPENAI_API_VERSION
 
-)
+AZURE_SEARCH_API_VERSION = '2021-04-30-Preview'
+AZURE_OPENAI_API_VERSION = "2023-03-15-preview"
 
-os.environ["OPENAI_API_BASE"] = os.environ["AZURE_OPENAI_ENDPOINT"] = st.session_state["AZURE_OPENAI_ENDPOINT "] = AZURE_OPENAI_ENDPOINT
-os.environ["OPENAI_API_KEY"] = os.environ["AZURE_OPENAI_API_KEY"] = st.session_state["AZURE_OPENAI_API_KEY"] = AZURE_OPENAI_KEY
+AZURE_SEARCH_ENDPOINT = os.environ["AZURE_SEARCH_ENDPOINT"]
+AZURE_SEARCH_KEY = os.environ["AZURE_SEARCH_KEY"]
+
+os.environ["OPENAI_API_BASE"] = os.environ["AZURE_OPENAI_ENDPOINT"]
+os.environ["OPENAI_API_KEY"] = os.environ["AZURE_OPENAI_API_KEY"]
 os.environ["OPENAI_API_VERSION"] = os.environ["AZURE_OPENAI_API_VERSION"] = AZURE_OPENAI_API_VERSION
-
 
 
 def clear_submit():
@@ -41,7 +34,6 @@ def clear_submit():
 def get_search_results(query, indexes):
     
     headers = {'Content-Type': 'application/json','api-key': AZURE_SEARCH_KEY}
-    params = {'api-version': AZURE_SEARCH_API_VERSION}
 
     agg_search_results = []
     for index in indexes:

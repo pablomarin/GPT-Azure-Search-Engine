@@ -42,8 +42,6 @@ https://webapp-cstevuxaqrxcm.azurewebsites.net/
    - (Coming soon) Chat Interface
    - (Coming soon) Recommends new searches based on users' history.
    - (Coming soon) Multi-Source (Blob Storage + SQL DB, CosmosDB, Sharepoint, etc)
-   
-
 
 ---
 
@@ -70,14 +68,13 @@ _Note: If you have never created a cognitive multi-service account before, pleas
 ```
 pip install -r ./requirements.txt
 ```
-8. Edit app/credentials.py with your azure services information
-9. Run 01-Load-Data-ACogSearch.ipynb:
+8. Run 01-Load-Data-ACogSearch.ipynb:
   - Loads 9.8k PDFs into your Search Engine and create the first index with AI skills
-10. Run 02-LoadCSVOneToMany-ACogSearch.ipynb and:
+9. Run 02-LoadCSVOneToMany-ACogSearch.ipynb and:
   - Ingests 52k documents into your Search Engine coming from 1 CSV file
-11. Run 03-Quering-AOpenAI.ipynb:
+10. Run 03-Quering-AOpenAI.ipynb:
    - Run queries in Azure Cognitive Search and see how they compare with enhancing the experience with Azure OpenAI
-12. Go to the app/ folder and click the Deploy to Azure function to deploy the Web Application in Azure Web App Service. It takes about 15-20 minutes.
+11. Go to the app/ folder and click the Deploy to Azure function to deploy the Web Application in Azure Web App Service. It takes about 15-20 minutes.
    - The deployment automatically comes with CI/CD, so any change that you commit/push to your github forked repo will automatically trigger a deployment in the web application.
 
 ---
