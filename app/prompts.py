@@ -41,7 +41,22 @@ refine_question_template = (
     "Given the context information and not prior knowledge, "
     "answer the question (in {language}): {question}\n"
 )
+
 REFINE_QUESTION_PROMPT = PromptTemplate(
     input_variables=["context_str", "question", "language"], 
+    template=refine_question_template,
+)
+
+detect_language_template = (
+    "Context information is below. \n"
+    "---------------------\n"
+    "{context_str}"
+    "\n---------------------\n"
+    "Given the context information and not prior knowledge, "
+    "answer the question (in {language}): {question}\n"
+)
+
+DETECT_LANGUAGE_PROMPT = PromptTemplate(
+    input_variables=["question", "language"], 
     template=refine_question_template,
 )

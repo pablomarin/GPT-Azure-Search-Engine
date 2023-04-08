@@ -156,7 +156,7 @@ if qbutton or bbutton or st.session_state.get("submit"):
                 
             if "add_text" in locals():
                 with st.spinner(add_text):
-                    if(len(docs)>1):
+                    if(len(docs)>0):
                         language = random.choice(list(file_content.items()))[1]["language"]
                         index = embed_docs(docs, language)
                         sources = search_docs(index,query)
