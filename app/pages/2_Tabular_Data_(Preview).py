@@ -86,13 +86,13 @@ if uploaded_file is not None:
                                 response = agent.run(preffix + query_str + suffix) 
                                 break
                             except:
-                                response = "Too many failed retries. Try Again - RateLimitError: Requests to the Creates a completion for the chat message Operation under Azure OpenAI API version 2023-03-15-preview have exceeded call rate limit of your current OpenAI S0 pricing tier. Please retry after 6 seconds. Please contact Azure support service if you would like to further increase the default rate limit.."
+                                response = ":warning: **Too many failed retries. Try Again** - RateLimitError: Requests to the Creates a completion for the chat message Operation under Azure OpenAI API version 2023-03-15-preview have exceeded call rate limit of your current OpenAI S0 pricing tier. Please retry after 6 seconds. Please contact Azure support service if you would like to further increase the default rate limit.."
                                 continue  
 
 
                     with placeholder.container():
                         st.markdown("#### Answer")
-                        st.markdown(">[!WARNING]<br>>" + response.replace("$","\$"))
+                        st.markdown(response.replace("$","\$"))
 
                 except Exception as e:
                     st.error(e)
