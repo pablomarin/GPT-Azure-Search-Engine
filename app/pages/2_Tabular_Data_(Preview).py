@@ -45,7 +45,7 @@ with col2:
 if ingest_button: # Make button a condition.
     url_selected = "https://pandemicdatalake.blob.core.windows.net/public/curated/covid-19/covid_tracking/latest/covid_tracking.csv"
 
-if (uploaded_file) or (url_selected):
+if (uploaded_file is not None) or (url_selected is not None):
     df = pd.read_csv(uploaded_file)
     st.write("Here is the first two rows of your file:", df.head(2))
     
