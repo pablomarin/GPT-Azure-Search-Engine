@@ -191,5 +191,4 @@ else:
                             st.markdown("---")
 
             except OpenAIError as e:
-                st.error(e._message)
-                st.error(e._status_code)
+                st.error(e)
