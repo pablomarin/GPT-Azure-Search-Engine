@@ -26,7 +26,7 @@ export AZURE_OPENAI_API_KEY=<Enter your value>
 3. Run the Streamlit server🚀
 ```bash
 cd app
-streamlit run main.py
+streamlit run Home.py
 ```
 4. If you are working on an Azure ML compute instance, go to:<br>
 https://{Your-AMLCompute-Name}-{port}.{your-region}.instances.azureml.ms/ 
