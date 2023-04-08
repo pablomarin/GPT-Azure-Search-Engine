@@ -94,7 +94,7 @@ For example:
             """)
 
 coli1, coli2 = st.columns([2,1])
-with coli1
+with coli1:
     query = st.text_input("Ask a question to your enterprise data lake", value= "What is CLP?", on_change=clear_submit)
 with coli2:
     temp = st.slider('Temperature :thermometer:', min_value=0.0, max_value=1.0, step=0.1, value=0.5)
