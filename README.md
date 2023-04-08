@@ -23,7 +23,7 @@ The goal of the MVP workshop is to show/prove the value of a GPT Smart Search En
 
 ## Demo
 
-https://webapp-cstevuxaqrxcm.azurewebsites.net/
+https://pablomarin-gpt-azure-search-engine-apphome-oq98mn.streamlit.app
 
 ---
 
