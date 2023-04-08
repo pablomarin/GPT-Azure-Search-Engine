@@ -40,7 +40,7 @@ with col1:
 with col2:
     st.markdown("Or pick this sample dataset:")
     st.markdown("[Info about Covid Tracking Project](https://learn.microsoft.com/en-us/azure/open-datasets/dataset-covid-tracking?tabs=azure-storage) ")
-    st.markdown("[Download CSV file](https://pandemicdatalake.blob.core.windows.net/public/curated/covid-19/covid_tracking/latest/covid_tracking.csv")
+    st.markdown("[Download CSV file](https://pandemicdatalake.blob.core.windows.net/public/curated/covid-19/covid_tracking/latest/covid_tracking.csv)")
 
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
