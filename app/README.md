@@ -23,7 +23,9 @@ pip install -r requirements.txt
 cd app
 streamlit run main.py
 ```
-3. Go to https://{Your-AMLCompute-Name}-{port}.{your-region}.instances.azureml.ms/ to test  
+3. If you are working on an Azure ML compute instance, go to:<br>
+https://{Your-AMLCompute-Name}-{port}.{your-region}.instances.azureml.ms/ 
+  
 Example: https://myComputeInstance-8501.southcentralus.instances.azureml.ms/ 
  
 ## To Deploy in Azure Web App Service
