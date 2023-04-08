@@ -48,15 +48,15 @@ REFINE_QUESTION_PROMPT = PromptTemplate(
 )
 
 detect_language_template = (
-    "Context information is below. \n"
+    "Given the paragraph below. \n"
     "---------------------\n"
-    "{context_str}"
+    "{text}"
     "\n---------------------\n"
-    "Given the context information and not prior knowledge, "
-    "answer the question (in {language}): {question}\n"
+    "Detect the language that the text is writen and, "
+    "return only the ISO 639-1 code of the language detected.\n"
 )
 
 DETECT_LANGUAGE_PROMPT = PromptTemplate(
-    input_variables=["question", "language"], 
-    template=refine_question_template,
+    input_variables=["text"], 
+    template=detect_language_template,
 )
