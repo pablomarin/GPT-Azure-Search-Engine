@@ -43,9 +43,9 @@ with col2:
     ingest_button = st.button("Load Sample CSV") # Give button a variable name
 
 if ingest_button: # Make button a condition.
-    uploaded_file = "https://pandemicdatalake.blob.core.windows.net/public/curated/covid-19/covid_tracking/latest/covid_tracking.csv"
+    url_selected = "https://pandemicdatalake.blob.core.windows.net/public/curated/covid-19/covid_tracking/latest/covid_tracking.csv"
 
-if uploaded_file is not None:
+if (uploaded_file) or (url_selected):
     df = pd.read_csv(uploaded_file)
     st.write("Here is the first two rows of your file:", df.head(2))
     
