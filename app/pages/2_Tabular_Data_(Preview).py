@@ -21,7 +21,7 @@ def sidebar():
         st.session_state["AZURE_OPENAI_API_KEY"] = st.text_input("Enter Azure OpenAI Key:", type="password")
                 
 preffix = 'First set the pandas display options to show all the columns, then get the column names, then answer the question: '
-suffix = '. ALWAYS before giving the Final Answer, reflect on the answer and ask yourself if it answers correctly the original question. If you are not sure, try another method. \n If the two runs does not give the same result, reflect again two more times until you have two runs that have the same result. If you still cannot arrive to a consistent result, say that you are not sure of the answer. But, if you are sure of the correct answer, create a beautiful and thorough response. ALWAYS, as part of your final answer, explain how you got to the answer. Format the final answer in Markdown language'
+suffix = '. ALWAYS before giving the Final Answer, reflect on the answer and ask yourself if it answers correctly the original question. If you are not sure, try another method. \n If the two runs does not give the same result, reflect again two more times until you have two runs that have the same result. If you still cannot arrive to a consistent result, say that you are not sure of the answer. But, if you are sure that the answer is correct, then create a beautiful and thorough response. ALWAYS, as part of your final answer, explain how you got to the answer.\n Format the final answer in Markdown language'
 
 max_retries = 5
 

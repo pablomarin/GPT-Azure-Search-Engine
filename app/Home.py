@@ -15,6 +15,7 @@ st.markdown("""
     This engine finds information from the following:
     - ~10k [Computer Science Publications in Arxiv from 2020-2022](https://www.kaggle.com/datasets/1b6883fb66c5e7f67c697c2547022cc04c9ee98c3742f9a4d6c671b4f4eda591)
     - ~52k [COVID-19 literature in LitCovid from 2020-2023](https://www.ncbi.nlm.nih.gov/research/coronavirus/)
+    - [Covid Tracking Project Dataset](https://learn.microsoft.com/en-us/azure/open-datasets/dataset-covid-tracking?tabs=azure-storage). A CSV with up-to-date tabular information of Covid cases in the US.
     
     **👈 Select a demo from the sidebar** to see some examples
     of what Azure Cognitive Search and Azure OpenAI Service can do!

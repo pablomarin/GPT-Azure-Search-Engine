@@ -44,13 +44,13 @@ Example: https://myComputeInstance-8501.southcentralus.instances.azureml.ms/
 
 3. Your App should be working now.
 
-3. Everytime you commit changes to your branch it will kick in CI/CD and deploy your changes to the web app
+4. Everytime you commit changes to your branch it will kick in CI/CD and deploy your changes to the web app
 
 ## Troubleshoot
 
 - If WebApp deployed succesfully but the Application didn't start
 1. Go to Azure portal -> Your Webapp -> Settings -> Configuration -> General Settings
-2. Make sure that StartUp Command has:  python -m streamlit run app/main.py --server.port 8000 --server.address 0.0.0.0
+2. Make sure that StartUp Command has:  python -m streamlit run app/Home.py --server.port 8000 --server.address 0.0.0.0
 
 - If deployment fails with error "Cannot find SourceControlToken with name Github" you can try the following
 1. Wait 20 mins and Retry
