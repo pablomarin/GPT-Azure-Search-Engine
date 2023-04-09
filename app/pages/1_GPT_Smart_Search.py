@@ -141,54 +141,54 @@ else:
             # Output Columns
             placeholder = st.empty()
 
-            # try:
-            docs = []
-            for key,value in file_content.items():
+            try:
+                docs = []
+                for key,value in file_content.items():
 
-                if qbutton:
-                    docs.append(Document(page_content=value['caption'], metadata={"source": value["location"]}))
-                    add_text = "Coming up with a quick answer... ⏳"
+                    if qbutton:
+                        docs.append(Document(page_content=value['caption'], metadata={"source": value["location"]}))
+                        add_text = "Coming up with a quick answer... ⏳"
 
-                if bbutton:
-                    for page in value["chunks"]:
-                        docs.append(Document(page_content=page, metadata={"source": value["location"]}))
-                    add_text = "Reading the source documents to provide the best answer... ⏳"
+                    if bbutton:
+                        for page in value["chunks"]:
+                            docs.append(Document(page_content=page, metadata={"source": value["location"]}))
+                        add_text = "Reading the source documents to provide the best answer... ⏳"
 
-            if "add_text" in locals():
-                with st.spinner(add_text):
-                    if(len(docs)>0):
-                        language = random.choice(list(file_content.items()))[1]["language"]
-                        index = embed_docs(docs, language)
-                        sources = search_docs(index,query)
-                        if qbutton:
-                            answer = get_answer(sources, query, deployment="gpt-35-turbo", chain_type = "stuff", temperature=temp, max_tokens=256)
-                        if bbutton: 
-                            answer = get_answer(sources, query, deployment="gpt-35-turbo", chain_type = "map_reduce", temperature=temp, max_tokens=500)
+                if "add_text" in locals():
+                    with st.spinner(add_text):
+                        if(len(docs)>0):
+                            language = random.choice(list(file_content.items()))[1]["language"]
+                            index = embed_docs(docs, language)
+                            sources = search_docs(index,query)
+                            if qbutton:
+                                answer = get_answer(sources, query, deployment="gpt-35-turbo", chain_type = "stuff", temperature=temp, max_tokens=256)
+                            if bbutton: 
+                                answer = get_answer(sources, query, deployment="gpt-35-turbo", chain_type = "map_reduce", temperature=temp, max_tokens=500)
 
-                    else:
-                        answer = {"output_text":"No results found" }
-            else:
-                answer = {"output_text":"No results found" }
+                        else:
+                            answer = {"output_text":"No results found" }
+                else:
+                    answer = {"output_text":"No results found" }
 
 
-            with placeholder.container():
+                with placeholder.container():
 
-                st.markdown("#### Answer")
-                st.markdown(answer["output_text"].split("SOURCES:")[0])
-                st.markdown("Sources:")
-                try: 
-                    for s in answer["output_text"].split("SOURCES:")[1].replace(" ","").split(","):
-                        st.markdown(s) 
-                except:
-                    st.markdown("N/A")
-                st.markdown("---")
-                st.markdown("#### Search Results")
+                    st.markdown("#### Answer")
+                    st.markdown(answer["output_text"].split("SOURCES:")[0])
+                    st.markdown("Sources:")
+                    try: 
+                        for s in answer["output_text"].split("SOURCES:")[1].replace(" ","").split(","):
+                            st.markdown(s) 
+                    except:
+                        st.markdown("N/A")
+                    st.markdown("---")
+                    st.markdown("#### Search Results")
 
-                if(len(docs)>1):
-                    for key, value in file_content.items():
-                        st.markdown(str(value["title"]) + '  (Score: ' + str(round(value["score"]*100/4,2)) + '%)')
-                        st.markdown(value["caption"])
-                        st.markdown("---")
+                    if(len(docs)>1):
+                        for key, value in file_content.items():
+                            st.markdown(str(value["title"]) + '  (Score: ' + str(round(value["score"]*100/4,2)) + '%)')
+                            st.markdown(value["caption"])
+                            st.markdown("---")
 
-            # except OpenAIError as e:
-            #     st.error(e)
+            except OpenAIError as e:
+                st.error(e)
