@@ -89,28 +89,23 @@ def text_to_docs(text: str | List[str]) -> List[Document]:
 # @st.cache_data(show_spinner=False)
 def embed_docs(docs: List[Document], language: str) -> VectorStore:
     """Embeds a list of Documents and returns a FAISS index"""
-
-    if not st.session_state.get("AZURE_OPENAI_API_KEY"):
-        raise AuthenticationError(
-            "You need to set the env variable AZURE_OPENAI_API_KEY"
-        )
-    else:   
-        # Select the Embedder model
-        if len(docs) < 50:
-            # OpenAI models are accurate but slower
-            embedder = OpenAIEmbeddings(document_model_name="text-embedding-ada-002", query_model_name="text-embedding-ada-002") 
+ 
+    # Select the Embedder model
+    if len(docs) < 50:
+        # OpenAI models are accurate but slower
+        embedder = OpenAIEmbeddings(document_model_name="text-embedding-ada-002", query_model_name="text-embedding-ada-002") 
+    else:
+        # Bert based models are faster (3x-10x) but not as accurate
+        # For Multiple language support we need to use a multilingual model. But if English only is the requirement, use "multi-qa-MiniLM-L6-cos-v1" for a good trade-off between quality and speed
+        # The fastest english model though is "all-MiniLM-L12-v2"
+        if language == "en":
+            embedder = HuggingFaceEmbeddings(model_name = 'all-MiniLM-L12-v2')
         else:
-            # Bert based models are faster (3x-10x) but not as accurate
-            # For Multiple language support we need to use a multilingual model. But if English only is the requirement, use "multi-qa-MiniLM-L6-cos-v1" for a good trade-off between quality and speed
-            # The fastest english model though is "all-MiniLM-L12-v2"
-            if language == "en":
-                embedder = HuggingFaceEmbeddings(model_name = 'all-MiniLM-L12-v2')
-            else:
-                embedder = HuggingFaceEmbeddings(model_name = 'distiluse-base-multilingual-cased-v2')
+            embedder = HuggingFaceEmbeddings(model_name = 'distiluse-base-multilingual-cased-v2')
 
-        index = FAISS.from_documents(docs, embedder)
-        
-        return index
+    index = FAISS.from_documents(docs, embedder)
+
+    return index
 
 
 # @st.cache_data
