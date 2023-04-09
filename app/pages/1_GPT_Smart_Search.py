@@ -124,7 +124,7 @@ else:
             try:
                 for search_results in agg_search_results:
                     for result in search_results['value']:
-                        if result['@search.rerankerScore'] > 0.4: # Show results that are at least 10% of the max possible score=4
+                        if result['@search.rerankerScore'] > 1: # Show results that are at least 25% of the max possible score=4
                             file_content[result['id']]={
                                                     "title": result['title'],
                                                     "chunks": result['pages'],

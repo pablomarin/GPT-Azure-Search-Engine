@@ -47,7 +47,7 @@ if uploaded_file is not None:
     
     st.write("Here is the first two rows of your file:", df.head(2))
     
-    query_str = st.text_input("Ask a question:", on_change=clear_submit)
+    query_str = st.text_input("Ask a question:", value="Tell me important things you see in this file", on_change=clear_submit)
 
     qbutton = st.button('Generate Answer')
     
