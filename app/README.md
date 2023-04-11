@@ -20,8 +20,6 @@ pip install -r requirements.txt
 ```bash
 export AZURE_SEARCH_ENDPOINT=<Enter your value>
 export AZURE_SEARCH_KEY=<Enter your value>
-export COG_SERVICES_NAME=<Enter your value>
-export COG_SERVICES_KEY=<Enter your value>
 export AZURE_OPENAI_ENDPOINT=<Enter your value>
 export AZURE_OPENAI_API_KEY=<Enter your value>
 ```
