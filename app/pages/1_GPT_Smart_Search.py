@@ -21,6 +21,9 @@ from utils import (
 AZURE_SEARCH_API_VERSION = '2021-04-30-Preview'
 AZURE_OPENAI_API_VERSION = "2023-03-15-preview"
 
+# setting encoding for GPT3.5 / GPT4 models
+encoding_name ='cl100k_base'
+
 def clear_submit():
     st.session_state["submit"] = False
 
@@ -162,7 +165,7 @@ else:
                             gpt_tokens_limit = model_tokens_limit('gpt-35-turbo')
                             num_token = 0
                             for i in range(len(docs)):
-                                num_token += num_tokens_from_string(docs[i].page_content)
+                                num_token += num_tokens_from_string(docs[i].page_content,encoding_name)
                             # if the token count <3000 then we are not doing the embedding.
                             if num_token > gpt_tokens_limit:
                                 language = random.choice(list(file_content.items()))[1]["language"]
