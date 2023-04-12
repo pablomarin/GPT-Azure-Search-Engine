@@ -8,3 +8,5 @@ pillow
 pypdf
 tenacity
 sentence_transformers
+sqlalchemy
+pyodbc
