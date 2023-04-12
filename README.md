@@ -13,9 +13,9 @@ The goal of the MVP workshop is to show/prove the value of a GPT Smart Search En
 * Accepted Application to Azure Open AI
 * Microsoft members need to be added as Guests in clients Azure AD
 * A Resource Group (RG)  needs to be set for this Workshop POC, in the customer Azure tenant
-* The customer team and the Microsoft team must have Contributor permissions to this resource group so they can set everything up 1-2 weeks prior to the workshop
-* A storage account must be set in place in the RG
-* Data/Documents must be uploaded to the blob storage account, at least one week prior to the workshop date
+* The customer team and the Microsoft team must have Contributor permissions to this resource group so they can set everything up 2 weeks prior to the workshop
+* A storage account must be set in place in the RG. <b>Disable firewalls and enable public network access from all networks</b>
+* Data/Documents must be uploaded to the blob storage account, at least two weeks prior to the workshop date
 * Azure Machine Learning Workspace must be deployed in the RG
 
 # Architecture 
