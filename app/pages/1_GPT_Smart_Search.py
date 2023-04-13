@@ -166,7 +166,7 @@ else:
                             num_token = 0
                             for i in range(len(docs)):
                                 num_token += num_tokens_from_string(docs[i].page_content,encoding_name)
-                            # if the token count <3000 then we are not doing the embedding.
+                            # if the token count >3000 then only doing the embedding.
                             if num_token > gpt_tokens_limit:
                                 language = random.choice(list(file_content.items()))[1]["language"]
                                 index = embed_docs(docs, language)
