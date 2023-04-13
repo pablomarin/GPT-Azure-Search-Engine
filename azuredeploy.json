@@ -172,19 +172,6 @@
       "dependsOn": [
         "[resourceId('Microsoft.Sql/servers', parameters('SQLserverName'))]"
       ]
-    },
-    {
-      "type": "Microsoft.Sql/servers/firewallRules",
-      "apiVersion": "2022-05-01-preview",
-      "name": "AllowAllAzureIPs",
-      "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Sql/servers', parameters('SQLserverName'))]"
-      ],
-      "properties": {
-        "startIpAddress": "0.0.0.0",
-        "endIpAddress": "255.255.255.255"
-      }
     }
   ]
 }
