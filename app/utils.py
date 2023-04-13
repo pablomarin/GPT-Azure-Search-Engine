@@ -17,6 +17,7 @@ from langchain.vectorstores.faiss import FAISS
 from openai.error import AuthenticationError
 from prompts import STUFF_PROMPT, REFINE_PROMPT, REFINE_QUESTION_PROMPT
 from pypdf import PdfReader
+import tiktoken
 
 
 # @st.cache_data
@@ -166,3 +167,23 @@ def wrap_text_in_html(text: str | List[str]) -> str:
         # Add horizontal rules between pages
         text = "\n<hr/>\n".join(text)
     return "".join([f"<p>{line}</p>" for line in text.split("\n")])
+
+# defining the token count function
+def num_tokens_from_string(string: str, encoding_name: str) -> int:
+    """Returns the number of tokens in a text string."""
+    encoding = tiktoken.get_encoding(encoding_name)
+    num_tokens = len(encoding.encode(string))
+    return num_tokens
+
+# Returning the toekn limit based on model selection
+def model_tokens_limit(model: str) -> int:
+    """Returns the number of tokens limits in a text model."""
+    if model == "gpt-35-turbo":
+        token_limit = 3000
+    elif model == "gpt-4":
+        token_limit = 7000
+    elif model == "gpt-4-32k":
+        token_limit = 31000
+    else:
+        token_limit = 3000
+    return token_limit
