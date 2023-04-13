@@ -93,27 +93,27 @@
         "description": "SKU of Cognitive Services account."
       }
     },
-    "serverName": {
+    "SQLserverName": {
       "type": "string",
       "defaultValue": "[uniqueString('sql', resourceGroup().id)]",
       "metadata": {
         "description": "The name of the SQL logical server."
       }
     },
-    "sqlDBName": {
+    "SQLDBName": {
       "type": "string",
       "defaultValue": "SampleDB",
       "metadata": {
         "description": "The name of the SQL Database."
       }
     },
-    "administratorLogin": {
+    "SQLadministratorLogin": {
       "type": "string",
       "metadata": {
         "description": "The administrator username of the SQL logical server."
       }
     },
-    "administratorLoginPassword": {
+    "SQLadministratorLoginPassword": {
       "type": "secureString",
       "metadata": {
         "description": "The administrator password of the SQL logical server."
@@ -153,24 +153,24 @@
     {
       "type": "Microsoft.Sql/servers",
       "apiVersion": "2022-05-01-preview",
-      "name": "[parameters('serverName')]",
+      "name": "[parameters('SQLserverName')]",
       "location": "[parameters('location')]",
       "properties": {
-        "administratorLogin": "[parameters('administratorLogin')]",
-        "administratorLoginPassword": "[parameters('administratorLoginPassword')]"
+        "administratorLogin": "[parameters('SQLadministratorLogin')]",
+        "administratorLoginPassword": "[parameters('SQLadministratorLoginPassword')]"
       }
     },
     {
       "type": "Microsoft.Sql/servers/databases",
       "apiVersion": "2022-05-01-preview",
-      "name": "[format('{0}/{1}', parameters('serverName'), parameters('sqlDBName'))]",
+      "name": "[format('{0}/{1}', parameters('SQLserverName'), parameters('SQLDBName'))]",
       "location": "[parameters('location')]",
       "sku": {
         "name": "Standard",
         "tier": "Standard"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Sql/servers', parameters('serverName'))]"
+        "[resourceId('Microsoft.Sql/servers', parameters('SQLserverName'))]"
       ]
     },
     {
@@ -179,7 +179,7 @@
         "name": "AllowAllAzureIPs",
         "location": "[resourceGroup().location]",
         "dependsOn": [
-            "[resourceId('Microsoft.Sql/servers', parameters('serverName'))]"
+            "[resourceId('Microsoft.Sql/servers', parameters('SQLserverName'))]"
         ],
         "properties": {
             "startIpAddress": "0.0.0.0",

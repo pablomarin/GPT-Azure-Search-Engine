@@ -38,7 +38,7 @@ https://pablomarin-gpt-azure-search-engine-apphome-oq98mn.streamlit.app
    - Multi-Lingual (ingests, indexes and understand any language)
    - Multi-Index -> multiple search indexes
    - Parses CSVs -> one-to-many documents (one row is an indexed document)
-   - Tabular Data Q&A using GPT-4
+   - Tabular Data Q&A in CSV files and SQL Databasees using GPT-4
    - (Coming soon) Chat Interface
    - (Coming soon) Recommends new searches based on users' history.
    - (Coming soon) Multi-Source (Blob Storage + SQL DB, CosmosDB, Sharepoint, etc)

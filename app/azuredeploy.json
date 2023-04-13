@@ -66,7 +66,7 @@
     "resources": [
       {
         "type": "Microsoft.Web/serverfarms",
-        "apiVersion": "2020-06-01",
+        "apiVersion": "2021-02-01",
         "name": "[variables('appServicePlanPortalName')]",
         "location": "[parameters('location')]",
         "sku": {
@@ -135,6 +135,7 @@
             "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
         ],
         "properties": {
+            "alwaysOn": true,
             "appCommandLine": "python -m streamlit run app/Home.py --server.port 8000 --server.address 0.0.0.0"
         }
     }
