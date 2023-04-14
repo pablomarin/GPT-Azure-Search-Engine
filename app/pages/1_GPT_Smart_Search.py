@@ -125,12 +125,13 @@ else:
             agg_search_results = get_search_results(query, indexes)
 
             file_content = OrderedDict()
+            content = dict()
 
             try:
                 for search_results in agg_search_results:
                     for result in search_results['value']:
                         if result['@search.rerankerScore'] > 1: # Show results that are at least 25% of the max possible score=4
-                            file_content[result['id']]={
+                            content[result['id']]={
                                                     "title": result['title'],
                                                     "chunks": result['pages'],
                                                     "language": result['language'],
@@ -140,7 +141,10 @@ else:
                                                 }
             except:
                 st.markdown("Not data returned from Azure Search, check connection..")
-
+            
+            #After results have been filtered we will Sort and add them as an Ordered list
+            for id in sorted(content, key= lambda x: content[x]["score"], reverse=True):
+                file_content[id] = content[id]
 
             st.session_state["submit"] = True
             # Output Columns
