@@ -19,6 +19,7 @@ The goal of the MVP workshop is to show/prove the value of a GPT Smart Search En
 * Azure Machine Learning Workspace must be deployed in the RG
    * Note: Please ensure you have enough core compute quota in your Azure Machine Learning workspace 
 
+
 # Architecture 
 ![Architecture](./images/GPT-Smart-Search-Architecture.jpg "Architecture")
 
@@ -39,7 +40,7 @@ https://pablomarin-gpt-azure-search-engine-apphome-oq98mn.streamlit.app
    - Multi-Lingual (ingests, indexes and understand any language)
    - Multi-Index -> multiple search indexes
    - Parses CSVs -> one-to-many documents (one row is an indexed document)
-   - Tabular Data Q&A in CSV files and SQL Databasees using GPT-4
+   - Tabular Data Q&A in CSV files and SQL Databases using GPT-4
    - (Coming soon) Chat Interface
    - (Coming soon) Recommends new searches based on users' history.
    - (Coming soon) Multi-Source (Blob Storage + SQL DB, CosmosDB, Sharepoint, etc)
