@@ -17,6 +17,7 @@ The goal of the MVP workshop is to show/prove the value of a GPT Smart Search En
 * A storage account must be set in place in the RG. <b>Disable firewalls and enable public network access from all networks</b>
 * Data/Documents must be uploaded to the blob storage account, at least two weeks prior to the workshop date
 * Azure Machine Learning Workspace must be deployed in the RG
+   * Note: Please ensure you have enough core compute quota in your Azure Machine Learning workspace 
 
 # Architecture 
 ![Architecture](./images/GPT-Smart-Search-Architecture.jpg "Architecture")
