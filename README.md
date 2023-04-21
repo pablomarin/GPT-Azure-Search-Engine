@@ -4,7 +4,7 @@
 Your organization needs a search engine that can make sense of all kinds of types of data, stored in different locations, and that can return the links of similar documents, but more importantly, provide the answer to the question! In other words, you want private and secured ChatGPT for your organization that can interpret, comprehend, and answer questions about your business data.
 The goal of the MVP workshop is to show/prove the value of a GPT Smart Search Engine built with the Azure Services, with your own data in your own environment. For more information on the 2 day workshop, click the powerpoint presentation below:
 
-[Accelerator Pitch Deck](https://github.com/pablomarin/GPT-Azure-Search-Engine/blob/main/Azure%20Open%20AI%20GPT-3%20Smart%20Search%20-%20Pitch%20Deck.pptx)
+[Accelerator Pitch Deck](https://microsoft-my.sharepoint.com/:p:/p/jheseltine/Ee0OFL6hWNBCtRpoFRHIdj8BPGCzq01xTxkmEp0scLwSAg?e=EIz9is)
 
 **Click "*view raw*" to view powerpoint presentation**
 
@@ -17,6 +17,8 @@ The goal of the MVP workshop is to show/prove the value of a GPT Smart Search En
 * A storage account must be set in place in the RG. <b>Disable firewalls and enable public network access from all networks</b>
 * Data/Documents must be uploaded to the blob storage account, at least two weeks prior to the workshop date
 * Azure Machine Learning Workspace must be deployed in the RG
+   * Note: Please ensure you have enough core compute quota in your Azure Machine Learning workspace 
+
 
 # Architecture 
 ![Architecture](./images/GPT-Smart-Search-Architecture.jpg "Architecture")
@@ -38,7 +40,7 @@ https://pablomarin-gpt-azure-search-engine-apphome-oq98mn.streamlit.app
    - Multi-Lingual (ingests, indexes and understand any language)
    - Multi-Index -> multiple search indexes
    - Parses CSVs -> one-to-many documents (one row is an indexed document)
-   - Tabular Data Q&A in CSV files and SQL Databasees using GPT-4
+   - Tabular Data Q&A in CSV files and SQL Databases using GPT-4
    - (Coming soon) Chat Interface
    - (Coming soon) Recommends new searches based on users' history.
    - (Coming soon) Multi-Source (Blob Storage + SQL DB, CosmosDB, Sharepoint, etc)

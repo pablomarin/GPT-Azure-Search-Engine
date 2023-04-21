@@ -37,14 +37,40 @@ Example: https://myComputeInstance-8501.southcentralus.instances.azureml.ms/
 
 [![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fpablomarin%2FGPT-Azure-Search-Engine%2Fmain%2Fapp%2Fazuredeploy.json)
 
+### Deploy via Github
+
 1. Make Sure that once the ARM template is ready to be created in the Azure portal, you change the ***Repo Url*** variable to your own repo:
 "https://github.com/<YOUR_GITHUB_NAME>/GPT-Azure-Search-Engine.git"
 
-2. Once the deployment is done, go to **Azure Portal -> Your Web App Service -> Settings -> Congiguration -> Application Settings** and set the values of the enviromental variables needed. **Don't forget to click the SAVE button on the top**.
+2. Once the deployment is done, go to **Azure Portal -> Your Web App Service -> Settings -> Configuration -> Application Settings** and set the values of the enviromental variables needed. **Don't forget to click the SAVE button on the top**.
 
 3. Your App should be working now.
 
 4. Everytime you commit changes to your branch it will kick in CI/CD and deploy your changes to the web app
+
+### [Local Git deployment to Azure App Service](https://learn.microsoft.com/en-us/azure/app-service/deploy-local-git?tabs=cli)
+
+
+1. In the Azure portal, navigate to your app's management page. 
+2. From the left menu, select Deployment Center > Settings. Select Local Git in Source, then click Save.
+![Shows how to enable local Git deployment for App Service in the Azure portal](https://learn.microsoft.com/en-us/azure/app-service/media/deploy-local-git/enable-portal.png)
+3. In the Local Git section, copy the Git Clone Uri for later. This Uri doesn't contain any credentials.
+4. In a local terminal window, change the directory to the root of your Git repository, and add a Git remote using the URL you got from your app. If your chosen method doesn't give you a URL, use https://<app-name>.scm.azurewebsites.net/<app-name>.git with your app name in <app-name>.
+```bash
+git remote add azure <url>
+```
+5. Push to the Azure remote with ```bash
+git push azure master```.
+6. In the Git Credential Manager window, enter your user-scope or application-scope credentials, not your Azure sign-in credentials.
+7. If your Git remote URL already contains the username and password, you won't be prompted.
+8. Review the output. You may see runtime-specific automation, such as MSBuild for ASP.NET, npm install for Node.js, and pip install for Python.
+9. Browse to your app in the Azure portal to verify that the content is deployed.
+
+## [Docker deployment to Azure Container Instance]([https://learn.microsoft.com/en-us/azure/app-service/deploy-local-git?tabs=cli](https://learn.microsoft.com/en-us/azure/container-instances/container-instances-tutorial-deploy-app))
+1. Test app locally
+2. Dockerize your Streamlit App
+3. Push to Azure Container Registry 
+4. Create Container Instance
 
 ## Troubleshoot
 
