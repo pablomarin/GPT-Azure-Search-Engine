@@ -1,4 +1,5 @@
 streamlit
+streamlit-chat
 langchain
 faiss-cpu
 openai
