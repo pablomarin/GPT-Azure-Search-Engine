@@ -94,7 +94,6 @@ else:
     
         if ("No" in is_question ) or (mode == 'ChatGPT Knowledge'):
             answer = open_chain.run(query)
-            answer = open_chain.run(query)
 
         else:
 
