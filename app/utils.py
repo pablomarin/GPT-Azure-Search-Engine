@@ -96,7 +96,8 @@ def text_to_docs(text: str | List[str]) -> List[Document]:
 def embed_docs(docs: List[Document], language: str) -> VectorStore:
     """Embeds a list of Documents and returns a FAISS index"""
  
-    # Select the Embedder model
+    # Select the Embedder model'
+    print("Number of chunks:",len(docs))
     if len(docs) < 50:
         # OpenAI models are accurate but slower
         embedder = OpenAIEmbeddings(document_model_name="text-embedding-ada-002", query_model_name="text-embedding-ada-002") 
@@ -108,6 +109,7 @@ def embed_docs(docs: List[Document], language: str) -> VectorStore:
             embedder = HuggingFaceEmbeddings(model_name = 'all-MiniLM-L12-v2')
         else:
             embedder = HuggingFaceEmbeddings(model_name = 'distiluse-base-multilingual-cased-v2')
+
 
     index = FAISS.from_documents(docs, embedder)
 
@@ -138,9 +140,9 @@ def get_answer(docs: List[Document],
     # Get the answer
     
     if (deployment in ["gpt-35-turbo", "gpt-4", "gpt-4-32k"]) :
-        llm = AzureChatOpenAI(deployment_name=deployment, model_name=deployment, temperature=temperature, max_tokens=max_tokens)
+        llm = AzureChatOpenAI(deployment_name=deployment, temperature=temperature, max_tokens=max_tokens)
     else:
-        llm = AzureOpenAI(deployment_name=deployment, model_name=deployment, temperature=temperature, max_tokens=max_tokens)
+        llm = AzureOpenAI(deployment_name=deployment, temperature=temperature, max_tokens=max_tokens)
     
     chain = load_qa_with_sources_chain(llm, chain_type=chain_type)
     
@@ -218,8 +220,6 @@ def get_search_results(query: str, indexes: list) -> list:
         url += '&captions=extractive|highlight-false'
 
         resp = requests.get(url, headers=headers)
-        print(url)
-        print(resp.status_code)
 
         search_results = resp.json()
         agg_search_results.append(search_results)
@@ -242,9 +242,9 @@ def get_answer_with_memory(
     # Get the answer
     
     if (deployment in ["gpt-35-turbo", "gpt-4", "gpt-4-32k"]) :
-        llm = AzureChatOpenAI(deployment_name=deployment, model_name=deployment, temperature=temperature, max_tokens=max_tokens)
+        llm = AzureChatOpenAI(deployment_name=deployment, temperature=temperature, max_tokens=max_tokens)
     else:
-        llm = AzureOpenAI(deployment_name=deployment, model_name=deployment, temperature=temperature, max_tokens=max_tokens)
+        llm = AzureOpenAI(deployment_name=deployment, temperature=temperature, max_tokens=max_tokens)
     
     doc_chain = load_qa_with_sources_chain(llm, chain_type=chain_type)
     question_generator = LLMChain(llm=llm, prompt=CONDENSE_QUESTION_PROMPT)

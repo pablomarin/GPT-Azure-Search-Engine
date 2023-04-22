@@ -31,4 +31,4 @@ st.markdown("""
 st.markdown("---")
 
 
-st.sidebar.success("Select a demo above.")
+# st.sidebar.success("Select a demo above.")
