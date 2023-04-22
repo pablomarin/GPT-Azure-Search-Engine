@@ -86,15 +86,10 @@ else:
     query = st.text_input("You: ", key="input")
     
     if query:
-        question_assesser = ConversationChain(llm=llm)
         open_chain = ConversationChain(llm=llm, memory=st.session_state["memory"])
-        is_question = question_assesser.predict(input='If the prhase "' + query + '" is a considered grammatically a Question,  then respond only with the word:"yes", if not respond only with the word: "No". No more words in your response.')
-        
-        print("is_question", is_question)
     
-        if ("No" in is_question ) or (mode == 'ChatGPT Knowledge'):
+        if mode == 'ChatGPT Knowledge':
             answer = open_chain.run(query)
-
         else:
 
             index1_name = "cogsrch-index-files"
@@ -139,7 +134,7 @@ else:
                         index = embed_docs(st.session_state["docs"], language)
                         answer = get_answer_with_memory(query, index, 
                                                         st.session_state["chat_history"], 
-                                                        deployment="gpt-35-turbo", 
+                                                        deployment=MODEL, 
                                                         chain_type = "stuff", 
                                                         temperature=0.5, 
                                                         max_tokens=500)
@@ -148,7 +143,7 @@ else:
                         index = embed_docs(st.session_state["docs"], "en")
                         answer = get_answer_with_memory(query, index, 
                                                         st.session_state["chat_history"], 
-                                                        deployment="gpt-35-turbo", 
+                                                        deployment=MODEL, 
                                                         chain_type = "stuff", 
                                                         temperature=0.5, 
                                                         max_tokens=500)
