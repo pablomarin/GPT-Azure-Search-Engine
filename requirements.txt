@@ -1,0 +1,13 @@
+streamlit
+streamlit-chat
+langchain
+faiss-cpu
+openai
+tiktoken
+docx2txt
+pillow
+pypdf
+tenacity
+sentence_transformers
+sqlalchemy
+pyodbc
