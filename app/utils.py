@@ -106,7 +106,7 @@ def embed_docs(docs: List[Document], language: str) -> VectorStore:
         # For Multiple language support we need to use a multilingual model. But if English only is the requirement, use "multi-qa-MiniLM-L6-cos-v1" for a good trade-off between quality and speed
         # The fastest english model though is "all-MiniLM-L12-v2"
         if language == "en":
-            embedder = HuggingFaceEmbeddings(model_name = 'all-MiniLM-L12-v2')
+            embedder = HuggingFaceEmbeddings(model_name = 'multi-qa-MiniLM-L6-cos-v1')
         else:
             embedder = HuggingFaceEmbeddings(model_name = 'distiluse-base-multilingual-cased-v2')
 
