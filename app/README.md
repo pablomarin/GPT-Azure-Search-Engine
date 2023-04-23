@@ -22,7 +22,10 @@ export AZURE_SEARCH_ENDPOINT=<Enter your value>
 export AZURE_SEARCH_KEY=<Enter your value>
 export AZURE_OPENAI_ENDPOINT=<Enter your value>
 export AZURE_OPENAI_API_KEY=<Enter your value>
+<<<<<<< HEAD
 export DATASOURCE_SAS_TOKEN=<Enter your value>
+=======
+>>>>>>> e1e3a3643eec37d32b81aa4b9305542f625be58c
 ```
 3. Run the Streamlit server🚀
 ```bash

@@ -38,7 +38,6 @@ suffix = '. ALWAYS before giving the Final Answer, try another method. Then refl
 
 max_retries = 5
 
-
 sidebar()
 
 def clear_submit():

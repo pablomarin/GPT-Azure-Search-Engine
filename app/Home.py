@@ -19,6 +19,7 @@ st.markdown("""
     
     **👈 Select a demo from the sidebar** to see some examples
     of what Azure Cognitive Search and Azure OpenAI Service together can do!
+
     ### Want to learn more?
     - Check out [Github Repo](https://github.com/pablomarin/GPT-Azure-Search-Engine/)
     - Jump into [Azure OpenAI documentation](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/)
@@ -29,4 +30,3 @@ st.markdown("""
 """
 )
 st.markdown("---")
-

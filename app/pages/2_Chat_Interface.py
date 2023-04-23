@@ -58,6 +58,11 @@ Example questions:
     
     """)
 
+
+AZURE_OPENAI_API_VERSION = "2023-03-15-preview"
+# setting encoding for GPT3.5 / GPT4 models
+encoding_name ='cl100k_base'
+
 if (not os.environ.get("AZURE_SEARCH_ENDPOINT")) or (os.environ.get("AZURE_SEARCH_ENDPOINT") == ""):
     st.error("Please set your AZURE_SEARCH_ENDPOINT on your Web App Settings")
 elif (not os.environ.get("AZURE_SEARCH_KEY")) or (os.environ.get("AZURE_SEARCH_KEY") == ""):
@@ -163,6 +168,7 @@ else:
                             for page in value["chunks"]:
                                     st.session_state["docs"].append(Document(page_content=page, metadata={"source": value["name"]}))
 
+
                         language = random.choice(list(file_content.items()))[1]["language"]
                         index = embed_docs(st.session_state["docs"], language)
                         answer = get_answer_with_memory(query, index, 
@@ -187,7 +193,7 @@ else:
             except OpenAIError as e:
                     st.error(e)
 
-        
+
         # Append question and answer to memory
         st.session_state["past"].append(query)
         st.session_state["generated"].append(answer) 
