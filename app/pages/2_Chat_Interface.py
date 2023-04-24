@@ -174,7 +174,7 @@ else:
                         answer = get_answer_with_memory(query, index, 
                                                         st.session_state["chat_history"], 
                                                         deployment=MODEL, 
-                                                        chain_type = "stuff", 
+                                                        chain_type = "map_reduce", 
                                                         temperature=0.5, 
                                                         max_tokens=500)
 
@@ -183,7 +183,7 @@ else:
                         answer = get_answer_with_memory(query, index, 
                                                         st.session_state["chat_history"], 
                                                         deployment=MODEL, 
-                                                        chain_type = "stuff", 
+                                                        chain_type = "map_reduce", 
                                                         temperature=0.5, 
                                                         max_tokens=500)
                     else:
