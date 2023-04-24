@@ -197,19 +197,6 @@ else:
                                 title = str(value['title']) if (value['title']) else value['name']
                                 score = str(round(value['score']*100/4,2))
                                 st.markdown("[" + title +  "](" + url + ")" + "  (Score: " + score + "%)")
-                        st.markdown(answer["output_text"].split("SOURCES:")[0])
-                        st.markdown("Sources:")
-                        try: 
-                            for s in answer["output_text"].split("SOURCES:")[1].replace(" ","").split(","):
-                                st.markdown(s) 
-                        except:
-                            st.markdown("N/A")
-                        st.markdown("---")
-                        st.markdown("#### Search Results")
-
-                        if(len(docs)>1):
-                            for key, value in file_content.items():
-                                st.markdown(str(value["title"]) + '  (Score: ' + str(round(value["score"]*100/4,2)) + '%)')
                                 st.markdown(value["caption"])
                                 st.markdown("---")
 
