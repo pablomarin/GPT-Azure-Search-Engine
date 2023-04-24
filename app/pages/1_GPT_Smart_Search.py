@@ -48,20 +48,12 @@ Ask a question that you think can be answered with the information in about 10k 
 
 For example:
 - What are markov chains?
-<<<<<<< HEAD
 - List the authors that talk about Boosting Algorithms
-=======
-- List the authors that talk about Gradient Boosting Machines
->>>>>>> e1e3a3643eec37d32b81aa4b9305542f625be58c
 - How does random forest work?
 - What kind of problems can I solve with reinforcement learning? Give me some real life examples
 - What kind of problems Turing Machines solve?
 - What are the main risk factors for Covid-19?
-<<<<<<< HEAD
 - What medicine reduces inflammation in the lungs?
-=======
-- What medicine reduces inflamation in the lungs?
->>>>>>> e1e3a3643eec37d32b81aa4b9305542f625be58c
 - Why Covid doesn't affect kids that much compared to adults?
     
     \nYou will notice that the answers to these questions are diferent from the open ChatGPT, since these papers are the only possible context. This search engine does not look at the open internet to answer these questions. If the context doesn't contain information, the engine will respond: I don't know.

@@ -2,11 +2,12 @@
 
 # Accelerator powered by Azure Cognitive Search + Azure OpenAI 
 Your organization needs a search engine that can make sense of all kinds of types of data, stored in different locations, and that can return the links of similar documents, but more importantly, provide the answer to the question! In other words, you want private and secured ChatGPT for your organization that can interpret, comprehend, and answer questions about your business data.
-The goal of the MVP workshop is to show/prove the value of a GPT Smart Search Engine built with the Azure Services, with your own data in your own environment. For more information on the 2 day workshop, click the powerpoint presentation below:
+
+The goal of the MVP workshop is to show/prove the value of a GPT Smart Search Engine built with the Azure Services, with your own data in your own environment. The repo is made to teach customers step-by-step on how to build a Smart Search Engine. Each Notebook builds on top of each other. 
+For more information on the 2 day workshop, click the powerpoint presentation below:
 
 [Accelerator Pitch Deck](https://microsoft-my.sharepoint.com/:p:/p/jheseltine/Ee0OFL6hWNBCtRpoFRHIdj8BPGCzq01xTxkmEp0scLwSAg?e=EIz9is)
 
-**Click "*view raw*" to view powerpoint presentation**
 
 **Prerequisites Client 2-Day Workshop**
 * Azure subscription
@@ -43,7 +44,6 @@ https://pablomarin-gpt-azure-search-engine-apphome-oq98mn.streamlit.app
    - Tabular Data Q&A in CSV files and SQL Databases using GPT-4
    - ChatBot Interface
    - (Coming soon) Recommends new searches based on users' history.
-   - (Coming soon) Multi-Source (Blob Storage + SQL DB, CosmosDB, Sharepoint, etc)
 
 ---
 
