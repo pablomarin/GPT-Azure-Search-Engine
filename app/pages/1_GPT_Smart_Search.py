@@ -9,15 +9,14 @@ from langchain.docstore.document import Document
 from langchain.callbacks.base import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 
-from components.sidebar import sidebar
 from utils import (
     get_search_results,
+    order_search_results,
+    model_tokens_limit,
+    num_tokens_from_docs,
     embed_docs,
-    get_answer,
-    get_sources,
     search_docs,
-    num_tokens_from_string,
-    model_tokens_limit
+    get_answer,
 )
 st.set_page_config(page_title="GPT Smart Search", page_icon="📖", layout="wide")
 # Add custom CSS styles to adjust padding
@@ -35,7 +34,7 @@ st.header("GPT Smart Search Engine")
 AZURE_OPENAI_API_VERSION = "2023-03-15-preview"
 
 # setting encoding for GPT3.5 / GPT4 models
-encoding_name ='cl100k_base'
+MODEL = "gpt-35-turbo"
 
 def clear_submit():
     st.session_state["submit"] = False
@@ -58,25 +57,18 @@ For example:
     
     \nYou will notice that the answers to these questions are diferent from the open ChatGPT, since these papers are the only possible context. This search engine does not look at the open internet to answer these questions. If the context doesn't contain information, the engine will respond: I don't know.
     """)
-    st.markdown("""
-            - ***Quick Answer***: GPT model only uses, as context, the captions of the results coming from Azure Search
-            - ***Best Answer***: GPT model uses, as context. all of the content of the documents coming from Azure Search
-            """)
 
-coli1, coli2 = st.columns([2,1])
+coli1, coli2= st.columns([3,1])
 with coli1:
     query = st.text_input("Ask a question to your enterprise data lake", value= "What is CLP?", on_change=clear_submit)
 with coli2:
-    temp = st.slider('Temperature :thermometer:', min_value=0.0, max_value=1.0, step=0.1, value=0.5)
+    language= st.selectbox('Answer language',('English', 'Spanish', 'French', 'German', 'Portuguese', 'Italian'), index=0)
 
 # options = ['English', 'Spanish', 'Portuguese', 'French', 'Russian']
 # selected_language = st.selectbox('Answer Language:', options, index=0)
 
-col1, col2, col3 = st.columns([1,1,3])
-with col1:
-    qbutton = st.button('Quick Answer')
-with col2:
-    bbutton = st.button('Best Answer')
+button = st.button('Search')
+
 
 
 if (not os.environ.get("AZURE_SEARCH_ENDPOINT")) or (os.environ.get("AZURE_SEARCH_ENDPOINT") == ""):
@@ -94,9 +86,10 @@ else:
     os.environ["OPENAI_API_BASE"] = os.environ.get("AZURE_OPENAI_ENDPOINT")
     os.environ["OPENAI_API_KEY"] = os.environ.get("AZURE_OPENAI_API_KEY")
     os.environ["OPENAI_API_VERSION"] = os.environ["AZURE_OPENAI_API_VERSION"] = AZURE_OPENAI_API_VERSION
+    os.environ["OPENAI_API_TYPE"] = "azure"
 
 
-    if qbutton or bbutton or st.session_state.get("submit"):
+    if button or st.session_state.get("submit"):
         if not query:
             st.error("Please enter a question!")
         else:
@@ -106,27 +99,10 @@ else:
                 index1_name = "cogsrch-index-files"
                 index2_name = "cogsrch-index-csv"
                 indexes = [index1_name, index2_name]
+                
                 agg_search_results = get_search_results(query, indexes)
+                ordered_results = order_search_results(agg_search_results, reranker_threshold=1)
 
-                file_content = OrderedDict()
-                content = dict()
-
-                for search_results in agg_search_results:
-                    for result in search_results['value']:
-                        if result['@search.rerankerScore'] > 1: # Show results that are at least 25% of the max possible score=4
-                            content[result['id']]={
-                                                    "title": result['title'],
-                                                    "chunks": result['pages'],
-                                                    "language": result['language'],
-                                                    "caption": result['@search.captions'][0]['text'],
-                                                    "score": result['@search.rerankerScore'],
-                                                    "name": result['metadata_storage_name'],
-                                                    "location": result['metadata_storage_path']                  
-                                                }
-                            
-                #After results have been filtered we will Sort and add them as an Ordered list
-                for id in sorted(content, key= lambda x: content[x]["score"], reverse=True):
-                    file_content[id] = content[id]
 
                 st.session_state["submit"] = True
                 # Output Columns
@@ -136,38 +112,31 @@ else:
                 st.markdown("Not data returned from Azure Search, check connection..")
                 st.markdown(e)
             
-            if "file_content" in locals():
+            if "ordered_results" in locals():
                 try:
                     docs = []
-                    for key,value in file_content.items():
-
-                        if qbutton:
-                            docs.append(Document(page_content=value['caption'], metadata={"source": value["location"]}))
-                            add_text = "Coming up with a quick answer... ⏳"
-
-                        if bbutton:
-                            for page in value["chunks"]:
-                                docs.append(Document(page_content=page, metadata={"source": value["location"]}))
+                    for key,value in ordered_results.items():
+                        for page in value["chunks"]:
+                            docs.append(Document(page_content=page, metadata={"source": value["location"]}))
                             add_text = "Reading the source documents to provide the best answer... ⏳"
 
                     if "add_text" in locals():
                         with st.spinner(add_text):
                             if(len(docs)>0):
-                                gpt_tokens_limit = model_tokens_limit('gpt-35-turbo')
-                                num_token = 0
-                                for i in range(len(docs)):
-                                    num_token += num_tokens_from_string(docs[i].page_content,encoding_name)
-                                # if the token count >3000 then only doing the embedding.
-                                if num_token > gpt_tokens_limit:
-                                    language = random.choice(list(file_content.items()))[1]["language"]
-                                    index = embed_docs(docs, language)
-                                    sources = search_docs(index,query)
-                                    if qbutton:
-                                        answer = get_answer(sources, query, deployment="gpt-35-turbo", chain_type = "stuff", temperature=temp, max_tokens=256)
-                                    if bbutton: 
-                                        answer = get_answer(sources, query, deployment="gpt-35-turbo", chain_type = "map_reduce", temperature=temp, max_tokens=500)
+                                
+                                tokens_limit = model_tokens_limit(MODEL)
+                                num_tokens = num_tokens_from_docs(docs)
+                                
+                                if num_tokens > tokens_limit:
+                                    index = embed_docs(docs)
+                                    top_docs = search_docs(index,query)
+                                    num_tokens = num_tokens_from_docs(top_docs)
+                                    chain_type = "map_reduce" if num_tokens > tokens_limit else "stuff"
                                 else:
-                                    answer = get_answer(docs, query, deployment="gpt-35-turbo", chain_type = "stuff", temperature=temp, max_tokens=256)
+                                    top_docs = docs
+                                    chain_type = "stuff"
+                                
+                                answer = get_answer(top_docs, query, language=language, deployment=MODEL, chain_type = chain_type)
                             else:
                                 answer = {"output_text":"No results found" }
                     else:
@@ -192,7 +161,7 @@ else:
                         st.markdown("#### Search Results")
 
                         if(len(docs)>0):
-                            for key, value in file_content.items():
+                            for key, value in ordered_results.items():
                                 url = value['location'] + os.environ.get("DATASOURCE_SAS_TOKEN")
                                 title = str(value['title']) if (value['title']) else value['name']
                                 score = str(round(value['score']*100/4,2))

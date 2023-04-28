@@ -4,7 +4,6 @@ from collections import OrderedDict
 import streamlit as st
 from streamlit_chat import message
 from langchain.chains import ConversationChain
-from langchain.chains.conversation.memory import ConversationEntityMemory
 from langchain.memory import ConversationBufferMemory
 from langchain.chains.conversation.prompt import ENTITY_MEMORY_CONVERSATION_TEMPLATE
 from langchain.chat_models import AzureChatOpenAI
@@ -13,12 +12,12 @@ from langchain.docstore.document import Document
 
 from utils import (
     get_search_results,
+    order_search_results,
+    model_tokens_limit,
+    num_tokens_from_docs,
     embed_docs,
-    get_answer_with_memory,
-    get_sources,
     search_docs,
-    num_tokens_from_string,
-    model_tokens_limit
+    get_answer,
 )
 
 # From here down is all the StreamLit UI.
@@ -37,8 +36,9 @@ st.header("GPT Smart Search Engine - Chatbot")
 
 
 AZURE_OPENAI_API_VERSION = "2023-03-15-preview"
-encoding_name ='cl100k_base'
-
+# setting encoding for GPT3.5 / GPT4 models
+MODEL = "gpt-35-turbo"
+tokens_limit = model_tokens_limit(MODEL)
 
 with st.sidebar:
     st.markdown("""# Instructions""")
@@ -59,10 +59,6 @@ Example questions:
     """)
 
 
-AZURE_OPENAI_API_VERSION = "2023-03-15-preview"
-# setting encoding for GPT3.5 / GPT4 models
-encoding_name ='cl100k_base'
-
 if (not os.environ.get("AZURE_SEARCH_ENDPOINT")) or (os.environ.get("AZURE_SEARCH_ENDPOINT") == ""):
     st.error("Please set your AZURE_SEARCH_ENDPOINT on your Web App Settings")
 elif (not os.environ.get("AZURE_SEARCH_KEY")) or (os.environ.get("AZURE_SEARCH_KEY") == ""):
@@ -76,6 +72,7 @@ else:
     os.environ["OPENAI_API_BASE"] = os.environ.get("AZURE_OPENAI_ENDPOINT")
     os.environ["OPENAI_API_KEY"] = os.environ.get("AZURE_OPENAI_API_KEY")
     os.environ["OPENAI_API_VERSION"] = os.environ["AZURE_OPENAI_API_VERSION"] = AZURE_OPENAI_API_VERSION
+    os.environ["OPENAI_API_TYPE"] = "azure"
 
 
     # Initialize session states
@@ -83,14 +80,12 @@ else:
         st.session_state["generated"] = []
     if "past" not in st.session_state:
         st.session_state["past"] = []
-    if "chat_history" not in st.session_state:
-        st.session_state["chat_history"] = []
     if "docs" not in st.session_state:
         st.session_state["docs"] = []
     if "input" not in st.session_state:
         st.session_state["input"] = ""
     if "memory" not in st.session_state:
-        st.session_state["memory"] = ConversationBufferMemory()
+        st.session_state["memory"] = ConversationBufferMemory(memory_key="chat_history",input_key="question")
 
     # Define function to start a new chat
     def new_chat():
@@ -99,95 +94,82 @@ else:
         """        
         st.session_state["generated"] = []
         st.session_state["past"] = []
-        st.session_state["chat_history"] = []
+        st.session_state["docs"] = []
         st.session_state["input"] = ""
-        st.session_state["memory"] = ConversationBufferMemory()
+        st.session_state["memory"] = ConversationBufferMemory(memory_key="chat_history",input_key="question")
 
 
-    # Define model
-    MODEL = "gpt-35-turbo"
     # Create an OpenAI instance
     llm = AzureChatOpenAI(deployment_name=MODEL, temperature=0)
     
     
-    coli1, coli2 = st.columns([3,1])
+    coli1, coli2, coli3 = st.columns([3,1,1])
     with coli1:
         mode = st.radio("Usage Mode",('Corporate Documents Knowledge', 'ChatGPT Knowledge'))
     with coli2:
-        K = st.number_input(' No. Messages to remember',min_value=3,max_value=1000)
+        language= st.selectbox('Chat language',('English', 'Spanish', 'French', 'German', 'Portuguese', 'Italian'), index=0)
+    with coli3:
+        K = st.number_input('Memory size (msgs)',min_value=5,max_value=1000)
         
 
     col1, col2 = st.columns([6,1])
     with col1:
         query = st.text_input("Talk with your enterprise data lake", key="input", label_visibility="collapsed")
     with col2:
-        st.button("New Chat", on_click = new_chat, type='primary')
+        st.button("New Topic", on_click = new_chat, type='primary')
     
     if query:
-        open_chain = ConversationChain(llm=llm, memory=st.session_state["memory"])
+        open_chain = ConversationChain(llm=llm)
     
         if mode == 'ChatGPT Knowledge':
             answer = open_chain.run(query)
         else:
-
-            index1_name = "cogsrch-index-files"
-            index2_name = "cogsrch-index-csv"
-            indexes = [index1_name, index2_name]
-
-            agg_search_results = get_search_results(query, indexes)
-
-            file_content = OrderedDict()
-            content = dict()
-
             try:
-                for search_results in agg_search_results:
-                    for result in search_results['value']:
-                        if result['@search.rerankerScore'] > 1: # Show results that are at least 25% of the max possible score=4
-                            content[result['id']]={
-                                                    "title": result['title'],
-                                                    "chunks": result['pages'],
-                                                    "language": result['language'],
-                                                    "caption": result['@search.captions'][0]['text'],
-                                                    "score": result['@search.rerankerScore'],
-                                                    "name": result['metadata_storage_name'],
-                                                    "location": result['metadata_storage_path']                  
-                                                }
+                index1_name = "cogsrch-index-files"
+                index2_name = "cogsrch-index-csv"
+                indexes = [index1_name, index2_name]
+                
+                agg_search_results = get_search_results(query, indexes)
+                ordered_results = order_search_results(agg_search_results, reranker_threshold=1)
+                
             except:
                 st.markdown("Not data returned from Azure Search, check connection..")
                 st.stop()
 
-            #After results have been filtered we will Sort and add them as an Ordered list
-            for id in sorted(content, key= lambda x: content[x]["score"], reverse=True):
-                file_content[id] = content[id]
-
-
             try:
-                with st.spinner("Searching in corporate documents... ⏳"):
-                    if len(file_content) > 0:
-                        for key,value in file_content.items():
+                
+                if len(st.session_state["docs"]) == 0 :
+                    with st.spinner("Searching in corporate documents... ⏳"):
+                        for key,value in ordered_results.items():
                             for page in value["chunks"]:
                                     st.session_state["docs"].append(Document(page_content=page, metadata={"source": value["name"]}))
+                        num_tokens = num_tokens_from_docs(st.session_state["docs"])
 
+                        if num_tokens > tokens_limit:
+                            index = embed_docs(st.session_state["docs"])
+                            top_docs = search_docs(index,query)
+                            num_tokens = num_tokens_from_docs(top_docs)
+                            chain_type = "map_reduce" if num_tokens > tokens_limit else "stuff"
+                        else:
+                            top_docs = st.session_state["docs"]
+                            chain_type = "stuff"
 
-                        language = random.choice(list(file_content.items()))[1]["language"]
-                        index = embed_docs(st.session_state["docs"], language)
-                        answer = get_answer_with_memory(query, index, 
-                                                        st.session_state["chat_history"], 
-                                                        deployment=MODEL, 
-                                                        chain_type = "stuff", 
-                                                        temperature=0.5, 
-                                                        max_tokens=500)
+                        answer = get_answer(top_docs, query, language=language, deployment=MODEL, chain_type = chain_type, memory=st.session_state["memory"])["output_text"]
 
-                    elif len(st.session_state["docs"]) > 0:
-                        index = embed_docs(st.session_state["docs"], "en")
-                        answer = get_answer_with_memory(query, index, 
-                                                        st.session_state["chat_history"], 
-                                                        deployment=MODEL, 
-                                                        chain_type = "stuff", 
-                                                        temperature=0.5, 
-                                                        max_tokens=500)
+                elif len(st.session_state["docs"]) > 0:
+                    num_tokens = num_tokens_from_docs(st.session_state["docs"])
+                    if num_tokens > tokens_limit:
+                        index = embed_docs(st.session_state["docs"])
+                        top_docs = search_docs(index,query)
+                        num_tokens = num_tokens_from_docs(top_docs)
+                        chain_type = "map_reduce" if num_tokens > tokens_limit else "stuff"
                     else:
-                        answer = "Results Not Found"
+                        top_docs = st.session_state["docs"]
+                        chain_type = "stuff"
+
+                    answer = get_answer(top_docs, query, language=language, deployment=MODEL, chain_type = chain_type, memory=st.session_state["memory"])["output_text"]
+                else:
+                    answer = "Results Not Found"
 
             
             except OpenAIError as e:
@@ -196,9 +178,10 @@ else:
 
         # Append question and answer to memory
         st.session_state["past"].append(query)
-        st.session_state["generated"].append(answer) 
-        st.session_state["memory"].chat_memory.add_user_message(query)
-        st.session_state["memory"].chat_memory.add_ai_message(answer)
+        try:
+            st.session_state["generated"].append(answer.split("SOURCES:")[0])
+        except:
+            st.session_state["generated"].append(answer.split("Sources:")[0])
 
         
         for i in range(len(st.session_state["generated"]) - 1, -1, -1):
@@ -206,8 +189,6 @@ else:
             message(st.session_state["past"][i], is_user=True, key=str(i) + "_user", 
                     avatar_style="lorelei-neutral", seed="Harley")
 
-        for i in range(len(st.session_state['generated'])-1, -1, -1):
-            st.session_state["chat_history"].append(("Human:" + st.session_state["past"][i],"AI:" + st.session_state["generated"][i]))
 
 
 

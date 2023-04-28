@@ -3,10 +3,11 @@ from io import BytesIO
 from typing import Any, Dict, List
 import requests
 import os
+from collections import OrderedDict
 
 import docx2txt
 import streamlit as st
-from embeddings import OpenAIEmbeddings
+from langchain.embeddings import OpenAIEmbeddings
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.docstore.document import Document
 from langchain.llms import AzureOpenAI
@@ -15,14 +16,20 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import VectorStore
 from langchain.vectorstores.faiss import FAISS
 from langchain.chains import LLMChain
+from langchain.memory import ConversationBufferMemory
 from langchain.chains.question_answering import load_qa_chain
 from langchain.chains.qa_with_sources import load_qa_with_sources_chain
 from langchain.chains import ConversationalRetrievalChain
 from langchain.chains.conversational_retrieval.prompts import CONDENSE_QUESTION_PROMPT
 from openai.error import AuthenticationError
-from prompts import STUFF_PROMPT, REFINE_PROMPT, REFINE_QUESTION_PROMPT
 from pypdf import PdfReader
 import tiktoken
+
+try:
+    from .prompts import STUFF_PROMPT, COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT
+except:
+    from prompts import STUFF_PROMPT, COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT
+
 
 
 # @st.cache_data
@@ -93,22 +100,19 @@ def text_to_docs(text: str | List[str]) -> List[Document]:
 
 
 # @st.cache_data(show_spinner=False)
-def embed_docs(docs: List[Document], language: str) -> VectorStore:
+def embed_docs(docs: List[Document]) -> VectorStore:
     """Embeds a list of Documents and returns a FAISS index"""
  
     # Select the Embedder model'
     print("Number of chunks:",len(docs))
     if len(docs) < 50:
         # OpenAI models are accurate but slower
-        embedder = OpenAIEmbeddings(document_model_name="text-embedding-ada-002", query_model_name="text-embedding-ada-002") 
+        embedder = OpenAIEmbeddings(deployment="text-embedding-ada-002", chunk_size=1) 
     else:
         # Bert based models are faster (3x-10x) but not as accurate
         # For Multiple language support we need to use a multilingual model. But if English only is the requirement, use "multi-qa-MiniLM-L6-cos-v1" for a good trade-off between quality and speed
         # The fastest english model though is "all-MiniLM-L12-v2"
-        if language == "en":
-            embedder = HuggingFaceEmbeddings(model_name = 'all-MiniLM-L12-v2')
-        else:
-            embedder = HuggingFaceEmbeddings(model_name = 'distiluse-base-multilingual-cased-v2')
+        embedder = HuggingFaceEmbeddings(model_name = 'distiluse-base-multilingual-cased-v2')
 
 
     index = FAISS.from_documents(docs, embedder)
@@ -116,7 +120,6 @@ def embed_docs(docs: List[Document], language: str) -> VectorStore:
     return index
 
 
-# @st.cache_data
 def search_docs(index: VectorStore, query: str) -> List[Document]:
     """Searches a FAISS index for similar chunks to the query
     and returns a list of Documents."""
@@ -126,34 +129,6 @@ def search_docs(index: VectorStore, query: str) -> List[Document]:
     return docs
 
 
-# @st.cache_data
-def get_answer(docs: List[Document], 
-               query: str, 
-               deployment: str, 
-               chain_type: str, 
-               temperature: float, 
-               max_tokens: int
-              ) -> Dict[str, Any]:
-    
-    """Gets an answer to a question from a list of Documents."""
-
-    # Get the answer
-    
-    if (deployment in ["gpt-35-turbo", "gpt-4", "gpt-4-32k"]) :
-        llm = AzureChatOpenAI(deployment_name=deployment, temperature=temperature, max_tokens=max_tokens)
-    else:
-        llm = AzureOpenAI(deployment_name=deployment, temperature=temperature, max_tokens=max_tokens)
-    
-    chain = load_qa_with_sources_chain(llm, chain_type=chain_type)
-    
-    answer = chain( {"input_documents": docs, "question": query}, return_only_outputs=True)
-    #answer = chain( {"input_documents": docs, "question": query, "language": language}, return_only_outputs=True)
-
-    return answer
-
-
-
-# @st.cache_data
 def get_sources(answer: Dict[str, Any], docs: List[Document]) -> List[Document]:
     """Gets the source documents for an answer."""
 
@@ -168,6 +143,54 @@ def get_sources(answer: Dict[str, Any], docs: List[Document]) -> List[Document]:
     return source_docs
 
 
+
+def get_answer(docs: List[Document], 
+               query: str, 
+               language: str,
+               deployment: str, 
+               chain_type: str,
+               memory: ConversationBufferMemory = None,
+               temperature: float = 0.5, 
+               max_tokens: int = 500
+              ) -> Dict[str, Any]:
+    
+    """Gets an answer to a question from a list of Documents."""
+
+    # Get the answer
+    
+    if (deployment in ["gpt-35-turbo", "gpt-4", "gpt-4-32k"]) :
+        llm = AzureChatOpenAI(deployment_name=deployment, temperature=temperature, max_tokens=max_tokens)
+    else:
+        llm = AzureOpenAI(deployment_name=deployment, temperature=temperature, max_tokens=max_tokens)
+    
+    if chain_type == "stuff":
+        if memory == None:
+            chain = load_qa_with_sources_chain(llm, chain_type=chain_type,
+                                               prompt=COMBINE_PROMPT)
+        else:
+            chain = load_qa_with_sources_chain(llm, chain_type=chain_type, 
+                                               prompt=COMBINE_CHAT_PROMPT,
+                                               memory=memory)
+
+    elif chain_type == "map_reduce":
+        if memory == None:
+            chain = load_qa_with_sources_chain(llm, chain_type=chain_type, 
+                                               question_prompt=COMBINE_QUESTION_PROMPT,
+                                               combine_prompt=COMBINE_PROMPT)
+        else:
+            chain = load_qa_with_sources_chain(llm, chain_type=chain_type, 
+                                               question_prompt=COMBINE_QUESTION_PROMPT,
+                                               combine_prompt=COMBINE_CHAT_PROMPT,
+                                               memory=memory)
+    else:
+        print("Error: chain_type", chain_type, "not supported")
+    
+    answer = chain( {"input_documents": docs, "question": query, "language": language}, return_only_outputs=True)
+
+    return answer
+
+
+
 def wrap_text_in_html(text: str | List[str]) -> str:
     """Wraps each text block separated by newlines in <p> tags"""
     if isinstance(text, list):
@@ -175,8 +198,10 @@ def wrap_text_in_html(text: str | List[str]) -> str:
         text = "\n<hr/>\n".join(text)
     return "".join([f"<p>{line}</p>" for line in text.split("\n")])
 
-# defining the token count function
-def num_tokens_from_string(string: str, encoding_name: str) -> int:
+
+# Returns the num of tokens used on a string
+def num_tokens_from_string(string: str) -> int:
+    encoding_name ='cl100k_base'
     """Returns the number of tokens in a text string."""
     encoding = tiktoken.get_encoding(encoding_name)
     num_tokens = len(encoding.encode(string))
@@ -195,12 +220,17 @@ def model_tokens_limit(model: str) -> int:
         token_limit = 3000
     return token_limit
 
+# Returns num of toknes used on a list of Documents objects
+def num_tokens_from_docs(docs: List[Document]) -> int:
+    num_tokens = 0
+    for i in range(len(docs)):
+        num_tokens += num_tokens_from_string(docs[i].page_content)
+    return num_tokens
 
 
-def get_search_results(query: str, indexes: list) -> list:
+def get_search_results(query: str, indexes: list) -> List[dict]:
     
     AZURE_SEARCH_API_VERSION = '2021-04-30-Preview'
-    
     headers = {'Content-Type': 'application/json','api-key': os.environ["AZURE_SEARCH_KEY"]}
 
     agg_search_results = []
@@ -226,34 +256,28 @@ def get_search_results(query: str, indexes: list) -> list:
 
     return agg_search_results
     
-    
-def get_answer_with_memory(
-               query: str, 
-               index: VectorStore,
-               chat_history: list,
-               deployment: str, 
-               chain_type: str, 
-               temperature: float,
-               max_tokens: int
-              ) -> Dict[str, Any]:
-    
-    """Gets an answer to a question from a list of Documents."""
 
-    # Get the answer
+def order_search_results( agg_search_results: List[dict], reranker_threshold: int) -> OrderedDict:
     
-    if (deployment in ["gpt-35-turbo", "gpt-4", "gpt-4-32k"]) :
-        llm = AzureChatOpenAI(deployment_name=deployment, temperature=temperature, max_tokens=max_tokens)
-    else:
-        llm = AzureOpenAI(deployment_name=deployment, temperature=temperature, max_tokens=max_tokens)
+    """Orders based on score the results from get_search_results function"""
     
-    doc_chain = load_qa_with_sources_chain(llm, chain_type=chain_type)
-    question_generator = LLMChain(llm=llm, prompt=CONDENSE_QUESTION_PROMPT)
-    chain = ConversationalRetrievalChain(
-                        retriever=index.as_retriever(),
-                        question_generator=question_generator,
-                        combine_docs_chain=doc_chain,
-                    )
+    content = dict()
+    ordered_content = OrderedDict()
     
-    result = chain({"question": query, "chat_history": chat_history})
+    for search_results in agg_search_results:
+        for result in search_results['value']:
+            if result['@search.rerankerScore'] > reranker_threshold: # Show results that are at least 25% of the max possible score=4
+                content[result['id']]={
+                                        "title": result['title'],
+                                        "chunks": result['pages'],
+                                        "language": result['language'],
+                                        "caption": result['@search.captions'][0]['text'],
+                                        "score": result['@search.rerankerScore'],
+                                        "name": result['metadata_storage_name'],
+                                        "location": result['metadata_storage_path']                  
+                                    }
+    #After results have been filtered we will Sort and add them as an Ordered list
+    for id in sorted(content, key= lambda x: content[x]["score"], reverse=True):
+        ordered_content[id] = content[id]
 
-    return result["answer"]
+    return ordered_content
