@@ -82,13 +82,10 @@
             "linuxFxVersion": "[parameters('linuxFxVersion')]",
             "appSettings": [
                 {
-<<<<<<< HEAD
                   "name": "DATASOURCE_SAS_TOKEN",
                   "value": ""
                 },
                 {
-=======
->>>>>>> e1e3a3643eec37d32b81aa4b9305542f625be58c
                   "name": "AZURE_SEARCH_ENDPOINT",
                   "value": ""
                 },
