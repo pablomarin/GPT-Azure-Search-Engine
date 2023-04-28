@@ -4,12 +4,12 @@
 Your organization needs a search engine that can make sense of all kinds of types of data, stored in different locations, and that can return the links of similar documents, but more importantly, provide the answer to the question! In other words, you want private and secured ChatGPT for your organization that can interpret, comprehend, and answer questions about your business data.
 
 The goal of the MVP workshop is to show/prove the value of a GPT Smart Search Engine built with the Azure Services, with your own data in your own environment. The repo is made to teach customers step-by-step on how to build a Smart Search Engine. Each Notebook builds on top of each other. 
-For more information on the 2 day workshop, click the powerpoint presentation below:
+For more information on the 3 day workshop, click the powerpoint presentation below:
 
-[Accelerator Pitch Deck](https://microsoft-my.sharepoint.com/:p:/p/jheseltine/Ee0OFL6hWNBCtRpoFRHIdj8BPGCzq01xTxkmEp0scLwSAg?e=EIz9is)
+[Accelerator Pitch Deck](https://github.com/pablomarin/GPT-Azure-Search-Engine/blob/main/Azure%20Open%20AI%20GPT%20Smart%20Search%20-%20Pitch%20Deck%20.pdf)
 
 
-**Prerequisites Client 2-Day Workshop**
+**Prerequisites Client 3-Day Workshop**
 * Azure subscription
 * Accepted Application to Azure Open AI
 * Microsoft members need to be added as Guests in clients Azure AD
@@ -96,7 +96,7 @@ A: Because using STUFF type with all the content of the pages as context, uses t
 A: Quoting the [OpenAI documentation](https://platform.openai.com/docs/guides/fine-tuning): "GPT-3 has been pre-trained on a vast amount of text from the open internet. When given a prompt with just a few examples, it can often intuit what task you are trying to perform and generate a plausible completion. This is often called "few-shot learning.
 Fine-tuning improves on few-shot learning by training on many more examples than can fit in the prompt, letting you achieve better results on a wide number of tasks. Once a model has been fine-tuned, you won't need to provide examples in the prompt anymore. This saves costs and enables lower-latency requests"
 
-So training/fine tunning the model requires that we provide hundreds/thousands of Prompt and Completion tuples, or in other words, we need to provide samples of query-responses. For a company knowledge base of Terabytes of information this is not feasible. To come up with all the possible tuples that users my request, is simply not possible. So the search engine is absolutely necessary for a company data search engine using OpenAI.
+So training/fine tunning the model requires that we provide hundreds/thousands of Prompt and Completion tuples, or in other words, we need to provide samples of query-responses. For a company knowledge base of Terabytes of information this is not feasible. To come up with all the possible tuples that users might request, it is simply not possible. So the search engine is absolutely necessary for a company data search engine using OpenAI.
 
 ---
 
