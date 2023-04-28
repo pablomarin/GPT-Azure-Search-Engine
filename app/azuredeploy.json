@@ -20,19 +20,8 @@
       "sku": {
         "type": "string",
         "allowedValues": [
-<<<<<<< HEAD
             "B3",
             "S3"
-=======
-            "B2",
-            "B3",
-            "S2",
-            "S3",
-            "P1",
-            "P2",
-            "P3",
-            "P4"
->>>>>>> e1e3a3643eec37d32b81aa4b9305542f625be58c
         ],
         "defaultValue": "B3",
         "metadata": {
