@@ -9,5 +9,5 @@ pillow
 pypdf
 tenacity
 sentence_transformers
-sqlalchemy
+sqlalchemy<2.0.0
 pyodbc
