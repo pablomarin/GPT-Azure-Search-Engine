@@ -6,7 +6,7 @@ Your organization needs a search engine that can make sense of all kinds of type
 The goal of the MVP workshop is to show/prove the value of a GPT Smart Search Engine built with the Azure Services, with your own data in your own environment. The repo is made to teach customers step-by-step on how to build a Smart Search Engine. Each Notebook builds on top of each other. 
 For more information on the 3 day workshop, click the powerpoint presentation below:
 
-[Accelerator Pitch Deck](https://github.com/pablomarin/GPT-Azure-Search-Engine/blob/main/Azure%20Open%20AI%20GPT%20Smart%20Search%20-%20Pitch%20Deck%20.pdf)
+[Accelerator Pitch Deck](https://github.com/pablomarin/GPT-Azure-Search-Engine/blob/main/Azure%20Open%20AI%20GPT%20Smart%20Search%20-%20Pitch%20Deck.pdf)
 
 
 **Prerequisites Client 3-Day Workshop**
