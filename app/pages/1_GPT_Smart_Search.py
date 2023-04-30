@@ -1,6 +1,7 @@
 import streamlit as st
 import urllib
 import os
+import re
 import time
 import random
 from collections import OrderedDict
@@ -146,10 +147,13 @@ else:
                     with placeholder.container():
 
                         st.markdown("#### Answer")
-                        answer_text = answer["output_text"].split("SOURCES:")[0]
+                        split_word = "Source"
+                        split_regex = re.compile(f"{split_word}s:?\\W*", re.IGNORECASE)
+                        answer_text = split_regex.split(answer["output_text"])[0]
                         st.markdown(answer_text)
                         try:
-                            sources_list = answer["output_text"].split("SOURCES:")[1].replace(" ","").split(",")
+                            sources_list = split_regex.split(answer["output_text"])[1].replace(" ","").split(",")
+                            #sources_list = answer["output_text"].split("SOURCES:")[1].replace(" ","").split(",")
                             sources_markdown = "Sources: "
                             for index, value in enumerate(sources_list):
                                 sources_markdown += "[[" + str(index+1) + "]](" + value + os.environ.get("DATASOURCE_SAS_TOKEN") + ")"

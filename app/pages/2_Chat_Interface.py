@@ -9,6 +9,8 @@ from langchain.chains.conversation.prompt import ENTITY_MEMORY_CONVERSATION_TEMP
 from langchain.chat_models import AzureChatOpenAI
 from openai.error import OpenAIError
 from langchain.docstore.document import Document
+from prompts import CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX
+
 
 from utils import (
     get_search_results,
