@@ -11,3 +11,4 @@ tenacity
 sentence_transformers
 sqlalchemy<2.0.0
 pyodbc
+tabulate
