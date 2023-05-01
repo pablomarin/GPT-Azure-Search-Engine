@@ -17,18 +17,26 @@ from langchain.vectorstores import VectorStore
 from langchain.vectorstores.faiss import FAISS
 from langchain.chains import LLMChain
 from langchain.memory import ConversationBufferMemory
+from langchain.agents import create_csv_agent
 from langchain.chains.question_answering import load_qa_chain
 from langchain.chains.qa_with_sources import load_qa_with_sources_chain
 from langchain.chains import ConversationalRetrievalChain
 from langchain.chains.conversational_retrieval.prompts import CONDENSE_QUESTION_PROMPT
+from langchain.tools import BaseTool
 from openai.error import AuthenticationError
+from langchain.docstore.document import Document
 from pypdf import PdfReader
+from sqlalchemy.engine.url import URL
+from langchain.sql_database import SQLDatabase
+from langchain import SQLDatabaseChain
 import tiktoken
 
 try:
-    from .prompts import STUFF_PROMPT, COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT
+    from .prompts import (STUFF_PROMPT, COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT,
+                          CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX, MSSQL_PROMPT)
 except:
-    from prompts import STUFF_PROMPT, COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT
+    from prompts import (STUFF_PROMPT, COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT,
+                         CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX, MSSQL_PROMPT)
 
 
 
@@ -228,7 +236,7 @@ def num_tokens_from_docs(docs: List[Document]) -> int:
     return num_tokens
 
 
-def get_search_results(query: str, indexes: list) -> List[dict]:
+def get_search_results(query: str, indexes: list, k: int = 5) -> List[dict]:
     
     AZURE_SEARCH_API_VERSION = '2021-04-30-Preview'
     headers = {'Content-Type': 'application/json','api-key': os.environ["AZURE_SEARCH_KEY"]}
@@ -240,7 +248,7 @@ def get_search_results(query: str, indexes: list) -> List[dict]:
         url += '?api-version={}'.format(AZURE_SEARCH_API_VERSION)
         url += '&search={}'.format(query)
         url += '&select=*'
-        url += '&$top=5'  # You can change this to anything you need/want
+        url += '&$top={}'.format(k)  # You can change this to anything you need/want
         url += '&queryLanguage=en-us'
         url += '&queryType=semantic'
         url += '&semanticConfiguration=my-semantic-config'
@@ -281,3 +289,127 @@ def order_search_results( agg_search_results: List[dict], reranker_threshold: in
         ordered_content[id] = content[id]
 
     return ordered_content
+
+
+class DocSearchWrapper(BaseTool):
+    """Wrapper for Azure GPT Smart Search Engine"""
+    
+    name = "DocSearchWrapper"
+    description = "useful for when you need to answer questions about covid or computer science"
+
+    indexes: List[str]
+    k: int = 10
+    deployment_name: str = "gpt-35-turbo"
+    response_language: str = "English"
+    reranker_th: int = 1
+    
+    def _run(self, query: str) -> str:
+
+        agg_search_results = get_search_results(query, self.indexes, self.k)
+        ordered_results = order_search_results(agg_search_results, reranker_threshold=self.reranker_th)
+        docs = []
+        for key,value in ordered_results.items():
+            for page in value["chunks"]:
+                docs.append(Document(page_content=page, metadata={"source": value["location"]}))
+
+        # Calculate number of tokens of our docs
+        tokens_limit = model_tokens_limit(self.deployment_name)
+
+        if(len(docs)>0):
+            num_tokens = num_tokens_from_docs(docs)
+            print("Custom token limit for", self.deployment_name, ":", tokens_limit)
+            print("Combined docs tokens count:",num_tokens)
+
+        else:
+            return "No Results Found"
+
+        if num_tokens > tokens_limit:
+            index = embed_docs(docs)
+            top_docs = search_docs(index, query)
+
+            # Now we need to recalculate the tokens count of the top results from similarity vector search
+            # in order to select the chain type: stuff or map_reduce
+
+            num_tokens = num_tokens_from_docs(top_docs)   
+            print("Token count after similarity search:", num_tokens)
+            chain_type = "map_reduce" if num_tokens > tokens_limit else "stuff"
+
+        else:
+            # if total tokens is less than our limit, we don't need to vectorize and do similarity search
+            top_docs = docs
+            chain_type = "stuff"
+
+        print("Chain Type selected:", chain_type)
+
+        response = get_answer(docs=top_docs, query=query, language=self.response_language, deployment=self.deployment_name, chain_type=chain_type)
+
+        return response['output_text']
+    
+    async def _arun(self, query: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError("SmartSearchWrapper does not support async")
+    
+
+class CSVTabularWrapper(BaseTool):
+    """Wrapper CSV agent"""
+    
+    name = "CSVTabularWrapper"
+    description = "useful for when you need to answer questions number of cases, deaths, hospitalizations, tests, people in ICU, people in Ventilator, in the United States"
+
+    path: str
+    deployment_name: str = "gpt-4"
+    
+    def _run(self, query: str) -> str:
+        llm = AzureChatOpenAI(deployment_name=self.deployment_name, temperature=0, max_tokens=500)
+        agent = create_csv_agent(llm, self.path, verbose=True)
+        for i in range(5):
+            try:
+                response = agent.run(CSV_PROMPT_PREFIX + query + CSV_PROMPT_SUFFIX) 
+                break
+            except:
+                response = "Error too many failed retries"
+                continue
+        
+        return response
+    
+    async def _arun(self, query: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError("CSVTabularWrapper does not support async")
+        
+        
+class SQLDbWrapper(BaseTool):
+    """Wrapper SQLDB Agent"""
+    
+    name = "SQLDbWrapper"
+    description = "useful for when you need to answer questions number of cases, deaths, hospitalizations, tests, people in ICU, people in Ventilator, in the United States"
+
+    server: str
+    database: str
+    username: str
+    password: str
+    k:str = 5
+    deployment_name: str = "gpt-35-turbo"
+    
+    def _run(self, query: str) -> str:
+        
+        db_config = {
+            'drivername': 'mssql+pyodbc',
+            'username': self.username+'@'+self.server,
+            'password': self.password,
+            'host': self.server,
+            'port': 1433,
+            'database': self.database,
+            'query': {'driver': 'ODBC Driver 18 for SQL Server'}
+        }
+
+        db_url = URL.create(**db_config)
+        db = SQLDatabase.from_uri(db_url)
+        llm = AzureChatOpenAI(deployment_name=self.deployment_name, temperature=0, max_tokens=500)
+        db_chain = SQLDatabaseChain(llm=llm, database=db, prompt=MSSQL_PROMPT, verbose=True)
+        response = db_chain(query)['result']
+        
+        return response
+    
+    async def _arun(self, query: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError("CSVTabularWrapper does not support async")
