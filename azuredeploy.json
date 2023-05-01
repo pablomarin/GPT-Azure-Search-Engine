@@ -111,6 +111,13 @@
             "metadata": {
                 "description": "The administrator password of the SQL logical server."
             }
+        },
+        "BingSearchAPIName": {
+            "defaultValue": "[format('bing-search-{0}', uniqueString(resourceGroup().id))]",
+            "type": "String",
+            "metadata": {
+                "description": "The name of the Bing Search API service"
+            }
         }
     },
     "resources": [
@@ -179,6 +186,16 @@
                     }
                 }
             ]
+        },
+        {
+            "type": "Microsoft.Bing/accounts",
+            "apiVersion": "2020-06-10",
+            "kind": "Bing.Search.v7",
+            "name": "[parameters('BingSearchAPIName')]",
+            "location": "global",
+            "sku": {
+                "name": "S1"
+            }
         }
     ]
 }

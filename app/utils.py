@@ -33,10 +33,11 @@ import tiktoken
 
 try:
     from .prompts import (STUFF_PROMPT, COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT,
-                          CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX, MSSQL_PROMPT)
-except:
+                          CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX, MSSQL_PROMPT, CHATGPT_PROMPT)
+except Exception as e:
+    print(e)
     from prompts import (STUFF_PROMPT, COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT,
-                         CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX, MSSQL_PROMPT)
+                         CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX, MSSQL_PROMPT, CHATGPT_PROMPT)
 
 
 
@@ -294,8 +295,8 @@ def order_search_results( agg_search_results: List[dict], reranker_threshold: in
 class DocSearchWrapper(BaseTool):
     """Wrapper for Azure GPT Smart Search Engine"""
     
-    name = "DocSearchWrapper"
-    description = "useful for when you need to answer questions about covid or computer science"
+    name = "Doc Search"
+    description = 'useful for when you need to answer questions that **DO NOT** begin with "Hey Bing" or "Hey ChatGPT"'
 
     indexes: List[str]
     k: int = 10
@@ -353,8 +354,8 @@ class DocSearchWrapper(BaseTool):
 class CSVTabularWrapper(BaseTool):
     """Wrapper CSV agent"""
     
-    name = "CSVTabularWrapper"
-    description = "useful for when you need to answer questions number of cases, deaths, hospitalizations, tests, people in ICU, people in Ventilator, in the United States"
+    name = "CSV Search"
+    description = "useful for when you need to answer questions about number of cases, deaths, hospitalizations, tests, people in ICU, people in Ventilator, regarding Covid in the United States"
 
     path: str
     deployment_name: str = "gpt-4"
@@ -380,8 +381,8 @@ class CSVTabularWrapper(BaseTool):
 class SQLDbWrapper(BaseTool):
     """Wrapper SQLDB Agent"""
     
-    name = "SQLDbWrapper"
-    description = "useful for when you need to answer questions number of cases, deaths, hospitalizations, tests, people in ICU, people in Ventilator, in the United States"
+    name = "SQL Search"
+    description = "useful for when you need to answer questions about number of cases, deaths, hospitalizations, tests, people in ICU, people in Ventilator, in the United States related to Covid-19"
 
     server: str
     database: str
@@ -412,4 +413,30 @@ class SQLDbWrapper(BaseTool):
     
     async def _arun(self, query: str) -> str:
         """Use the tool asynchronously."""
-        raise NotImplementedError("CSVTabularWrapper does not support async")
+        raise NotImplementedError("SQLDbWrapper does not support async")
+        
+        
+class ChatGPTWrapper(BaseTool):
+    """Wrapper for a ChatGPT clone"""
+    
+    name = "ChatGPT Search"
+    description = 'useful **ONLY** when you need to answer questions that begin with "Hey ChatGPT"'
+
+    deployment_name: str = "gpt-35-turbo"
+    
+    def _run(self, query: str) -> str:
+        
+        llm = AzureChatOpenAI(deployment_name=self.deployment_name, temperature=0.5, max_tokens=500)
+        chatgpt_chain = LLMChain(
+            llm=llm, 
+            prompt=CHATGPT_PROMPT, 
+            verbose=False
+        )
+        
+        response = chatgpt_chain.run(query)
+        
+        return response
+    
+    async def _arun(self, query: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError("ChatGPTWrapper does not support async")
