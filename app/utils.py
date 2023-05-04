@@ -32,11 +32,11 @@ from langchain import SQLDatabaseChain
 import tiktoken
 
 try:
-    from .prompts import (STUFF_PROMPT, COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT,
+    from .prompts import (COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT,
                           CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX, MSSQL_PROMPT, CHATGPT_PROMPT)
 except Exception as e:
     print(e)
-    from prompts import (STUFF_PROMPT, COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT,
+    from prompts import (COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT,
                          CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX, MSSQL_PROMPT, CHATGPT_PROMPT)
 
 
@@ -296,55 +296,63 @@ class DocSearchWrapper(BaseTool):
     """Wrapper for Azure GPT Smart Search Engine"""
     
     name = "Doc Search"
-    description = 'useful for when you need to answer questions that **DO NOT** begin with "Hey Bing" or "Hey ChatGPT"'
+    description = 'useful for when you need to answer questions that **DO NOT** begin with "Hey Bing" or "Hey ChatGPT".\n'
 
     indexes: List[str]
     k: int = 10
     deployment_name: str = "gpt-35-turbo"
     response_language: str = "English"
     reranker_th: int = 1
+    max_tokens: int = 500
+    temperature: float = 0.5
     
     def _run(self, query: str) -> str:
 
-        agg_search_results = get_search_results(query, self.indexes, self.k)
-        ordered_results = order_search_results(agg_search_results, reranker_threshold=self.reranker_th)
-        docs = []
-        for key,value in ordered_results.items():
-            for page in value["chunks"]:
-                docs.append(Document(page_content=page, metadata={"source": value["location"]}))
+        try:
+            agg_search_results = get_search_results(query, self.indexes, self.k)
+            ordered_results = order_search_results(agg_search_results, reranker_threshold=self.reranker_th)
+            docs = []
+            for key,value in ordered_results.items():
+                for page in value["chunks"]:
+                    docs.append(Document(page_content=page, metadata={"source": value["location"]}))
 
-        # Calculate number of tokens of our docs
-        tokens_limit = model_tokens_limit(self.deployment_name)
+            # Calculate number of tokens of our docs
+            tokens_limit = model_tokens_limit(self.deployment_name)
 
-        if(len(docs)>0):
-            num_tokens = num_tokens_from_docs(docs)
-            print("Custom token limit for", self.deployment_name, ":", tokens_limit)
-            print("Combined docs tokens count:",num_tokens)
+            if(len(docs)>0):
+                num_tokens = num_tokens_from_docs(docs)
+                print("Custom token limit for", self.deployment_name, ":", tokens_limit)
+                print("Combined docs tokens count:",num_tokens)
 
-        else:
-            return "No Results Found"
+            else:
+                return "No Results Found"
 
-        if num_tokens > tokens_limit:
-            index = embed_docs(docs)
-            top_docs = search_docs(index, query)
+            if num_tokens > tokens_limit:
+                index = embed_docs(docs)
+                top_docs = search_docs(index, query)
 
-            # Now we need to recalculate the tokens count of the top results from similarity vector search
-            # in order to select the chain type: stuff or map_reduce
+                # Now we need to recalculate the tokens count of the top results from similarity vector search
+                # in order to select the chain type: stuff or map_reduce
 
-            num_tokens = num_tokens_from_docs(top_docs)   
-            print("Token count after similarity search:", num_tokens)
-            chain_type = "map_reduce" if num_tokens > tokens_limit else "stuff"
+                num_tokens = num_tokens_from_docs(top_docs)   
+                print("Token count after similarity search:", num_tokens)
+                chain_type = "map_reduce" if num_tokens > tokens_limit else "stuff"
 
-        else:
-            # if total tokens is less than our limit, we don't need to vectorize and do similarity search
-            top_docs = docs
-            chain_type = "stuff"
+            else:
+                # if total tokens is less than our limit, we don't need to vectorize and do similarity search
+                top_docs = docs
+                chain_type = "stuff"
 
-        print("Chain Type selected:", chain_type)
+            print("Chain Type selected:", chain_type)
 
-        response = get_answer(docs=top_docs, query=query, language=self.response_language, deployment=self.deployment_name, chain_type=chain_type)
+            response = get_answer(docs=top_docs, query=query, language=self.response_language, 
+                                  deployment=self.deployment_name, chain_type=chain_type,
+                                  temperature=self.temperature, max_tokens=self.max_tokens)
 
-        return response['output_text']
+            return response['output_text']
+        
+        except Exception as e:
+            print(e)
     
     async def _arun(self, query: str) -> str:
         """Use the tool asynchronously."""
@@ -355,23 +363,29 @@ class CSVTabularWrapper(BaseTool):
     """Wrapper CSV agent"""
     
     name = "CSV Search"
-    description = "useful for when you need to answer questions about number of cases, deaths, hospitalizations, tests, people in ICU, people in Ventilator, regarding Covid in the United States"
+    description = 'useful for when you need to answer questions about number of cases, deaths, hospitalizations, tests, people in ICU, people in Ventilator, in the United States related to Covid-19.\n'
 
     path: str
     deployment_name: str = "gpt-4"
+    max_tokens: int = 500
+    temperature: float = 0
     
     def _run(self, query: str) -> str:
-        llm = AzureChatOpenAI(deployment_name=self.deployment_name, temperature=0, max_tokens=500)
-        agent = create_csv_agent(llm, self.path, verbose=True)
-        for i in range(5):
-            try:
-                response = agent.run(CSV_PROMPT_PREFIX + query + CSV_PROMPT_SUFFIX) 
-                break
-            except:
-                response = "Error too many failed retries"
-                continue
         
-        return response
+        try:
+            llm = AzureChatOpenAI(deployment_name=self.deployment_name, temperature=self.temperature, max_tokens=self.max_tokens)
+            agent = create_csv_agent(llm, self.path, verbose=True)
+            for i in range(5):
+                try:
+                    response = agent.run(CSV_PROMPT_PREFIX + query + CSV_PROMPT_SUFFIX) 
+                    break
+                except:
+                    response = "Error too many failed retries"
+                    continue
+
+            return response
+        except Exception as e:
+            print(e)
     
     async def _arun(self, query: str) -> str:
         """Use the tool asynchronously."""
@@ -382,34 +396,35 @@ class SQLDbWrapper(BaseTool):
     """Wrapper SQLDB Agent"""
     
     name = "SQL Search"
-    description = "useful for when you need to answer questions about number of cases, deaths, hospitalizations, tests, people in ICU, people in Ventilator, in the United States related to Covid-19"
+    description = 'useful for when you need to answer questions about number of cases, deaths, hospitalizations, tests, people in ICU, people in Ventilator, in the United States related to Covid-19.\n'
 
-    server: str
-    database: str
-    username: str
-    password: str
     k:str = 5
     deployment_name: str = "gpt-35-turbo"
+    max_tokens: int = 500
+    temperature: float = 0
     
     def _run(self, query: str) -> str:
-        
-        db_config = {
-            'drivername': 'mssql+pyodbc',
-            'username': self.username+'@'+self.server,
-            'password': self.password,
-            'host': self.server,
-            'port': 1433,
-            'database': self.database,
-            'query': {'driver': 'ODBC Driver 18 for SQL Server'}
-        }
+        try:
+            db_config = {
+                'drivername': 'mssql+pyodbc',
+                'username': os.environ["SQL_SERVER_USERNAME"] +'@'+ os.environ["SQL_SERVER_ENDPOINT"],
+                'password': os.environ["SQL_SERVER_PASSWORD"],
+                'host': os.environ["SQL_SERVER_ENDPOINT"],
+                'port': 1433,
+                'database': os.environ["SQL_SERVER_DATABASE"],
+                'query': {'driver': 'ODBC Driver 18 for SQL Server'}
+            }
 
-        db_url = URL.create(**db_config)
-        db = SQLDatabase.from_uri(db_url)
-        llm = AzureChatOpenAI(deployment_name=self.deployment_name, temperature=0, max_tokens=500)
-        db_chain = SQLDatabaseChain(llm=llm, database=db, prompt=MSSQL_PROMPT, verbose=True)
-        response = db_chain(query)['result']
+            db_url = URL.create(**db_config)
+            db = SQLDatabase.from_uri(db_url)
+            llm = AzureChatOpenAI(deployment_name=self.deployment_name, temperature=self.temperature, max_tokens=self.max_tokens)
+            db_chain = SQLDatabaseChain(llm=llm, database=db, prompt=MSSQL_PROMPT, verbose=True)
+            response = db_chain(query)['result']
+
+            return response
         
-        return response
+        except Exception as e:
+            print(e)
     
     async def _arun(self, query: str) -> str:
         """Use the tool asynchronously."""
@@ -420,23 +435,27 @@ class ChatGPTWrapper(BaseTool):
     """Wrapper for a ChatGPT clone"""
     
     name = "ChatGPT Search"
-    description = 'useful **ONLY** when you need to answer questions that begin with "Hey ChatGPT"'
+    description = 'useful **ONLY** when you need to answer questions that begin with "Hey ChatGPT".\n'
 
     deployment_name: str = "gpt-35-turbo"
+    max_tokens: int = 500
+    temperature: float = 0.5
     
     def _run(self, query: str) -> str:
-        
-        llm = AzureChatOpenAI(deployment_name=self.deployment_name, temperature=0.5, max_tokens=500)
-        chatgpt_chain = LLMChain(
-            llm=llm, 
-            prompt=CHATGPT_PROMPT, 
-            verbose=False
-        )
-        
-        response = chatgpt_chain.run(query)
-        
-        return response
-    
+        try:
+            llm = AzureChatOpenAI(deployment_name=self.deployment_name, temperature=self.temperature, max_tokens=self.max_tokens)
+            chatgpt_chain = LLMChain(
+                llm=llm, 
+                prompt=CHATGPT_PROMPT, 
+                verbose=False
+            )
+
+            response = chatgpt_chain.run(query)
+
+            return response
+        except Exception as e:
+            print(e)
+            
     async def _arun(self, query: str) -> str:
         """Use the tool asynchronously."""
         raise NotImplementedError("ChatGPTWrapper does not support async")

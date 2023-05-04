@@ -1,26 +1,15 @@
 import os
-import random
-from collections import OrderedDict
+import re
 import streamlit as st
 from streamlit_chat import message
-from langchain.chains import ConversationChain
-from langchain.memory import ConversationBufferMemory
-from langchain.chains.conversation.prompt import ENTITY_MEMORY_CONVERSATION_TEMPLATE
 from langchain.chat_models import AzureChatOpenAI
-from openai.error import OpenAIError
-from langchain.docstore.document import Document
-from prompts import CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX
+from langchain.utilities import BingSearchAPIWrapper
+from langchain.memory import ConversationBufferWindowMemory
+from langchain.agents import ConversationalChatAgent, AgentExecutor, Tool
 
-
-from utils import (
-    get_search_results,
-    order_search_results,
-    model_tokens_limit,
-    num_tokens_from_docs,
-    embed_docs,
-    search_docs,
-    get_answer,
-)
+#custom libraries that we will use later in the app
+from utils import DocSearchWrapper, CSVTabularWrapper, SQLDbWrapper, ChatGPTWrapper
+from prompts import CUSTOM_CHATBOT_PREFIX, CUSTOM_CHATBOT_SUFFIX
 
 # From here down is all the StreamLit UI.
 st.set_page_config(page_title="GPT Smart Search", page_icon="📖", layout="wide")
@@ -37,26 +26,27 @@ st.markdown("""
 st.header("GPT Smart Search Engine - Chatbot")
 
 
-AZURE_OPENAI_API_VERSION = "2023-03-15-preview"
-# setting encoding for GPT3.5 / GPT4 models
-MODEL = "gpt-35-turbo"
-tokens_limit = model_tokens_limit(MODEL)
-
 with st.sidebar:
     st.markdown("""# Instructions""")
     st.markdown("""
-You can select if you want to talk to your documents only or to ChatGPT. 
-***The memory is shared between both usage modes.***
+
+This Chatbot has access to:
+- Bing Search for Current Events
+- ChatGPT for commong knowledge
+- Azure Search for corporate knowledge (Arxiv papers and Covid Articles)
 
 Example questions:
+- Hello, my name is Bob, what's yours?
+- What's the main economic news of today?
+- How do I cook a chocolate cake?
+- What medicine reduces inflammation in the lungs?
+- Why Covid doesn't affect kids that much compared to adults?
 - What are markov chains?
 - List the authors that talk about Boosting Algorithms
 - How does random forest work?
 - What kind of problems can I solve with reinforcement learning? Give me some real life examples
 - What kind of problems Turing Machines solve?
 - What are the main risk factors for Covid-19?
-- What medicine reduces inflammation in the lungs?
-- Why Covid doesn't affect kids that much compared to adults?
     
     """)
 
@@ -69,8 +59,19 @@ elif (not os.environ.get("AZURE_OPENAI_ENDPOINT")) or (os.environ.get("AZURE_OPE
     st.error("Please set your AZURE_OPENAI_ENDPOINT on your Web App Settings")
 elif (not os.environ.get("AZURE_OPENAI_API_KEY")) or (os.environ.get("AZURE_OPENAI_API_KEY") == ""):
     st.error("Please set your AZURE_OPENAI_API_KEY on your Web App Settings")
+elif (not os.environ.get("BING_SUBSCRIPTION_KEY")) or (os.environ.get("BING_SUBSCRIPTION_KEY") == ""):
+    st.error("Please set your BING_SUBSCRIPTION_KEY on your Web App Settings")
+elif (not os.environ.get("DATASOURCE_SAS_TOKEN")) or (os.environ.get("DATASOURCE_SAS_TOKEN") == ""):
+    st.error("Please set your DATASOURCE_SAS_TOKEN on your Web App Settings")
+    
 
 else: 
+    
+    # Don't mess with this unless you really know what you are doing
+    AZURE_SEARCH_API_VERSION = '2021-04-30-Preview'
+    AZURE_OPENAI_API_VERSION = "2023-03-15-preview"
+    BING_SEARCH_URL = "https://api.bing.microsoft.com/v7.0/search"
+    
     os.environ["OPENAI_API_BASE"] = os.environ.get("AZURE_OPENAI_ENDPOINT")
     os.environ["OPENAI_API_KEY"] = os.environ.get("AZURE_OPENAI_API_KEY")
     os.environ["OPENAI_API_VERSION"] = os.environ["AZURE_OPENAI_API_VERSION"] = AZURE_OPENAI_API_VERSION
@@ -87,7 +88,7 @@ else:
     if "input" not in st.session_state:
         st.session_state["input"] = ""
     if "memory" not in st.session_state:
-        st.session_state["memory"] = ConversationBufferMemory(memory_key="chat_history",input_key="question")
+        st.session_state["memory"] = ConversationBufferWindowMemory(memory_key="chat_history", return_messages=True, k=10)
 
     # Define function to start a new chat
     def new_chat():
@@ -98,21 +99,43 @@ else:
         st.session_state["past"] = []
         st.session_state["docs"] = []
         st.session_state["input"] = ""
-        st.session_state["memory"] = ConversationBufferMemory(memory_key="chat_history",input_key="question")
+        st.session_state["memory"] = ConversationBufferWindowMemory(memory_key="chat_history", return_messages=True, k=10)
 
 
-    # Create an OpenAI instance
-    llm = AzureChatOpenAI(deployment_name=MODEL, temperature=0)
+    # Select a Deployment model name
+    MODEL_DEPLOYMENT_NAME = "gpt-35-turbo"
     
+    # Initialize our Tools/Experts
+    doc_search = DocSearchWrapper(indexes=["cogsrch-index-files", "cogsrch-index-csv"],k=5, deployment_name=MODEL_DEPLOYMENT_NAME)
+    www_search = BingSearchAPIWrapper(k=5)
+    sql_search = SQLDbWrapper(k=30,deployment_name=MODEL_DEPLOYMENT_NAME)
     
-    coli1, coli2, coli3 = st.columns([3,1,1])
-    with coli1:
-        mode = st.radio("Usage Mode",('Corporate Documents Knowledge', 'ChatGPT Knowledge'))
-    with coli2:
-        language= st.selectbox('Chat language',('English', 'Spanish', 'French', 'German', 'Portuguese', 'Italian'), index=0)
-    with coli3:
-        K = st.number_input('Memory size (msgs)',min_value=5,max_value=1000)
-        
+    tools = [
+        Tool(
+            name = "Current events and news",
+            func=www_search.run,
+            description='useful to get current events information like weather, news, sports results, current movies.\n'
+        ),
+        Tool(
+            name = "Covid statistics",
+            func=sql_search.run,
+            description='useful  when you need to answer questions about number of cases, deaths, hospitalizations, tests, people in ICU, people in Ventilator, in the United States related to Covid-19.\n',
+            return_direct=True
+        ),
+        Tool(
+            name = "Search",
+            func=doc_search.run,
+            description='useful when you need to answer questions about Covid-19 or about Computer Science.\n',
+            return_direct=True
+        ),
+    ]
+
+    # Set main Agent
+    llm = AzureChatOpenAI(deployment_name=MODEL_DEPLOYMENT_NAME, temperature=0.5, max_tokens=500)
+    agent = ConversationalChatAgent.from_llm_and_tools(llm=llm, tools=tools, system_message=CUSTOM_CHATBOT_PREFIX, human_message=CUSTOM_CHATBOT_SUFFIX)
+    memory = ConversationBufferWindowMemory(memory_key="chat_history", return_messages=True, k=10)
+    agent_chain = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True, memory=memory)
+    
 
     col1, col2 = st.columns([6,1])
     with col1:
@@ -121,69 +144,19 @@ else:
         st.button("New Topic", on_click = new_chat, type='primary')
     
     if query:
-        open_chain = ConversationChain(llm=llm)
-    
-        if mode == 'ChatGPT Knowledge':
-            answer = open_chain.run(query)
-        else:
-            try:
-                index1_name = "cogsrch-index-files"
-                index2_name = "cogsrch-index-csv"
-                indexes = [index1_name, index2_name]
-                
-                agg_search_results = get_search_results(query, indexes)
-                ordered_results = order_search_results(agg_search_results, reranker_threshold=1)
-                
-            except:
-                st.markdown("Not data returned from Azure Search, check connection..")
-                st.stop()
-
-            try:
-                
-                if len(st.session_state["docs"]) == 0 :
-                    with st.spinner("Searching in corporate documents... ⏳"):
-                        for key,value in ordered_results.items():
-                            for page in value["chunks"]:
-                                    st.session_state["docs"].append(Document(page_content=page, metadata={"source": value["name"]}))
-                        num_tokens = num_tokens_from_docs(st.session_state["docs"])
-
-                        if num_tokens > tokens_limit:
-                            index = embed_docs(st.session_state["docs"])
-                            top_docs = search_docs(index,query)
-                            num_tokens = num_tokens_from_docs(top_docs)
-                            chain_type = "map_reduce" if num_tokens > tokens_limit else "stuff"
-                        else:
-                            top_docs = st.session_state["docs"]
-                            chain_type = "stuff"
-
-                        answer = get_answer(top_docs, query, language=language, deployment=MODEL, chain_type = chain_type, memory=st.session_state["memory"])["output_text"]
-
-                elif len(st.session_state["docs"]) > 0:
-                    num_tokens = num_tokens_from_docs(st.session_state["docs"])
-                    if num_tokens > tokens_limit:
-                        index = embed_docs(st.session_state["docs"])
-                        top_docs = search_docs(index,query)
-                        num_tokens = num_tokens_from_docs(top_docs)
-                        chain_type = "map_reduce" if num_tokens > tokens_limit else "stuff"
-                    else:
-                        top_docs = st.session_state["docs"]
-                        chain_type = "stuff"
-
-                    answer = get_answer(top_docs, query, language=language, deployment=MODEL, chain_type = chain_type, memory=st.session_state["memory"])["output_text"]
-                else:
-                    answer = "Results Not Found"
-
+        with st.spinner("Thinking ... ⏳"):
+            for i in range(3):
+                try:
+                    answer = agent_chain.run(input=query) 
+                    break
+                except:
+                    answer = "Error too many failed retries"
+                    continue
             
-            except OpenAIError as e:
-                    st.error(e)
-
 
         # Append question and answer to memory
         st.session_state["past"].append(query)
-        try:
-            st.session_state["generated"].append(answer.split("SOURCES:")[0])
-        except:
-            st.session_state["generated"].append(answer.split("Sources:")[0])
+        st.session_state["generated"].append(answer)
 
         
         for i in range(len(st.session_state["generated"]) - 1, -1, -1):

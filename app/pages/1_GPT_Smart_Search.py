@@ -7,8 +7,6 @@ import random
 from collections import OrderedDict
 from openai.error import OpenAIError
 from langchain.docstore.document import Document
-from langchain.callbacks.base import CallbackManager
-from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 
 from utils import (
     get_search_results,
