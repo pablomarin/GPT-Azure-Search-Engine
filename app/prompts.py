@@ -242,6 +242,7 @@ MSSQL_PROMPT = PromptTemplate(
 
 CSV_PROMPT_PREFIX = """
 First set the pandas display options to show all the columns, get the column names, then answer the question.
+Use pandasql and SQL queries to interact with the dataframe.
 
 """
 

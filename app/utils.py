@@ -325,7 +325,7 @@ class DocSearchWrapper(BaseTool):
                 print("Combined docs tokens count:",num_tokens)
 
             else:
-                return "No Results Found"
+                return "No Results Found in my knowledge base"
 
             if num_tokens > tokens_limit:
                 index = embed_docs(docs)
