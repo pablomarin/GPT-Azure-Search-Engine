@@ -26,19 +26,19 @@ For more information on the 3 day workshop, click the powerpoint presentation be
 ![Architecture](./images/GPT-Smart-Search-Architecture.jpg "Architecture")
 
 ## Flow
-1- User ask a question
-2- In the App, an OpenAI LLM with a very clever prompt decides what source contains the answer to the question
-3- Four types of sources are available
-    3a - Azure SQL Database - Contains covid related stats in the US
-    3b - Azure Bing Search API - Access to web search online for current information
-    3c - Azure Cognitive Search - Contains index AI-Enriched documents from Blob Storage (10k PDFs and 52k articles)
-    3d - CSV Tabular File - Contains covid related stats in the US 
-3c.1- Uses an LLM (OpenAI or Local Bert model) to vectorize the Top K documents chunks coming from 3c
-3c.2- In-memory cosine similarity to get the top N chunks
-3c.3- Uses OpenAI GPT model to craft the response from Cog Search Engine (3c) from the question and the top N chunks
-4- Gets the results from the source and craft the answer
-5- Save the tuple (Question and Answer) to CosmosDB to keep history
-6- Deliver the answer to the user
+1. User ask a question
+2. In the App, an OpenAI LLM with a very clever prompt decides what source contains the answer to the question
+3. Four types of sources are available
+   * 3a. Azure SQL Database - Contains covid related stats in the US
+   * 3b. Azure Bing Search API - Access to web search online for current information
+   * 3c. Azure Cognitive Search - Contains index AI-Enriched documents from Blob Storage (10k PDFs and 52k articles)
+      * 3c.1. Uses an LLM (OpenAI or Local Bert model) to vectorize the Top K documents chunks coming from 3c
+      * 3c.2. In-memory cosine similarity to get the top N chunks
+      * 3c.3. Uses OpenAI GPT model to craft the response from Cog Search Engine (3c) combining the question and the top N chunks
+    * 3d. CSV Tabular File - Contains covid related stats in the US
+5. Gets the result from the source and craft the answer
+6. Save the tuple (Question and Answer) to CosmosDB to keep history
+7. Deliver the answer to the user
 
 ---
 ## Demo
