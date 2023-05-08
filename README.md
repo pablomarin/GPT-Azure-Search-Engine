@@ -26,19 +26,19 @@ For more information on the 3 day workshop, click the powerpoint presentation be
 ![Architecture](./images/GPT-Smart-Search-Architecture.jpg "Architecture")
 
 ## Flow
-1. User ask a question
-2. In the App, an OpenAI LLM with a very clever prompt decides what source contains the answer to the question
-3. Four types of sources are available
-   * 3a. Azure SQL Database - Contains covid related stats in the US
-   * 3b. Azure Bing Search API - Access to web search online for current information
-   * 3c. Azure Cognitive Search - Contains index AI-Enriched documents from Blob Storage (10k PDFs and 52k articles)
-      * 3c.1. Uses an LLM (OpenAI or Local Bert model) to vectorize the Top K documents chunks coming from 3c
-      * 3c.2. In-memory cosine similarity to get the top N chunks
-      * 3c.3. Uses OpenAI GPT model to craft the response from Cog Search Engine (3c) combining the question and the top N chunks
-    * 3d. CSV Tabular File - Contains covid related stats in the US
-5. Gets the result from the source and craft the answer
-6. Save the tuple (Question and Answer) to CosmosDB to keep history
-7. Deliver the answer to the user
+1. The user asks a question.
+2. In the app, an OpenAI LLM uses a clever prompt to determine which source contains the answer to the question.
+3. Four types of sources are available:
+   * 3a. Azure SQL Database - contains COVID-related statistics in the US.
+   * 3b. Azure Bing Search API - provides online web search for current information.
+   * 3c. Azure Cognitive Search - contains AI-enriched documents from Blob Storage (10k PDFs and 52k articles).
+      * 3c.1. Uses an LLM (OpenAI or Local Bert model) to vectorize the top K document chunks from 3c.
+      * 3c.2. Uses in-memory cosine similarity to get the top N chunks.
+      * 3c.3. Uses an OpenAI GPT model to craft the response from the Cog Search Engine (3c) by combining the question and the top N chunks.
+   * 3d. CSV Tabular File - contains COVID-related statistics in the US.
+4. The app retrieves the result from the source and crafts the answer.
+5. The tuple (Question and Answer) is saved to CosmosDB to keep a record of the interaction.
+6. The answer is delivered to the user.
 
 ---
 ## Demo
