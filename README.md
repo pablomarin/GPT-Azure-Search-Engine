@@ -1,7 +1,7 @@
 ![image](https://user-images.githubusercontent.com/113465005/226238596-cc76039e-67c2-46b6-b0bb-35d037ae66e1.png)
 
 # Accelerator powered by Azure Cognitive Search + Azure OpenAI 
-Your organization requires a chatbot and search engine capable of comprehending diverse types of data scattered across various locations. Additionally, the chatbot/search engine should be able to provide answers to inquiries, along with the source and an explanation of how and where the answer was obtained. In other words, you want private and secured ChatGPT for your organization that can interpret, comprehend, and answer questions about your business data.
+Your organization requires a chatbot and search engine capable of comprehending diverse types of data scattered across various locations. Additionally, the chatbot/search engine should be able to provide answers to inquiries, along with the source and an explanation of how and where the answer was obtained. In other words, you want **private and secured ChatGPT for your organization that can interpret, comprehend, and answer questions about your business data**.
 
 The goal of the MVP workshop is to show/prove the value of a GPT Smart Search Engine built with the Azure Services, with your own data in your own environment. The repo is made to teach customers step-by-step on how to build a Smart Search Engine Chat Bot. Each Notebook builds on top of each other and ends in building a web application.
 
