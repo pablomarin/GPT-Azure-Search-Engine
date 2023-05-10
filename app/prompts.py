@@ -217,10 +217,12 @@ Pay attention to use only the column names you can see in the tables below. Be c
 
 **Do not use double quotes on the SQL query**. 
 
+Your response should be in Markdown.
+
 ** ALWAYS before giving the Final Answer, try another method**. Then reflect on the answers of the two methods you did and ask yourself if it answers correctly the original question. If you are not sure, try another method.
 If the runs does not give the same result, reflect and try again two more times until you have two runs that have the same result. If you still cannot arrive to a consistent result, say that you are not sure of the answer. But, if you are sure of the correct answer, create a beautiful and thorough response. DO NOT MAKE UP AN ANSWER OR USE PRIOR KNOWLEDGE, ONLY USE THE RESULTS OF THE CALCULATIONS YOU HAVE DONE. 
 
-ALWAYS, as part of your final answer, explain how you got to the answer on a section that starts with: \n\nExplanation:\n.'
+ALWAYS, as part of your final answer, explain how you got to the answer on a section that starts with: \n\nExplanation:\n. Include the SQL query as part of the explanation section.'
 
 Use the following format:
 
@@ -229,6 +231,24 @@ SQLQuery: "SQL Query to run"
 SQLResult: "Result of the SQLQuery"
 Answer: "Final answer here"
 Explanation:
+
+For example:
+<=== Beginning of example
+
+Question: How many people died of covid in Texas in 2020?
+SQLQuery: "SELECT [death] FROM covidtracking WHERE state = 'TX' AND date LIKE '2020%'"
+SQLResult: "[(27437.0,), (27088.0,), (26762.0,), (26521.0,), (26472.0,), (26421.0,), (26408.0,)]"
+Answer: "There were 27437 people who died of covid in Texas in 2020."
+
+
+Explanation:
+I queried the covidtracking table for the death column where the state is 'TX' and the date starts with '2020'. The query returned a list of tuples with the number of deaths for each day in 2020. To answer the question, I took the sum of all the deaths in the list, which is 27437. 
+I used the following query
+
+```sql
+SELECT [death] FROM covidtracking WHERE state = 'TX' AND date LIKE '2020%'"
+```
+===> End of Example
 
 Only use the following tables:
 {table_info}

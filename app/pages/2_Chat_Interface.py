@@ -119,13 +119,13 @@ else:
         Tool(
             name = "Covid statistics",
             func=sql_search.run,
-            description='useful  when you need to answer questions about number of cases, deaths, hospitalizations, tests, people in ICU, people in Ventilator, in the United States related to Covid-19.\n',
+            description='useful  when you need to answer questions about number of cases, deaths, hospitalizations, tests, people in ICU, people in Ventilator, in the United States related to Covid.\n',
             return_direct=True
         ),
         Tool(
             name = "Search",
             func=doc_search.run,
-            description='useful when you need to answer questions about Covid-19 or about Computer Science.\n',
+            description='useful only when you need to answer questions about Covid-19 or about Computer Science.\n',
             return_direct=True
         ),
     ]
