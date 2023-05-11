@@ -23,6 +23,10 @@ export AZURE_SEARCH_KEY=<Enter your value>
 export AZURE_OPENAI_ENDPOINT=<Enter your value>
 export AZURE_OPENAI_API_KEY=<Enter your value>
 export DATASOURCE_SAS_TOKEN=<Enter your value>
+export SQL_SERVER_ENDPOINT=<Enter your value>
+export SQL_SERVER_DATABASE=<Enter your value>
+export SQL_SERVER_USERNAME=<Enter your value>
+export SQL_SERVER_PASSWORD=<Enter your value>
 ```
 3. Run the Streamlit server🚀
 ```bash
@@ -47,7 +51,6 @@ Example: https://myComputeInstance-8501.southcentralus.instances.azureml.ms/
 
 3. Your App should be working now.
 
-4. Everytime you commit changes to your branch it will kick in CI/CD and deploy your changes to the web app
 
 ### [Local Git deployment to Azure App Service](https://learn.microsoft.com/en-us/azure/app-service/deploy-local-git?tabs=cli)
 

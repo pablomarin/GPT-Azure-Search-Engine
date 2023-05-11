@@ -21,9 +21,10 @@
         "type": "string",
         "allowedValues": [
             "B3",
-            "S3"
+            "S3",
+            "P2v3"
         ],
-        "defaultValue": "B3",
+        "defaultValue": "P2v3",
         "metadata": {
           "description": "The SKU of App Service Plan."
         }
@@ -108,7 +109,23 @@
                 {
                   "name": "BING_SUBSCRIPTION_KEY",
                   "value": ""
-                }
+                },
+                {
+                  "name": "SQL_SERVER_DATABASE",
+                  "value": "SampleDB"
+                },
+                {
+                  "name": "SQL_SERVER_ENDPOINT",
+                  "value": ""
+                },
+                {
+                  "name": "SQL_SERVER_PASSWORD",
+                  "value": ""
+                },
+                {
+                  "name": "SQL_SERVER_USERNAME",
+                  "value": ""
+                },
             ]
           }
         },
@@ -124,7 +141,7 @@
               "properties": {
                 "repoUrl": "[parameters('repoUrl')]",
                 "branch": "[parameters('repoBranch')]",
-                "isManualIntegration": false
+                "isManualIntegration": true
               }
             }
           ]
