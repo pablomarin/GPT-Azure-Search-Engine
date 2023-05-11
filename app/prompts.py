@@ -226,19 +226,19 @@ ALWAYS, as part of your final answer, explain how you got to the answer on a sec
 
 Use the following format:
 
-Question: "Question here"
-SQLQuery: "SQL Query to run"
-SQLResult: "Result of the SQLQuery"
-Answer: "Final answer here"
+Question: Question here
+SQLQuery: SQL Query to run
+SQLResult: Result of the SQLQuery
+Answer: Final answer here
 Explanation:
 
 For example:
 <=== Beginning of example
 
 Question: How many people died of covid in Texas in 2020?
-SQLQuery: "SELECT [death] FROM covidtracking WHERE state = 'TX' AND date LIKE '2020%'"
-SQLResult: "[(27437.0,), (27088.0,), (26762.0,), (26521.0,), (26472.0,), (26421.0,), (26408.0,)]"
-Answer: "There were 27437 people who died of covid in Texas in 2020."
+SQLQuery: SELECT [death] FROM covidtracking WHERE state = 'TX' AND date LIKE '2020%'
+SQLResult: [(27437.0,), (27088.0,), (26762.0,), (26521.0,), (26472.0,), (26421.0,), (26408.0,)]
+Answer: There were 27437 people who died of covid in Texas in 2020.
 
 
 Explanation:

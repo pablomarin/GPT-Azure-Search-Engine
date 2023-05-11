@@ -412,7 +412,7 @@ class SQLDbWrapper(BaseTool):
                 'host': os.environ["SQL_SERVER_ENDPOINT"],
                 'port': 1433,
                 'database': os.environ["SQL_SERVER_DATABASE"],
-                'query': {'driver': 'ODBC Driver 18 for SQL Server'}
+                'query': {'driver': 'ODBC Driver 17 for SQL Server'}
             }
 
             db_url = URL.create(**db_config)
