@@ -43,7 +43,7 @@ For more information on the 3 day workshop, click the powerpoint presentation be
 ---
 ## Demo
 
-https://pablomarin-gpt-azure-search-engine-apphome-oq98mn.streamlit.app
+https://gptsmartsearch.azurewebsites.net/
 
 ---
 
