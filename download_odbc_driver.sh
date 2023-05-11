@@ -16,7 +16,7 @@ apt-get update
 echo "Installing msodbcsql18.."
 ACCEPT_EULA=Y apt-get install -y msodbcsql17
 # optional: for bcp and sqlcmd
-ACCEPT_EULA=Y apt-get install -y mssql-tools17
+ACCEPT_EULA=Y apt-get install -y mssql-tools
 echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> ~/.bashrc
 source ~/.bashrc
 # optional: for unixODBC development headers
