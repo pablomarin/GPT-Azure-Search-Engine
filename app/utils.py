@@ -29,15 +29,21 @@ from pypdf import PdfReader
 from sqlalchemy.engine.url import URL
 from langchain.sql_database import SQLDatabase
 from langchain import SQLDatabaseChain
+from langchain.agents import AgentExecutor
+from langchain.agents import create_sql_agent
+from langchain.agents.agent_toolkits import SQLDatabaseToolkit
+
 import tiktoken
 
 try:
     from .prompts import (COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT,
-                          CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX, MSSQL_PROMPT, CHATGPT_PROMPT)
+                          CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX, MSSQL_PROMPT, MSSQL_AGENT_PREFIX, 
+                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT)
 except Exception as e:
     print(e)
     from prompts import (COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT,
-                         CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX, MSSQL_PROMPT, CHATGPT_PROMPT)
+                          CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX, MSSQL_PROMPT, MSSQL_AGENT_PREFIX, 
+                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT)
 
 
 
@@ -386,6 +392,8 @@ class CSVTabularWrapper(BaseTool):
             return response
         except Exception as e:
             print(e)
+            response = e
+            return response
     
     async def _arun(self, query: str) -> str:
         """Use the tool asynchronously."""
@@ -418,13 +426,29 @@ class SQLDbWrapper(BaseTool):
             db_url = URL.create(**db_config)
             db = SQLDatabase.from_uri(db_url)
             llm = AzureChatOpenAI(deployment_name=self.deployment_name, temperature=self.temperature, max_tokens=self.max_tokens)
-            db_chain = SQLDatabaseChain(llm=llm, database=db, prompt=MSSQL_PROMPT, verbose=True)
-            response = db_chain(query)['result']
-
+            toolkit = SQLDatabaseToolkit(db=db, llm=llm)
+            agent_executor = create_sql_agent(
+                prefix=MSSQL_AGENT_PREFIX,
+                format_instructions = MSSQL_AGENT_FORMAT_INSTRUCTIONS,
+                llm=llm,
+                toolkit=toolkit,
+                verbose=True
+            )
+            
+            for i in range(5):
+                try:
+                    response = agent_executor.run(query) 
+                    break
+                except:
+                    response = "Error too many failed retries"
+                    continue
+        
             return response
         
         except Exception as e:
+            response = e
             print(e)
+            return response
     
     async def _arun(self, query: str) -> str:
         """Use the tool asynchronously."""

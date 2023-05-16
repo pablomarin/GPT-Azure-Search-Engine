@@ -13,3 +13,4 @@ sqlalchemy<2.0.0
 pyodbc
 tabulate
 pandasql
+azure-ai-formrecognizer

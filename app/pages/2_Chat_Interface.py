@@ -30,9 +30,10 @@ with st.sidebar:
     st.markdown("""# Instructions""")
     st.markdown("""
 
-This Chatbot has access to:
+This Chatbot has access tothe following tools/pluggins:
 - Bing Search for Current Events
 - ChatGPT for commong knowledge
+- Azure SQL for covid statistics data
 - Azure Search for corporate knowledge (Arxiv papers and Covid Articles)
 
 Example questions:
@@ -42,6 +43,7 @@ Example questions:
 - What medicine reduces inflammation in the lungs?
 - Why Covid doesn't affect kids that much compared to adults?
 - What are markov chains?
+- How many people where hospitalized in Arkansas in June 2020?
 - List the authors that talk about Boosting Algorithms
 - How does random forest work?
 - What kind of problems can I solve with reinforcement learning? Give me some real life examples
