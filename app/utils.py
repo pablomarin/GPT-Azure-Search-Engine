@@ -1,12 +1,9 @@
-import re
+import os
 from io import BytesIO
 from typing import Any, Dict, List
-import requests
-import os
 from collections import OrderedDict
-
+import requests
 import docx2txt
-import streamlit as st
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.docstore.document import Document
@@ -18,17 +15,13 @@ from langchain.vectorstores.faiss import FAISS
 from langchain.chains import LLMChain
 from langchain.memory import ConversationBufferMemory
 from langchain.agents import create_csv_agent
-from langchain.chains.question_answering import load_qa_chain
 from langchain.chains.qa_with_sources import load_qa_with_sources_chain
-from langchain.chains import ConversationalRetrievalChain
-from langchain.chains.conversational_retrieval.prompts import CONDENSE_QUESTION_PROMPT
 from langchain.tools import BaseTool
-from openai.error import AuthenticationError
-from langchain.docstore.document import Document
-from pypdf import PdfReader
-from sqlalchemy.engine.url import URL
 from langchain.sql_database import SQLDatabase
 from langchain import SQLDatabaseChain
+from pypdf import PdfReader
+from sqlalchemy.engine.url import URL
+
 import tiktoken
 
 try:
