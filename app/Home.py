@@ -1,15 +1,15 @@
 import streamlit as st
 
-st.set_page_config(page_title="GPT Smart Search", page_icon="📖", layout="wide")
+st.set_page_config(page_title="OXXO GPT Smart Search", page_icon="📖", layout="wide")
 
 st.image("https://user-images.githubusercontent.com/113465005/226238596-cc76039e-67c2-46b6-b0bb-35d037ae66e1.png")
 
-st.header("GPT Smart Search Engine")
+st.header("OXXO GPT Smart Search Engine")
 
 
 st.markdown("---")
 st.markdown("""
-    GPT Smart Search allows you to ask questions about your
+    OXXO GPT Smart Search allows you to ask questions about your
     documents and get accurate answers with instant citations.
     
     This engine finds information from the following:
