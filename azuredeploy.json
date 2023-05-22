@@ -11,6 +11,25 @@
                 "description": "Service name must only contain lowercase letters, digits or dashes, cannot use dash as the first two or last one characters, cannot contain consecutive dashes, and is limited between 2 and 60 characters in length."
             }
         },
+        "accountName": {
+            "type": "string",
+            "defaultValue": "[format('sql-{0}', uniqueString(resourceGroup().id))]",
+            "metadata": {
+              "description": "Cosmos DB account name, max length 44 characters, lowercase"
+            }
+        },
+        "databaseName": {
+            "type": "string",
+            "metadata": {
+              "description": "The name for the database"
+            }
+          },
+        "containerName": {
+            "type": "string",
+            "metadata": {
+              "description": "The name for the container"
+            }
+          },
         "sku": {
             "defaultValue": "standard",
             "allowedValues": [
@@ -121,6 +140,48 @@
         }
     },
     "resources": [
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts",
+            "apiVersion": "2023-04-15",
+            "name": "[parameters('accountName')]",
+            "location": "[parameters('location')]",
+            "properties" : {
+                "databaseAccountOfferType": "Standard",
+                "locations": "[parameters('location')]",
+                "enableFreeTier": false,
+                "isVirtualNetworkFilterEnabled": false,
+                "enableServerless": true
+            }
+        },
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases",
+            "name": "[concat(parameters('accountName'), '/', parameters('databaseName'))]",
+            "apiVersion": "2023-04-15",
+            "location": "[parameters('location')]",
+            "properties": {
+                "resource": {
+                    "id": "[parameters('databaseName')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+            "name": "[concat(parameters('accountName'), '/', parameters('databaseName'), '/', parameters('containerName'))]",
+            "apiVersion": "2023-04-15",
+            "location": "[parameters('location')]",
+            "properties": {
+                "resource": {
+                    "id": "[parameters('containerName')]",
+                }
+                "partitionKey": {
+                    "paths": [
+                        "/partitionKey"
+                    ],
+                    "kind": "Hash"
+                },
+                "defaultTtl": -1
+            }
+        },
         {
             "type": "Microsoft.Search/searchServices",
             "apiVersion": "2020-08-01",
