@@ -11,20 +11,20 @@
                 "description": "Service name must only contain lowercase letters, digits or dashes, cannot use dash as the first two or last one characters, cannot contain consecutive dashes, and is limited between 2 and 60 characters in length."
             }
         },
-        "accountName": {
+        "Cosmos accountName": {
             "type": "string",
             "defaultValue": "[format('sql-{0}', uniqueString(resourceGroup().id))]",
             "metadata": {
               "description": "Cosmos DB account name, max length 44 characters, lowercase"
             }
         },
-        "databaseName": {
+        "Cosmos databaseName": {
             "type": "string",
             "metadata": {
               "description": "The name for the database"
             }
           },
-        "containerName": {
+        "Cosmos containerName": {
             "type": "string",
             "metadata": {
               "description": "The name for the container"
@@ -143,39 +143,45 @@
         {
             "type": "Microsoft.DocumentDB/databaseAccounts",
             "apiVersion": "2023-04-15",
-            "name": "[parameters('accountName')]",
+            "name": "[parameters('Cosmos accountName')]",
             "location": "[parameters('location')]",
+            "kind": "GlobalDocumentDB",
             "properties" : {
                 "databaseAccountOfferType": "Standard",
                 "locations": "[parameters('location')]",
                 "enableFreeTier": false,
                 "isVirtualNetworkFilterEnabled": false,
-                "enableServerless": true
+                "publicNetworkAccess": "Enabled",
+                "capabilities": [
+                    {
+                        "name": "EnableServerless"
+                    }
+                ]
             }
         },
         {
             "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases",
-            "name": "[concat(parameters('accountName'), '/', parameters('databaseName'))]",
+            "name": "[concat(parameters('Cosmos accountName'), '/', parameters('Cosmos databaseName'))]",
             "apiVersion": "2023-04-15",
             "location": "[parameters('location')]",
             "properties": {
                 "resource": {
-                    "id": "[parameters('databaseName')]"
+                    "id": "[parameters('Cosmos databaseName')]"
                 }
             }
         },
         {
             "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
-            "name": "[concat(parameters('accountName'), '/', parameters('databaseName'), '/', parameters('containerName'))]",
+            "name": "[concat(parameters('Cosmos accountName'), '/', parameters('Cosmos databaseName'), '/', parameters('Cosmos containerName'))]",
             "apiVersion": "2023-04-15",
             "location": "[parameters('location')]",
             "properties": {
                 "resource": {
-                    "id": "[parameters('containerName')]",
-                }
+                    "id": "[parameters('Cosmos containerName')]"
+                },
                 "partitionKey": {
                     "paths": [
-                        "/partitionKey"
+                        "/user_id"
                     ],
                     "kind": "Hash"
                 },
