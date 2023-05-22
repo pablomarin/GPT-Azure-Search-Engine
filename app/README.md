@@ -91,7 +91,21 @@ For example, if you are running the app on an Azure ML compute instance:
     conda activate azureml_py310_sdkv2
     ```
 
-3. If deployment fails with error "Cannot find SourceControlToken with name Github" you can try the following
+3. If running locally and in Tabular Demo (preview) page you get this error: `AxiosError: Request failed with status code 403` when trying to upload the documment, do this in the shell
+    
+    ```bash
+    mkdir -p ~/.streamlit/
+    echo "\
+    [server]\n\
+    headless = true\n\
+    port = 8501\n\
+    enableXsrfProtection=false\n\
+    enableCORS = false\n\
+    \n\
+    " > ~/.streamlit/config.toml
+    ```
+    
+4. If deployment fails with error "Cannot find SourceControlToken with name Github" you can try the following
     1. Wait 20 mins and Retry
     2. Delete the browser cache and retry
     3. Go to the deployed WebApp and Authorize azure to deploy and build code directly from Github 

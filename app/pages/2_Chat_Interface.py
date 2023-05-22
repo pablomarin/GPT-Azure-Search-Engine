@@ -135,8 +135,7 @@ else:
     # Set main Agent
     llm = AzureChatOpenAI(deployment_name=MODEL_DEPLOYMENT_NAME, temperature=0.5, max_tokens=500)
     agent = ConversationalChatAgent.from_llm_and_tools(llm=llm, tools=tools, system_message=CUSTOM_CHATBOT_PREFIX, human_message=CUSTOM_CHATBOT_SUFFIX)
-    memory = ConversationBufferWindowMemory(memory_key="chat_history", return_messages=True, k=10)
-    agent_chain = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True, memory=memory)
+    agent_chain = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True, memory=st.session_state["memory"])
     
 
     col1, col2 = st.columns([6,1])

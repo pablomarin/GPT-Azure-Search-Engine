@@ -1,15 +1,21 @@
 ![image](https://user-images.githubusercontent.com/113465005/226238596-cc76039e-67c2-46b6-b0bb-35d037ae66e1.png)
 
-# Accelerator powered by Azure Cognitive Search + Azure OpenAI 
-Your organization requires a chatbot and search engine capable of comprehending diverse types of data scattered across various locations. Additionally, the chatbot/search engine should be able to provide answers to inquiries, along with the source and an explanation of how and where the answer was obtained. In other words, you want **private and secured ChatGPT for your organization that can interpret, comprehend, and answer questions about your business data**.
+# 3-day Workshop VBD powered by Azure Cognitive Search + Azure OpenAI + Langchain
+Your organization requires a chatbot and a search engine capable of comprehending diverse types of data scattered across various locations. Additionally, the conversational chatbot should be able to provide answers to inquiries, along with the source and an explanation of how and where the answer was obtained. In other words, you want **private and secured ChatGPT for your organization that can interpret, comprehend, and answer questions about your business data**.
 
 The goal of the MVP workshop is to show/prove the value of a GPT Smart Search Engine built with the Azure Services, with your own data in your own environment. The repo is made to teach customers step-by-step on how to build a Smart Search Engine Chat Bot. Each Notebook builds on top of each other and ends in building a web application.
 
-For more information on the 3 day workshop, click the powerpoint presentation below:
+**For Microsoft FTEs:** This is a customer funded VBD, below the assets for the delivery.
 
-[Accelerator Pitch Deck](https://github.com/pablomarin/GPT-Azure-Search-Engine/blob/main/Azure%20OpenAI%20Accelerator%20-%20GPT%20Smart%20Search%20Pitch%20Deck.pdf)
+| **Item**                   | **Description**                                                                                                     | **Link**                                                                                                                                                |
+|----------------------------|---------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
+| VBD SKU Info and Datasheet                   | CSAM must dispatch it as "Customer Invested" against credits/hours of Unified Support Contract                                      | [ESXP SKU page](https://esxp.microsoft.com/#/omexplanding/services/13098/geo/USA/details/1)                                                                                              |
+| VBD Delivery Guide         | How to deliver the VBD guidance         | [Eng Hub page](https://eng.ms/docs/microsoft-customer-partner-solutions-mcaps-core/customer-experience-and-support/customer-success/data-ai/resource-center/vbd/03_apps_data_ai/new_apps_data/readme-openai#d-execution-3)                                                                                     |
+| VBD Accreditation for CSAs     | Link for CSAs to get the Accreditation needed to deliver the workshop                                                                      | [Accreditation Link](https://learningplayer.microsoft.com/activity/s9239623/launch/)                                                                   |
+| VBD 3-day Workshop Asset (IP)  | The workshop code and MVP to be delivered  (this github repo)                                     | [Azure-Cognitive-Search-Azure-OpenAI-Accelerator](https://github.com/MSUSAzureAccelerators/Azure-Cognitive-Search-Azure-OpenAI-Accelerator)                |
+| VBD Workshop Deck          | The deck introducing and explaining the workshop                                                                    | [Azure OpenAI Accelerator - GPT Smart Search Pitch Deck.pdf](https://github.com/MSUSAzureAccelerators/Azure-Cognitive-Search-Azure-OpenAI-Accelerator/blob/main/Azure%20OpenAI%20Accelerator%20-%20GPT%20Smart%20Search%20Pitch%20Deck.pdf) |
 
-
+---
 **Prerequisites Client 3-Day Workshop**
 * Azure subscription
 * Accepted Application to Azure Open AI
@@ -21,7 +27,7 @@ For more information on the 3 day workshop, click the powerpoint presentation be
 * For IDE collaboration during workshop, Azure Machine Learning Workspace must be deployed in the RG
    * Note: Please ensure you have enough core compute quota in your Azure Machine Learning workspace 
 
-
+---
 # Architecture 
 ![Architecture](./images/GPT-Smart-Search-Architecture.jpg "Architecture")
 
@@ -61,7 +67,7 @@ https://gptsmartsearch.azurewebsites.net/
    - Tabular Data Q&A in CSV files and SQL Databases using GPT-4
    - Uses Bing Search API service for web search
    - ChatBot Interface
-   - (Coming soon) Recommends new searches based on users' history.
+   - (Coming soon) Recommends new searches based on users' history stored in CosmosDB.
 
 ---
 
@@ -102,11 +108,11 @@ pip install -r ./requirements.txt
 
 1. **Why the vector similarity is done in memory using FAISS versus having a separate vector database like RedisSearch or Pinecone?**
 
-A: True, doing the embeddings of the documents pages everytime that there is a query is not efficient. The ideal scenario is to vectorize the docs chunks once (first time they are needed) and then retrieve them from a database the next time they are needed. For this a special vector database is necessary. The ideal scenario though, is Azure Search to savea and retreive the vectors as part of the search results, along with the document chunks. Azure Search will soon allow this in a few months, let's wait for it. As of right now the embedding process doesn't take that much time or money, so it is worth the wait versus using another database just for vectors.
+A: True, doing the embeddings of the documents pages everytime that there is a query is not efficient. The ideal scenario is to vectorize the docs chunks once (first time they are needed) and then retrieve them from a database the next time they are needed. For this a special vector database is necessary. The ideal scenario though, is Azure Search to save and retreive the vectors as part of the search results, along with the document chunks. Azure Search will soon allow this in a few months, let's wait for it. As of right now the embedding process doesn't take that much time or money, so it is worth the wait versus using another database just for vectors. Once Azure Cog Search gets vector capabilities, the search/retrieval/answer process will be a lot faster.
 
 2. **Why use the MAP_REDUCE type in LangChaing sometimes versus STUFF type everytime?**
 
-A: Because using STUFF type with all the content of the pages as context, in many ocoasions, uses too many tokens. So the best way to deal with large documents is to find the answer by going trough all of the search results and doing many calls to the LLM looking for summarized answer, then combine this summaries and put them all in the call as context. For more information of the difference between STUFF and MAP_REDUCE, see [HERE](https://github.com/hwchase17/langchain/tree/master/langchain/chains/question_answering)
+A: Because using STUFF type with all the content of the pages as context, in many ocoasions, uses too many tokens. So the best way to deal with large documents is to find the answer by going trough all of the search results and doing many calls to the LLM looking for summarized answer, then combine this summaries and put them all in the call as context. However as time goes by, the tokens will not be a limitation anymore, GPT-4-32k models is a lot of tokens. Imagine GPT-5 or 6. For more information of the difference between STUFF and MAP_REDUCE, see [HERE](https://github.com/hwchase17/langchain/tree/master/langchain/chains/question_answering)
 
 3. **Why use Azure Cognitive Search engine to provide the context for the LLM and not fine tune the LLM instead?**
 
