@@ -114,7 +114,7 @@
         },
         "SQLDBName": {
             "defaultValue": "SampleDB",
-            "type": "sring",
+            "type": "String",
             "metadata": {
                 "description": "The name of the SQL Database."
             }
@@ -140,64 +140,6 @@
         }
     },
     "resources": [
-        {
-            "type": "Microsoft.DocumentDB/databaseAccounts",
-            "apiVersion": "2020-04-01",
-            "name": "[parameters('Cosmos accountName')]",
-            "location": "[parameters('location')]",
-            "kind": "GlobalDocumentDB",
-            "properties" : {
-                "databaseAccountOfferType": "Standard",
-                "locations": [
-                    {
-                      "locationName": "[parameters('location')]"
-                    }
-                  ],
-                "enableFreeTier": false,
-                "isVirtualNetworkFilterEnabled": false,
-                "publicNetworkAccess": "Enabled",
-                "capabilities": [
-                    {
-                        "name": "EnableServerless"
-                    }
-                ]
-            }
-        },
-        {
-            "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases",
-            "name": "[concat(parameters('Cosmos accountName'), '/', parameters('Cosmos databaseName'))]",
-            "apiVersion": "2020-04-01",
-            "location": "[parameters('location')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('Cosmos accountName'))]"
-            ],
-            "properties": {
-                "resource": {
-                    "id": "[parameters('Cosmos databaseName')]"
-                }
-            }
-        },
-        {
-            "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
-            "name": "[concat(parameters('Cosmos accountName'), '/', parameters('Cosmos databaseName'), '/', parameters('Cosmos containerName'))]",
-            "apiVersion": "2020-04-01",
-            "location": "[parameters('location')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('Cosmos accountName'))]"
-            ],
-            "properties": {
-                "resource": {
-                    "id": "[parameters('Cosmos containerName')]"
-                },
-                "partitionKey": {
-                    "paths": [
-                        "/user_id"
-                    ],
-                    "kind": "Hash"
-                },
-                "defaultTtl": -1
-            }
-        },
         {
             "type": "Microsoft.Search/searchServices",
             "apiVersion": "2020-08-01",
