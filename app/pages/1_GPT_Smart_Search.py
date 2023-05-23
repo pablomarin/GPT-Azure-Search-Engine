@@ -95,10 +95,11 @@ else:
             # Azure Search
 
             try:
-                index1_name = "cogsrch-index-files"
-                index2_name = "cogsrch-index-csv"
-                indexes = [index1_name, index2_name]
-                
+                #index1_name = "cogsrch-index-files"
+                # index2_name = "cogsrch-index-csv"
+                index3_name = "storagedocs1-index-files"
+                #indexes = [index1_name, index2_name,index3_name]
+                indexes = [index3_name]
                 agg_search_results = get_search_results(query, indexes)
                 ordered_results = order_search_results(agg_search_results, reranker_threshold=1)
 
