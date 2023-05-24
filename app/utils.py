@@ -243,7 +243,7 @@ def num_tokens_from_docs(docs: List[Document]) -> int:
     return num_tokens
 
 
-def get_search_results(query: str, indexes: list, k: int = 5) -> List[dict]:
+def get_search_results(query: str, indexes: list, k: int = 10) -> List[dict]:
     
     AZURE_SEARCH_API_VERSION = '2021-04-30-Preview'
     headers = {'Content-Type': 'application/json','api-key': os.environ["AZURE_SEARCH_KEY"]}
@@ -308,7 +308,7 @@ class DocSearchWrapper(BaseTool):
     k: int = 10
     deployment_name: str = "gpt-35-turbo"
     response_language: str = "English"
-    reranker_th: int = 1
+    reranker_th: int = 0.01
     max_tokens: int = 500
     temperature: float = 0.5
     
