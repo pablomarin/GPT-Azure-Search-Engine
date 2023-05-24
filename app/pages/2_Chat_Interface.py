@@ -12,7 +12,7 @@ from utils import DocSearchWrapper, CSVTabularWrapper, SQLDbWrapper, ChatGPTWrap
 from prompts import CUSTOM_CHATBOT_PREFIX, CUSTOM_CHATBOT_SUFFIX
 
 # From here down is all the StreamLit UI.
-st.set_page_config(page_title="GPT Smart Search", page_icon="📖", layout="wide")
+st.set_page_config(page_title="OXXO GPT Smart Search", page_icon="📖", layout="wide")
 # Add custom CSS styles to adjust padding
 st.markdown("""
         <style>
@@ -23,32 +23,31 @@ st.markdown("""
         </style>
         """, unsafe_allow_html=True)
 
-st.header("GPT Smart Search Engine - Chatbot")
+st.header("GPT Smart Search Engine - OXXO Chatbot")
 
 
 with st.sidebar:
-    st.markdown("""# Instructions""")
+    st.markdown("""# Instrucciones""")
     st.markdown("""
 
-This Chatbot has access tothe following tools/pluggins:
-- Bing Search for Current Events
-- ChatGPT for commong knowledge
-- Azure SQL for covid statistics data
-- Azure Search for corporate knowledge (Arxiv papers and Covid Articles)
+El chatbot tienen acceso a :
+- Busqueda en Bing
+- ChatGPT proporciona conociminto general
+- Azure SQL for covid statistics data ( prueba de ejemplo de NLP a SQL )
+- Servicio de Azure Search para busqueda de Incidentes y Causa raíz 
 
 Example questions:
-- Hello, my name is Bob, what's yours?
-- What's the main economic news of today?
-- How do I cook a chocolate cake?
-- What medicine reduces inflammation in the lungs?
-- Why Covid doesn't affect kids that much compared to adults?
-- What are markov chains?
+- Hola mi nombre es Alx?
+- Cual es la noticia principal en México?
+- Que puedo comprar de comer en Oxxo?
+
+En Pruebas NLP to SQL:  
 - How many people where hospitalized in Arkansas in June 2020?
 - List the authors that talk about Boosting Algorithms
-- How does random forest work?
-- What kind of problems can I solve with reinforcement learning? Give me some real life examples
-- What kind of problems Turing Machines solve?
-- What are the main risk factors for Covid-19?
+-
+-
+-
+-
     
     """)
 

@@ -17,7 +17,7 @@ from utils import (
     search_docs,
     get_answer,
 )
-st.set_page_config(page_title="GPT Smart Search", page_icon="📖", layout="wide")
+st.set_page_config(page_title="OXXO GPT Smart Search", page_icon="📖", layout="wide")
 # Add custom CSS styles to adjust padding
 st.markdown("""
         <style>
@@ -28,7 +28,7 @@ st.markdown("""
         </style>
         """, unsafe_allow_html=True)
 
-st.header("GPT Smart Search Engine")
+st.header("OXXO GPT Smart Search Engine")
 
 AZURE_OPENAI_API_VERSION = "2023-03-15-preview"
 
@@ -40,26 +40,21 @@ def clear_submit():
 
 
 with st.sidebar:
-    st.markdown("""# Instructions""")
+    st.markdown("""# Instrucciones""")
     st.markdown("""
-Ask a question that you think can be answered with the information in about 10k Arxiv Computer Science publications from 2020-2021 or in 52k Medical Covid-19 Publications from 2020.
+Puedes hacer preguntas de incidentes y obtener algunas respuestas genrales de cauda raíz 
 
-For example:
-- What are markov chains?
-- List the authors that talk about Boosting Algorithms
-- How does random forest work?
-- What kind of problems can I solve with reinforcement learning? Give me some real life examples
-- What kind of problems Turing Machines solve?
-- What are the main risk factors for Covid-19?
-- What medicine reduces inflammation in the lungs?
-- Why Covid doesn't affect kids that much compared to adults?
+Por :
+- que es goldengate?
+- otros detalles de causa raíz 
+
     
-    \nYou will notice that the answers to these questions are diferent from the open ChatGPT, since these papers are the only possible context. This search engine does not look at the open internet to answer these questions. If the context doesn't contain information, the engine will respond: I don't know.
+    \n Las respeustas solo son una muestra de algunos docuemtos Oxxo. el sisitema no responde información que no tiene como ccontexto. y no está conectado a internet.
     """)
 
 coli1, coli2= st.columns([3,1])
 with coli1:
-    query = st.text_input("Ask a question to your enterprise data lake", value= "What is CLP?", on_change=clear_submit)
+    query = st.text_input("Ask a question to your enterprise data lake", value= "que es goldengate?", on_change=clear_submit)
 with coli2:
     language= st.selectbox('Answer language',('English', 'Spanish', 'French', 'German', 'Portuguese', 'Italian'), index=0)
 
@@ -117,7 +112,7 @@ else:
                     for key,value in ordered_results.items():
                         for page in value["chunks"]:
                             docs.append(Document(page_content=page, metadata={"source": value["location"]}))
-                            add_text = "Reading the source documents to provide the best answer... ⏳"
+                            add_text = "Buscando Información de la fuente... ⏳"
 
                     if "add_text" in locals():
                         with st.spinner(add_text):
