@@ -32,7 +32,7 @@ with st.sidebar:
 
 This Chatbot has access tothe following tools/pluggins:
 - Bing Search for Current Events
-- ChatGPT for common knowledge
+- ChatGPT for commong knowledge
 - Azure SQL for covid statistics data
 - Azure Search for corporate knowledge (Arxiv papers and Covid Articles)
 
@@ -65,14 +65,7 @@ elif (not os.environ.get("BING_SUBSCRIPTION_KEY")) or (os.environ.get("BING_SUBS
     st.error("Please set your BING_SUBSCRIPTION_KEY on your Web App Settings")
 elif (not os.environ.get("DATASOURCE_SAS_TOKEN")) or (os.environ.get("DATASOURCE_SAS_TOKEN") == ""):
     st.error("Please set your DATASOURCE_SAS_TOKEN on your Web App Settings")
-elif (not os.environ.get("SQL_SERVER_ENDPOINT")) or (os.environ.get("SQL_SERVER_ENDPOINT") == ""):
-    st.error("Please set your SQL_SERVER_ENDPOINT on your Web App Settings")
-elif (not os.environ.get("SQL_SERVER_DATABASE")) or (os.environ.get("SQL_SERVER_DATABASE") == ""):
-    st.error("Please set your SQL_SERVER_DATABASE on your Web App Settings")
-elif (not os.environ.get("SQL_SERVER_USERNAME")) or (os.environ.get("SQL_SERVER_USERNAME") == ""):
-    st.error("Please set your SQL_SERVER_USERNAME on your Web App Settings")
-elif (not os.environ.get("SQL_SERVER_PASSWORD")) or (os.environ.get("SQL_SERVER_PASSWORD") == ""):
-    st.error("Please set your SQL_SERVER_PASSWORD on your Web App Settings")
+    
 
 else: 
     
@@ -84,7 +77,6 @@ else:
     os.environ["OPENAI_API_BASE"] = os.environ.get("AZURE_OPENAI_ENDPOINT")
     os.environ["OPENAI_API_KEY"] = os.environ.get("AZURE_OPENAI_API_KEY")
     os.environ["OPENAI_API_VERSION"] = os.environ["AZURE_OPENAI_API_VERSION"] = AZURE_OPENAI_API_VERSION
-    os.environ["BING_SEARCH_URL"] =  BING_SEARCH_URL
     os.environ["OPENAI_API_TYPE"] = "azure"
     os.environ["BING_SEARCH_URL"] =  BING_SEARCH_URL
 
