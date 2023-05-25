@@ -23,6 +23,7 @@ export AZURE_SEARCH_KEY=<Enter your value>
 export AZURE_OPENAI_ENDPOINT=<Enter your value>
 export AZURE_OPENAI_API_KEY=<Enter your value>
 export DATASOURCE_SAS_TOKEN=<Enter your value>
+export BING_SUBSCRIPTION_KEY=<Enter your value>
 export SQL_SERVER_ENDPOINT=<Enter your value>
 export SQL_SERVER_DATABASE=<Enter your value>
 export SQL_SERVER_USERNAME=<Enter your value>

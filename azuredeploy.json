@@ -146,7 +146,8 @@
             "properties": {
                 "replicaCount": "[parameters('Azure Search replicaCount')]",
                 "partitionCount": "[parameters('Azure Search partitionCount')]",
-                "hostingMode": "[parameters('Azure Search hostingMode')]"
+                "hostingMode": "[parameters('Azure Search hostingMode')]",
+                "semanticSearch": "free"
             }
         },
         {
