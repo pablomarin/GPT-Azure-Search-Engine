@@ -28,6 +28,7 @@ export SQL_SERVER_ENDPOINT=<Enter your value>
 export SQL_SERVER_DATABASE=<Enter your value>
 export SQL_SERVER_USERNAME=<Enter your value>
 export SQL_SERVER_PASSWORD=<Enter your value>
+export BING_SUBSCRIPTION_KEY=<Enter your value>
 ```
 3. Run the Streamlit server🚀
 ```bash
