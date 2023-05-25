@@ -65,7 +65,14 @@ elif (not os.environ.get("BING_SUBSCRIPTION_KEY")) or (os.environ.get("BING_SUBS
     st.error("Please set your BING_SUBSCRIPTION_KEY on your Web App Settings")
 elif (not os.environ.get("DATASOURCE_SAS_TOKEN")) or (os.environ.get("DATASOURCE_SAS_TOKEN") == ""):
     st.error("Please set your DATASOURCE_SAS_TOKEN on your Web App Settings")
-    
+elif (not os.environ.get("SQL_SERVER_ENDPOINT")) or (os.environ.get("SQL_SERVER_ENDPOINT") == ""):
+    st.error("Please set your SQL_SERVER_ENDPOINT on your Web App Settings")
+elif (not os.environ.get("SQL_SERVER_DATABASE")) or (os.environ.get("SQL_SERVER_DATABASE") == ""):
+    st.error("Please set your SQL_SERVER_DATABASE on your Web App Settings")
+elif (not os.environ.get("SQL_SERVER_USERNAME")) or (os.environ.get("SQL_SERVER_USERNAME") == ""):
+    st.error("Please set your SQL_SERVER_USERNAME on your Web App Settings")
+elif (not os.environ.get("SQL_SERVER_PASSWORD")) or (os.environ.get("SQL_SERVER_PASSWORD") == ""):
+    st.error("Please set your SQL_SERVER_PASSWORD on your Web App Settings")
 
 else: 
     
