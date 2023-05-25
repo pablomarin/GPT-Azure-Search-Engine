@@ -32,7 +32,7 @@ with st.sidebar:
 
 This Chatbot has access tothe following tools/pluggins:
 - Bing Search for Current Events
-- ChatGPT for commong knowledge
+- ChatGPT for common knowledge
 - Azure SQL for covid statistics data
 - Azure Search for corporate knowledge (Arxiv papers and Covid Articles)
 
