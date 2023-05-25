@@ -84,6 +84,7 @@ else:
     os.environ["OPENAI_API_BASE"] = os.environ.get("AZURE_OPENAI_ENDPOINT")
     os.environ["OPENAI_API_KEY"] = os.environ.get("AZURE_OPENAI_API_KEY")
     os.environ["OPENAI_API_VERSION"] = os.environ["AZURE_OPENAI_API_VERSION"] = AZURE_OPENAI_API_VERSION
+    os.environ["BING_SEARCH_URL"] =  BING_SEARCH_URL
     os.environ["OPENAI_API_TYPE"] = "azure"
 
 
