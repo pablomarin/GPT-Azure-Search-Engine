@@ -102,9 +102,9 @@ _Note: If you have never created a cognitive multi-service account before, pleas
         ```
       - On GitHub, go to **Settings-> SSH and GPG Keys-> New SSH Key**
       - In the "Title" field, add a descriptive label for the new key. "AML Compute". In the "Key" field, paste your public key.
-      - Finally, verify you are on your user directory **~/cloudfiles/code/Users/YOUR_USER $ **and clone
+      - Finally, verify you are on your user directory **~/cloudfiles/code/Users/YOUR_USER $ ** and clone using SSH
         ```
-        git clone https://github.com/YOUR-USERNAME/YOUR-REPOSITORY
+        git clone git@github.com:YOUR-USERNAME/YOUR-REPOSITORY.git
         ```
 
 7. Make sure you run the notebooks on a **Python 3.10 conda enviroment**
