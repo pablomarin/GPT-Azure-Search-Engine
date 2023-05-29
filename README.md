@@ -88,8 +88,27 @@ _Note: If you have never created a cognitive multi-service account before, pleas
 5. Enable Semantic Search on your Azure Cognitive Search Service:
    - On the left-nav pane, select Semantic Search (Preview).
    - Select either the Free plan or the Standard plan. You can switch between the free plan and the standard plan at any time.
-6. Make sure you run the notebooks on a **Python 3.10 conda enviroment**
-7. Install the dependencies on your machine (make sure you do the below comand on the same conda environment that you are going to run the notebooks:
+6. Clone repo to your AML Compute Instance.
+   - From GitHub: 
+      - On your Terminal, Paste the text below, substituting in your GitHub email address. [Generate a new SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#generating-a-new-ssh-key).
+        ```
+        ssh-keygen -t ed25519 -C "your_email@example.com"
+        ```
+     -  Copy the SSH public key to your clipboard. [Add a new SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#generating-a-new-ssh-key).
+        ```
+        cat ~/.ssh/id_ed25519.pub
+        # Then select and copy the contents of the id_ed25519.pub file
+        # displayed in the terminal to your clipboard
+        ```
+      - On GitHub, go to **Settings-> SSH and GPG Keys-> New SSH Key**
+      - In the "Title" field, add a descriptive label for the new key. "AML Compute". In the "Key" field, paste your public key.
+      - Finally, verify you are on your user directory **~/cloudfiles/code/Users/YOUR_USER $ **and clone
+        ```
+        git clone https://github.com/YOUR-USERNAME/YOUR-REPOSITORY
+        ```
+
+7. Make sure you run the notebooks on a **Python 3.10 conda enviroment**
+8. Install the dependencies on your machine (make sure you do the below comand on the same conda environment that you are going to run the notebooks:
 ```
 pip install -r ./requirements.txt
 ```
