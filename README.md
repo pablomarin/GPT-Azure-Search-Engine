@@ -66,7 +66,7 @@ https://gptsmartsearch.azurewebsites.net/
    - Tabular Data Q&A in CSV files and SQL Databases using GPT-4
    - Uses Bing Search API service for web search
    - ChatBot Interface
-   - (Coming soon) Recommends new searches based on users' history stored in CosmosDB.
+   - Uses CosmosDB as persistent memory to save conversations for further analysis.
 
 ---
 
