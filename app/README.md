@@ -29,6 +29,10 @@ export SQL_SERVER_DATABASE=<Enter your value>
 export SQL_SERVER_USERNAME=<Enter your value>
 export SQL_SERVER_PASSWORD=<Enter your value>
 export BING_SUBSCRIPTION_KEY=<Enter your value>
+export AZURE_COSMOSDB_ENDPOINT=<Enter your value>
+export AZURE_COSMOSDB_NAME=<Enter your value>
+export AZURE_COSMOSDB_CONTAINER_NAME=<Enter your value>
+export AZURE_COMOSDB_CONNECTION_STRING=<Enter your value>
 ```
 3. Run the Streamlit server🚀
 ```bash
