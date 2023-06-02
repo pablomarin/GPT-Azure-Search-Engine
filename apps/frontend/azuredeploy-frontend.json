@@ -1,0 +1,162 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "webAppName": {
+            "type": "string",
+            "defaultValue": "[concat('webApp-Frontend-', uniqueString(resourceGroup().id))]",
+            "minLength": 2,
+            "metadata": {
+              "description": "Web app name."
+            }
+        },
+        "sku": {
+            "type": "string",
+            "allowedValues": [
+                "B3",
+                "S3",
+                "P2v3"
+            ],
+            "defaultValue": "S3",
+            "metadata": {
+              "description": "The SKU of App Service Plan."
+            }
+        },
+        "AppServicePlanName": {
+            "type": "string",
+            "defaultValue": "[concat('AppServicePlan-Frontend-', uniqueString(resourceGroup().id))]",
+            "metadata": {
+                "description": "The name of the App Service Plan."
+            }
+        },
+        "BOT_SERVICE_NAME": {
+            "type": "string",
+             "metadata": {
+                "description": "The name of your Bot Service."
+            }
+        },
+        "BOT_DIRECTLINE_SECRET_KEY": {
+            "type": "string",
+            "metadata": {
+                "description": "The SECRET KEY of the Direct Line Channel of the Bot Service"
+            }
+        },
+        "DATASOURCE_SAS_TOKEN": {
+            "type": "string",
+            "defaultValue": "?sv=2022-11-02&ss=bf&srt=sco&sp=rltfx&se=2023-11-29T01:50:59Z&st=2023-05-10T16:50:59Z&spr=https&sig=ZT7MLy%2BnlvAxUKKj5v0RwoWObXaab3gO4ec2%2Fci6iL0%3D"
+        },
+        "AZURE_SEARCH_ENDPOINT": {
+            "type": "string"
+        },
+        "AZURE_SEARCH_KEY": {
+            "type": "string"
+        },
+        "AZURE_SEARCH_API_VERSION": {
+            "type": "string",
+            "defaultValue": "2021-04-30-Preview"
+        },
+        "AZURE_OPENAI_ENDPOINT": {
+            "type": "string"
+        },
+        "AZURE_OPENAI_API_KEY": {
+            "type": "string"
+        },
+        "AZURE_OPENAI_MODEL_NAME": {
+            "type": "string",
+            "defaultValue": "gpt-35-turbo"
+        },
+        "AZURE_OPENAI_API_VERSION": {
+            "type": "string",
+            "defaultValue": "2023-03-15-preview"
+        }
+    },
+    "resources": [
+      {
+        "type": "Microsoft.Web/serverfarms",
+        "apiVersion": "2021-02-01",
+        "name": "[parameters('AppServicePlanName')]",
+        "location": "[resourceGroup().location]",
+        "sku": {
+          "name": "[parameters('sku')]"
+        },
+        "kind": "linux",
+        "properties": {
+          "reserved": true
+        }
+      },
+      {
+        "type": "Microsoft.Web/sites",
+        "apiVersion": "2020-06-01",
+        "name": "[parameters('webAppName')]",
+        "location": "[resourceGroup().location]",
+  
+        "dependsOn": [
+          "[resourceId('Microsoft.Web/serverfarms', parameters('AppServicePlanName'))]"
+        ],
+        "properties": {
+          "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('AppServicePlanName'))]",
+          "siteConfig": {
+            "appSettings": [
+                {
+                    "name": "BOT_SERVICE_NAME",
+                    "value": "[parameters('BOT_SERVICE_NAME')]"
+                },
+                {
+                    "name": "BOT_DIRECTLINE_SECRET_KEY",
+                    "value": "[parameters('BOT_DIRECTLINE_SECRET_KEY')]"
+                },
+                {
+                    "name": "DATASOURCE_SAS_TOKEN",
+                    "value": "[parameters('DATASOURCE_SAS_TOKEN')]"
+                },
+                {
+                    "name": "AZURE_SEARCH_ENDPOINT",
+                    "value": "[parameters('AZURE_SEARCH_ENDPOINT')]"
+                },
+                {
+                    "name": "AZURE_SEARCH_KEY",
+                    "value": "[parameters('AZURE_SEARCH_KEY')]"
+                },
+                {
+                    "name": "AZURE_SEARCH_API_VERSION",
+                    "value": "[parameters('AZURE_SEARCH_API_VERSION')]"
+                },
+                {
+                    "name": "AZURE_OPENAI_ENDPOINT",
+                    "value": "[parameters('AZURE_OPENAI_ENDPOINT')]"
+                },
+                {
+                    "name": "AZURE_OPENAI_API_KEY",
+                    "value": "[parameters('AZURE_OPENAI_API_KEY')]"
+                },
+                {
+                    "name": "AZURE_OPENAI_MODEL_NAME",
+                    "value": "[parameters('AZURE_OPENAI_MODEL_NAME')]"
+                },
+                {
+                    "name": "AZURE_OPENAI_API_VERSION",
+                    "value": "[parameters('AZURE_OPENAI_API_VERSION')]"
+                },
+                {
+                    "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
+                    "value": "true"
+                }
+            ]
+          }
+        }
+      },
+      {
+        "type": "Microsoft.Web/sites/config",
+        "apiVersion": "2022-03-01",
+        "name": "[concat(parameters('webAppName'), '/web')]",
+        "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
+        ],
+        "properties": {
+            "linuxFxVersion": "PYTHON|3.10",
+            "alwaysOn": true,
+            "appCommandLine": "python -m streamlit run Home.py --server.port 8000 --server.address 0.0.0.0"
+        }
+      }
+    ]
+  }

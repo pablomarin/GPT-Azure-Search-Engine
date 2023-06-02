@@ -1,5 +1,3 @@
-streamlit
-streamlit-chat
 langchain
 faiss-cpu
 openai
@@ -8,8 +6,8 @@ docx2txt
 pillow
 pypdf
 tenacity
-sentence_transformers
 sqlalchemy<2.0.0
 pyodbc
 tabulate
-pandasql
+botbuilder-integration-aiohttp>=4.14.4
+streamlit

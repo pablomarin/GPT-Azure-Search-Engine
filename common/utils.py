@@ -6,9 +6,7 @@ import os
 from collections import OrderedDict
 
 import docx2txt
-import streamlit as st
 from langchain.embeddings import OpenAIEmbeddings
-from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.docstore.document import Document
 from langchain.llms import AzureOpenAI
 from langchain.chat_models import AzureChatOpenAI
@@ -115,32 +113,28 @@ def text_to_docs(text: str | List[str]) -> List[Document]:
 
 
 # @st.cache_data(show_spinner=False)
-def embed_docs(docs: List[Document]) -> VectorStore:
+def embed_docs(docs: List[Document], chunks_limit: int=100) -> VectorStore:
     """Embeds a list of Documents and returns a FAISS index"""
  
     # Select the Embedder model'
     print("Number of chunks:",len(docs))
-    if len(docs) < 50:
-        # OpenAI models are accurate but slower
-        embedder = OpenAIEmbeddings(deployment="text-embedding-ada-002", chunk_size=1) 
-    else:
-        # Bert based models are faster (3x-10x) but not as accurate
-        # For Multiple language support we need to use a multilingual model. But if English only is the requirement, use "multi-qa-MiniLM-L6-cos-v1" for a good trade-off between quality and speed
-        # The fastest english model though is "all-MiniLM-L12-v2"
-        embedder = HuggingFaceEmbeddings(model_name = 'distiluse-base-multilingual-cased-v2')
-
+    embedder = OpenAIEmbeddings(deployment="text-embedding-ada-002", chunk_size=1) 
+    
+    if len(docs) > chunks_limit:
+        docs = docs[:chunks_limit]
+        print("Truncated Number of chunks:",len(docs))
 
     index = FAISS.from_documents(docs, embedder)
 
     return index
 
 
-def search_docs(index: VectorStore, query: str) -> List[Document]:
+def search_docs(index: VectorStore, query: str, k: int=4) -> List[Document]:
     """Searches a FAISS index for similar chunks to the query
     and returns a list of Documents."""
 
     # Search for similar chunks
-    docs = index.similarity_search(query, k=4)
+    docs = index.similarity_search(query, k)
     return docs
 
 
@@ -245,14 +239,13 @@ def num_tokens_from_docs(docs: List[Document]) -> int:
 
 def get_search_results(query: str, indexes: list, k: int = 5) -> List[dict]:
     
-    AZURE_SEARCH_API_VERSION = '2021-04-30-Preview'
     headers = {'Content-Type': 'application/json','api-key': os.environ["AZURE_SEARCH_KEY"]}
 
     agg_search_results = []
     
     for index in indexes:
         url = os.environ["AZURE_SEARCH_ENDPOINT"] + '/indexes/'+ index + '/docs'
-        url += '?api-version={}'.format(AZURE_SEARCH_API_VERSION)
+        url += '?api-version={}'.format(os.environ["AZURE_SEARCH_API_VERSION"])
         url += '&search={}'.format(query)
         url += '&select=*'
         url += '&$top={}'.format(k)  # You can change this to anything you need/want
@@ -311,6 +304,8 @@ class DocSearchWrapper(BaseTool):
     reranker_th: int = 1
     max_tokens: int = 500
     temperature: float = 0.5
+    chunks_limit:int = 100
+    similarity_k: int = 4
     
     def _run(self, query: str) -> str:
 
@@ -334,8 +329,8 @@ class DocSearchWrapper(BaseTool):
                 return "No Results Found in my knowledge base"
 
             if num_tokens > tokens_limit:
-                index = embed_docs(docs)
-                top_docs = search_docs(index, query)
+                index = embed_docs(docs, chunks_limit = self.chunks_limit)
+                top_docs = search_docs(index, query, k = self.similarity_k)
 
                 # Now we need to recalculate the tokens count of the top results from similarity vector search
                 # in order to select the chain type: stuff or map_reduce
@@ -354,8 +349,27 @@ class DocSearchWrapper(BaseTool):
             response = get_answer(docs=top_docs, query=query, language=self.response_language, 
                                   deployment=self.deployment_name, chain_type=chain_type,
                                   temperature=self.temperature, max_tokens=self.max_tokens)
+            
+            answer = response['output_text']
+            
+            try:
+                split_word = "Source"
+                split_regex = re.compile(f"{split_word}s:?\\W*", re.IGNORECASE)
+                answer_text = split_regex.split(answer)[0]
+                sources_list = split_regex.split(answer)[1].replace(" ","").split(",")
 
-            return response['output_text']
+                sources_html = '<br><u>Sources</u>: '
+                for index, value in enumerate(sources_list):
+                    url = value + os.environ["DATASOURCE_SAS_TOKEN"]
+                    sources_html +='<sup><a href="'+ url + '">[' + str(index+1) + ']</a></sup>'
+                    
+                answer = answer_text + sources_html
+
+            except Exception as e:
+                print(e)
+                
+            return answer
+
         
         except Exception as e:
             print(e)
@@ -375,12 +389,13 @@ class CSVTabularWrapper(BaseTool):
     deployment_name: str = "gpt-4"
     max_tokens: int = 500
     temperature: float = 0
+    verbose: bool = False
     
     def _run(self, query: str) -> str:
         
         try:
             llm = AzureChatOpenAI(deployment_name=self.deployment_name, temperature=self.temperature, max_tokens=self.max_tokens)
-            agent = create_csv_agent(llm, self.path, verbose=True)
+            agent = create_csv_agent(llm, self.path, verbose=self.verbose)
             for i in range(5):
                 try:
                     response = agent.run(CSV_PROMPT_PREFIX + query + CSV_PROMPT_SUFFIX) 
@@ -406,10 +421,10 @@ class SQLDbWrapper(BaseTool):
     name = "SQL Search"
     description = 'useful for when you need to answer questions about number of cases, deaths, hospitalizations, tests, people in ICU, people in Ventilator, in the United States related to Covid-19.\n'
 
-    k:str = 5
     deployment_name: str = "gpt-35-turbo"
     max_tokens: int = 500
     temperature: float = 0
+    verbose: bool = False
     
     def _run(self, query: str) -> str:
         try:
@@ -432,7 +447,7 @@ class SQLDbWrapper(BaseTool):
                 format_instructions = MSSQL_AGENT_FORMAT_INSTRUCTIONS,
                 llm=llm,
                 toolkit=toolkit,
-                verbose=True
+                verbose=self.verbose
             )
             
             for i in range(5):
@@ -464,6 +479,7 @@ class ChatGPTWrapper(BaseTool):
     deployment_name: str = "gpt-35-turbo"
     max_tokens: int = 500
     temperature: float = 0.5
+    verbose: bool = False
     
     def _run(self, query: str) -> str:
         try:
@@ -471,7 +487,7 @@ class ChatGPTWrapper(BaseTool):
             chatgpt_chain = LLMChain(
                 llm=llm, 
                 prompt=CHATGPT_PROMPT, 
-                verbose=False
+                verbose=self.verbose
             )
 
             response = chatgpt_chain.run(query)

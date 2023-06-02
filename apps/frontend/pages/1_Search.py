@@ -30,10 +30,6 @@ st.markdown("""
 
 st.header("GPT Smart Search Engine")
 
-AZURE_OPENAI_API_VERSION = "2023-03-15-preview"
-
-# setting encoding for GPT3.5 / GPT4 models
-MODEL = "gpt-35-turbo"
 
 def clear_submit():
     st.session_state["submit"] = False
@@ -84,10 +80,11 @@ elif (not os.environ.get("DATASOURCE_SAS_TOKEN")) or (os.environ.get("DATASOURCE
 else: 
     os.environ["OPENAI_API_BASE"] = os.environ.get("AZURE_OPENAI_ENDPOINT")
     os.environ["OPENAI_API_KEY"] = os.environ.get("AZURE_OPENAI_API_KEY")
-    os.environ["OPENAI_API_VERSION"] = os.environ["AZURE_OPENAI_API_VERSION"] = AZURE_OPENAI_API_VERSION
+    os.environ["OPENAI_API_VERSION"] = os.environ["AZURE_OPENAI_API_VERSION"]
     os.environ["OPENAI_API_TYPE"] = "azure"
-
-
+    
+    MODEL = os.environ.get("AZURE_OPENAI_MODEL_NAME")
+                           
     if button or st.session_state.get("submit"):
         if not query:
             st.error("Please enter a question!")

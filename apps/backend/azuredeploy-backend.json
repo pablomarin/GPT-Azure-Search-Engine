@@ -1,0 +1,351 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "MicrosoftAppId": {
+            "type": "string",
+            "metadata": {
+                "description": "Active Directory App ID"
+            }
+        },
+        "MicrosoftAppPassword": {
+            "type": "string",
+            "metadata": {
+                "description": "Active Directory App Secret Value"
+            }
+        },
+        "DATASOURCE_SAS_TOKEN": {
+            "type": "string",
+            "defaultValue": "?sv=2022-11-02&ss=bf&srt=sco&sp=rltfx&se=2023-11-29T01:50:59Z&st=2023-05-10T16:50:59Z&spr=https&sig=ZT7MLy%2BnlvAxUKKj5v0RwoWObXaab3gO4ec2%2Fci6iL0%3D"
+        },
+        "AZURE_SEARCH_ENDPOINT": {
+            "type": "string"
+        },
+        "AZURE_SEARCH_KEY": {
+            "type": "string"
+        },
+        "AZURE_SEARCH_API_VERSION": {
+            "type": "string",
+            "defaultValue": "2021-04-30-Preview"
+        },
+        "AZURE_OPENAI_ENDPOINT": {
+            "type": "string"
+        },
+        "AZURE_OPENAI_API_KEY": {
+            "type": "string"
+        },
+        "AZURE_OPENAI_MODEL_NAME": {
+            "type": "string",
+            "defaultValue": "gpt-35-turbo"
+        },
+        "AZURE_OPENAI_API_VERSION": {
+            "type": "string",
+            "defaultValue": "2023-03-15-preview"
+        },
+        "BING_SEARCH_URL": {
+            "type": "string",
+            "defaultValue": "https://api.bing.microsoft.com/v7.0/search"
+        },
+        "BING_SUBSCRIPTION_KEY": {
+            "type": "string"
+        },
+         "SQL_SERVER_ENDPOINT": {
+            "type": "string"
+        },
+        "SQL_SERVER_DATABASE": {
+            "type": "string",
+            "defaultValue": "SampleDB"
+        },
+        "SQL_SERVER_USERNAME": {
+            "type": "string"
+        },
+        "SQL_SERVER_PASSWORD": {
+            "type": "string"
+        },
+        "AZURE_COSMOSDB_ENDPOINT": {
+            "type": "string"
+        },
+         "AZURE_COSMOSDB_NAME": {
+            "type": "string"
+        },
+         "AZURE_COSMOSDB_CONTAINER_NAME": {
+            "type": "string"
+        },
+         "AZURE_COMOSDB_CONNECTION_STRING": {
+            "type": "string"
+        },
+        "botId": {
+            "type": "string",
+            "defaultValue": "[concat('BotId-', uniqueString(resourceGroup().id))]",
+            "metadata": {
+                "description": "The globally unique and immutable bot ID. Also used to configure the displayName of the bot, which is mutable."
+            }
+        },
+        "botSku": {
+            "defaultValue": "F0",
+            "type": "string",
+            "metadata": {
+                "description": "The pricing tier of the Bot Service Registration. Acceptable values are F0 and S1."
+            }
+        },
+        "newAppServicePlanName": {
+            "type": "string",
+            "defaultValue": "[concat('AppServicePlan-Backend-', uniqueString(resourceGroup().id))]",
+            "metadata": {
+                "description": "The name of the new App Service Plan."
+            }
+        },
+        "newAppServicePlanSku": {
+            "type": "string",
+            "allowedValues": [
+                "B3",
+                "S3",
+                "P2v3"
+            ],
+            "defaultValue": "S3",
+            "metadata": {
+                "description": "The SKU of the App Service Plan. Defaults to Standard values."
+            }
+        }
+    },
+    "variables": {
+        "servicePlanName": "[parameters('newAppServicePlanName')]",
+        "publishingUsername": "[concat('$', parameters('botId'))]",
+        "resourcesLocation": "[resourceGroup().location]",
+        "webAppName": "[concat('webApp-Backend-', parameters('botId'))]",
+        "siteHost": "[concat(variables('webAppName'), '.azurewebsites.net')]",
+        "botEndpoint": "[concat('https://', variables('siteHost'), '/api/messages')]"
+    },
+    "resources": [
+        {
+            "comments": "Create a new Linux App Service Plan if no existing App Service Plan name was passed in.",
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2021-02-01",
+            "name": "[variables('servicePlanName')]",
+            "location": "[variables('resourcesLocation')]",
+            "sku": {
+                  "name": "[parameters('newAppServicePlanSku')]"
+            },
+            "kind": "linux",
+            "properties": {
+                "reserved": true
+            }
+        },
+        {
+            "comments": "Create a Web App using a Linux App Service Plan",
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2016-08-01",
+            "name": "[variables('webAppName')]",
+            "location": "[variables('resourcesLocation')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', variables('servicePlanName'))]"
+            ],
+            "kind": "app,linux",
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "[concat(variables('webAppName'), '.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "[concat(variables('webAppName'), '.scm.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('servicePlanName'))]",
+                "reserved": true,
+                "scmSiteAlsoStopped": false,
+                "clientAffinityEnabled": false,
+                "clientCertEnabled": false,
+                "hostNamesDisabled": false,
+                "containerSize": 0,
+                "dailyMemoryTimeQuota": 0,
+                "httpsOnly": false,
+                "siteConfig": {
+                    "appSettings": [
+                        {
+                            "name": "MicrosoftAppId",
+                            "value": "[parameters('MicrosoftAppId')]"
+                        },
+                        {
+                            "name": "MicrosoftAppPassword",
+                            "value": "[parameters('MicrosoftAppPassword')]"
+                        },
+                        {
+                          "name": "DATASOURCE_SAS_TOKEN",
+                          "value": "[parameters('DATASOURCE_SAS_TOKEN')]"
+                        },
+                        {
+                          "name": "AZURE_SEARCH_ENDPOINT",
+                          "value": "[parameters('AZURE_SEARCH_ENDPOINT')]"
+                        },
+                        {
+                          "name": "AZURE_SEARCH_KEY",
+                          "value": "[parameters('AZURE_SEARCH_KEY')]"
+                        },
+                        {
+                          "name": "AZURE_SEARCH_API_VERSION",
+                          "value": "[parameters('AZURE_SEARCH_API_VERSION')]"
+                        },
+                        {
+                          "name": "AZURE_OPENAI_ENDPOINT",
+                          "value": "[parameters('AZURE_OPENAI_ENDPOINT')]"
+                        },
+                        {
+                          "name": "AZURE_OPENAI_API_KEY",
+                          "value": "[parameters('AZURE_OPENAI_API_KEY')]"
+                        },
+                        {
+                          "name": "AZURE_OPENAI_MODEL_NAME",
+                          "value": "[parameters('AZURE_OPENAI_MODEL_NAME')]"
+                        },
+                        {
+                          "name": "AZURE_OPENAI_API_VERSION",
+                          "value": "[parameters('AZURE_OPENAI_API_VERSION')]"
+                        },
+                        {
+                          "name": "BING_SEARCH_URL",
+                          "value": "[parameters('BING_SEARCH_URL')]"
+                        },
+                        {
+                          "name": "BING_SUBSCRIPTION_KEY",
+                          "value": "[parameters('BING_SUBSCRIPTION_KEY')]"
+                        },
+                        {
+                          "name": "SQL_SERVER_ENDPOINT",
+                          "value": "[parameters('SQL_SERVER_ENDPOINT')]"
+                        },
+                        {
+                          "name": "SQL_SERVER_DATABASE",
+                          "value": "[parameters('SQL_SERVER_DATABASE')]"
+                        },
+                        {
+                          "name": "SQL_SERVER_USERNAME",
+                          "value": "[parameters('SQL_SERVER_USERNAME')]"
+                        },
+                        {
+                          "name": "SQL_SERVER_PASSWORD",
+                          "value": "[parameters('SQL_SERVER_PASSWORD')]"
+                        },
+                        {
+                          "name": "AZURE_COSMOSDB_ENDPOINT",
+                          "value": "[parameters('AZURE_COSMOSDB_ENDPOINT')]"
+                        },
+                        {
+                          "name": "AZURE_COSMOSDB_NAME",
+                          "value": "[parameters('AZURE_COSMOSDB_NAME')]"
+                        },
+                        {
+                          "name": "AZURE_COSMOSDB_CONTAINER_NAME",
+                          "value": "[parameters('AZURE_COSMOSDB_CONTAINER_NAME')]"
+                        },
+                        {
+                          "name": "AZURE_COMOSDB_CONNECTION_STRING",
+                          "value": "[parameters('AZURE_COMOSDB_CONNECTION_STRING')]"
+                        },
+                        {
+                            "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
+                            "value": "true"
+                        }
+                    ],
+                    "cors": {
+                        "allowedOrigins": [
+                            "https://botservice.hosting.portal.azure.net",
+                            "https://hosting.onecloud.azure-test.net/"
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/config",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(variables('webAppName'), '/web')]",
+            "location": "[variables('resourcesLocation')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', variables('webAppName'))]"
+            ],
+            "properties": {
+                "numberOfWorkers": 1,
+                "defaultDocuments": [
+                    "Default.htm",
+                    "Default.html",
+                    "Default.asp",
+                    "index.htm",
+                    "index.html",
+                    "iisstart.htm",
+                    "default.aspx",
+                    "index.php",
+                    "hostingstart.html"
+                ],
+                "netFrameworkVersion": "v4.0",
+                "phpVersion": "",
+                "pythonVersion": "",
+                "nodeVersion": "",
+                "linuxFxVersion": "PYTHON|3.10",
+                "requestTracingEnabled": false,
+                "remoteDebuggingEnabled": false,
+                "remoteDebuggingVersion": "VS2017",
+                "httpLoggingEnabled": true,
+                "logsDirectorySizeLimit": 35,
+                "detailedErrorLoggingEnabled": false,
+                "publishingUsername": "[variables('publishingUsername')]",
+                "scmType": "None",
+                "use32BitWorkerProcess": true,
+                "webSocketsEnabled": false,
+                "alwaysOn": true,
+                "appCommandLine": "gunicorn --bind 0.0.0.0 --worker-class aiohttp.worker.GunicornWebWorker --timeout 600 app:APP",
+                "managedPipelineMode": "Integrated",
+                "virtualApplications": [
+                    {
+                        "virtualPath": "/",
+                        "physicalPath": "site\\wwwroot",
+                        "preloadEnabled": false,
+                        "virtualDirectories": null
+                    }
+                ],
+                "winAuthAdminState": 0,
+                "winAuthTenantState": 0,
+                "customAppPoolIdentityAdminState": false,
+                "customAppPoolIdentityTenantState": false,
+                "loadBalancing": "LeastRequests",
+                "routingRules": [],
+                "experiments": {
+                    "rampUpRules": []
+                },
+                "autoHealEnabled": false,
+                "vnetName": "",
+                "minTlsVersion": "1.2",
+                "ftpsState": "AllAllowed",
+                "reservedInstanceCount": 0
+            }
+        },
+        {
+            "apiVersion": "2021-03-01",
+            "type": "Microsoft.BotService/botServices",
+            "name": "[parameters('botId')]",
+            "location": "global",
+            "kind": "azurebot",
+            "sku": {
+                "name": "[parameters('botSku')]"
+            },
+            "properties": {
+                "name": "[parameters('botId')]",
+                "displayName": "[parameters('botId')]",
+                "iconUrl": "https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png",
+                "endpoint": "[variables('botEndpoint')]",
+                "msaAppId": "[parameters('MicrosoftAppId')]",
+                "luisAppIds": [],
+                "schemaTransformationVersion": "1.3",
+                "isCmekEnabled": false,
+                "isIsolated": false
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/', variables('webAppName'))]"
+            ]
+        }
+    ]
+}
