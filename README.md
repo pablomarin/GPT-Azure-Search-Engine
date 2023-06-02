@@ -3,19 +3,20 @@
 # 3-day POC VBD powered by: Azure Cognitive Search + Azure OpenAI + Bot Framework + Langchain
 Your organization requires a chatbot and a search engine capable of comprehending diverse types of data scattered across various locations. Additionally, the conversational chatbot should be able to provide answers to inquiries, along with the source and an explanation of how and where the answer was obtained. In other words, you want **private and secured ChatGPT for your organization that can interpret, comprehend, and answer questions about your business data**.
 
-The goal of the MVP workshop is to show/prove the value of a GPT Virtual Assistant built with Azure Services, with your own data in your own environment. The repo is made to teach customers step-by-step on how to build a OpenAI based Smart Search Engine. Each Notebook builds on top of each other and ends in building two applications: Backend and Frontend, with a Bot and a Search interface.
+The goal of the MVP POC is to show/prove the value of a GPT Virtual Assistant built with Azure Services, with your own data in your own environment. The repo is made to teach customers step-by-step on how to build a OpenAI based Smart Search Engine. Each Notebook builds on top of each other and ends in building two applications: Backend and Frontend, with a Bot and a Search interface.
 
 **For Microsoft FTEs:** This is a customer funded VBD, below the assets for the delivery.
 
 | **Item**                   | **Description**                                                                                                     | **Link**                                                                                                                                                |
 |----------------------------|---------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
-| VBD SKU Info and Datasheet                   | CSAM must dispatch it as "Customer Invested" against credits/hours of Unified Support Contract                                      | [ESXP SKU page](https://esxp.microsoft.com/#/omexplanding/services/13098/geo/USA/details/1)                                                                                              |
-| VBD Accreditation for CSAs     | Link for CSAs to get the Accreditation needed to deliver the workshop                                                                      | [Accreditation Link](https://learningplayer.microsoft.com/activity/s9239623/launch/)                                                                   |
-| VBD 3-day Workshop Asset (IP)  | The workshop code and MVP to be delivered  (this github repo)                                     | [Azure-Cognitive-Search-Azure-OpenAI-Accelerator](https://github.com/MSUSAzureAccelerators/Azure-Cognitive-Search-Azure-OpenAI-Accelerator)                |
+| VBD SKU Info and Datasheet                   | CSAM must dispatch it as "Customer Invested" against credits/hours of Unified Support Contract                                      | [ESXP SKU page](https://esxp.microsoft.com/#/omexplanding/services/14205/geo/USA/details/1)                                                                                              |
+| VBD Accreditation for CSAs     | Link for CSAs to get the Accreditation needed to deliver the workshop                                                                      | [Accreditation Link 1](https://learningplayer.microsoft.com/activity/s9239623/launch/)<br>
+[Accreditation Link 2](https://learningplayer.microsoft.com/activity/s9239638/launch/)  |
+| VBD 3-day POC Asset (IP)  | The POC code and MVP to be delivered  (this github repo)                                     | [Azure-Cognitive-Search-Azure-OpenAI-Accelerator](https://github.com/MSUSAzureAccelerators/Azure-Cognitive-Search-Azure-OpenAI-Accelerator)                |
 | VBD Workshop Deck          | The deck introducing and explaining the workshop                                                                    | [Azure OpenAI Accelerator - GPT Smart Search Pitch Deck.pdf](https://github.com/MSUSAzureAccelerators/Azure-Cognitive-Search-Azure-OpenAI-Accelerator/blob/main/Azure%20OpenAI%20Accelerator%20-%20GPT%20Smart%20Search%20Pitch%20Deck.pdf) |
 
 ---
-**Prerequisites Client 3-Day Workshop**
+**Prerequisites Client 3-Day POC**
 * Azure subscription
 * Accepted Application to Azure Open AI
 * Microsoft members need to be added as Guests in clients Azure AD
@@ -68,7 +69,7 @@ https://gptsmartsearch.azurewebsites.net/
 
 ---
 
-## **Steps to Run the Accelerator**
+## **Steps to Run the POC/Accelerator**
 
 Note: (Pre-requisite) You need to have an Azure OpenAI service already created
 
