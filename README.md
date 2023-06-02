@@ -1,6 +1,6 @@
 ![image](https://user-images.githubusercontent.com/113465005/226238596-cc76039e-67c2-46b6-b0bb-35d037ae66e1.png)
 
-# 3-day Workshop VBD powered by: Azure Cognitive Search + Azure OpenAI + Bot Framework + Langchain
+# 3-day POC VBD powered by: Azure Cognitive Search + Azure OpenAI + Bot Framework + Langchain
 Your organization requires a chatbot and a search engine capable of comprehending diverse types of data scattered across various locations. Additionally, the conversational chatbot should be able to provide answers to inquiries, along with the source and an explanation of how and where the answer was obtained. In other words, you want **private and secured ChatGPT for your organization that can interpret, comprehend, and answer questions about your business data**.
 
 The goal of the MVP workshop is to show/prove the value of a GPT Virtual Assistant built with Azure Services, with your own data in your own environment. The repo is made to teach customers step-by-step on how to build a OpenAI based Smart Search Engine. Each Notebook builds on top of each other and ends in building two applications: Backend and Frontend, with a Bot and a Search interface.
@@ -37,7 +37,7 @@ The goal of the MVP workshop is to show/prove the value of a GPT Virtual Assista
    * 3a. Azure SQL Database - contains COVID-related statistics in the US.
    * 3b. Azure Bing Search API - provides online web search for current information.
    * 3c. Azure Cognitive Search - contains AI-enriched documents from Blob Storage (10k PDFs and 52k articles).
-      * 3c.1. Uses an LLM (OpenAI or Local Bert model) to vectorize the top K document chunks from 3c.
+      * 3c.1. Uses an LLM (OpenAI) to vectorize the top K document chunks from 3c.
       * 3c.2. Uses in-memory cosine similarity to get the top N chunks.
       * 3c.3. Uses an OpenAI GPT model to craft the response from the Cog Search Engine (3c) by combining the question and the top N chunks.
    * 3d. CSV Tabular File - contains COVID-related statistics in the US.
