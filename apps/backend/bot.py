@@ -25,12 +25,12 @@ class MyBot(ActivityHandler):
     # See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
     
     # Set a Deployment model name
-    MODEL_DEPLOYMENT_NAME = "gpt-35-turbo"
+    MODEL = os.environ.get("AZURE_OPENAI_MODEL_NAME")
     
     # Initialize our Tools/Experts
-    doc_search = DocSearchWrapper(indexes=["cogsrch-index-files", "cogsrch-index-csv"],k=5, deployment_name=MODEL_DEPLOYMENT_NAME, chunks_limit=100, similarity_k=5)
+    doc_search = DocSearchWrapper(indexes=["cogsrch-index-files", "cogsrch-index-csv"],k=5, deployment_name=MODEL, chunks_limit=100, similarity_k=5)
     www_search = BingSearchAPIWrapper(k=3)
-    sql_search = SQLDbWrapper(deployment_name=MODEL_DEPLOYMENT_NAME)
+    sql_search = SQLDbWrapper(deployment_name=MODEL)
     
     tools = [
         Tool(
@@ -53,7 +53,7 @@ class MyBot(ActivityHandler):
     ]
     
     # Set main Agent
-    llm = AzureChatOpenAI(deployment_name=MODEL_DEPLOYMENT_NAME, temperature=0.5, max_tokens=500)
+    llm = AzureChatOpenAI(deployment_name=MODEL, temperature=0.5, max_tokens=500)
     agent = ConversationalChatAgent.from_llm_and_tools(llm=llm, tools=tools, system_message=CUSTOM_CHATBOT_PREFIX, human_message=CUSTOM_CHATBOT_SUFFIX)
     memory = ConversationBufferWindowMemory(memory_key="chat_history", return_messages=True, k=10)
     agent_chain = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True, memory=memory)
