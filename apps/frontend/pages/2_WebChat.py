@@ -21,25 +21,28 @@ with st.sidebar:
 This Chatbot is hosted in an independent Backend Azure Web App and was created using the Bot Framework SDK.
 It has access to the following tools/pluggins:
 
-- Bing Search for Current Events
-- ChatGPT for common knowledge
-- Azure SQL for covid statistics data
-- Azure Search for corporate knowledge (Arxiv papers and Covid Articles)
+- Bing Search (use @bing in your question)
+- ChatGPT for common knowledge (use @chatgpt in your question)
+- Azure SQL for covid statistics data (use @covidstats in your question)
+- Azure Search for corporate knowledge - Arxiv papers and Covid Articles (use @docsearch in your question)
+
+Note: If you don't use any of the tool names beginning with @, the bot will try to use it's own knowledge or tool available to answer the question.
 
 Example questions:
 
 - Hello, my name is Bob, what's yours?
-- What's the main economic news of today?
-- How do I cook a chocolate cake?
-- What medicine reduces inflammation in the lungs?
-- Why Covid doesn't affect kids that much compared to adults?
+- @bing, What's the main economic news of today?
+- @chatgpt, How do I cook a chocolate cake?
+- @docsearch, What medicine reduces inflammation in the lungs?
+- @docsearch, Why Covid doesn't affect kids that much compared to adults?
 - What are markov chains?
-- How many people where hospitalized in Arkansas in June 2020?
-- List the authors that talk about Boosting Algorithms
-- How does random forest work?
-- What kind of problems can I solve with reinforcement learning? Give me some real life examples
-- What kind of problems Turing Machines solve?
-- What are the main risk factors for Covid-19?
+- @covidstats, How many people where hospitalized in Arkansas in June 2020?
+- @docsearch, List the authors that talk about Boosting Algorithms
+- @docsearch, How does random forest work?
+- @chatgpt, how do I fix this error: aiohttp.web_exceptions.HTTPNotFound: Not Found
+- @bing, what movies are showing tonight in Seattle?
+- @docsearch, What are the main risk factors for Covid-19?
+- Please tell me a joke
     """)
     
 st.markdown("""

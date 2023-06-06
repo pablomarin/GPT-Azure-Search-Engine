@@ -8,7 +8,7 @@ from langchain.memory import ConversationBufferWindowMemory
 from langchain.agents import ConversationalChatAgent, AgentExecutor, Tool
 
 #custom libraries that we will use later in the app
-from utils import DocSearchWrapper, CSVTabularWrapper, SQLDbWrapper, ChatGPTWrapper
+from utils import DocSearchWrapper, CSVTabularWrapper, SQLDbWrapper, ChatGPTWrapper, run_agent
 from prompts import CUSTOM_CHATBOT_PREFIX, CUSTOM_CHATBOT_SUFFIX
 
 from botbuilder.core import ActivityHandler, TurnContext
@@ -28,27 +28,34 @@ class MyBot(ActivityHandler):
     MODEL = os.environ.get("AZURE_OPENAI_MODEL_NAME")
     
     # Initialize our Tools/Experts
-    doc_search = DocSearchWrapper(indexes=["cogsrch-index-files", "cogsrch-index-csv"],k=5, deployment_name=MODEL, chunks_limit=100, similarity_k=5)
-    www_search = BingSearchAPIWrapper(k=3)
-    sql_search = SQLDbWrapper(deployment_name=MODEL)
+    doc_search = DocSearchWrapper(indexes=["cogsrch-index-files", "cogsrch-index-csv"],k=5, deployment_name=MODEL, chunks_limit=100, similarity_k=5, verbose=False)
+    www_search = BingSearchAPIWrapper(k=5)
+    sql_search = SQLDbWrapper(deployment_name=MODEL, verbose=False)
+    chatgpt_search = ChatGPTWrapper(deployment_name=MODEL, verbose=False)
     
     tools = [
         Tool(
-            name = "Current events, facts, and news",
+            name = "@bing",
             func=www_search.run,
-            description='useful to get current events information like weather, news, sports results, restaurants, current movies.\n'
-        ),
+            description='useful when the questions includes the term: @bing.\n'
+            ),
         Tool(
-            name = "Covid statistics",
+            name = "@covidstats",
             func=sql_search.run,
-            description='useful  when you need to answer questions about number of cases, deaths, hospitalizations, tests, people in ICU, people in Ventilator, in the United States related to Covid.\n',
+            description='useful when the questions includes the term: @covidstats.\n',
             return_direct=True
         ),
         Tool(
-            name = "Search",
+            name = "@docsearch",
             func=doc_search.run,
-            description='useful ONLY when you need to answer questions about Covid or about Computer Science, nothing else.\n',
+            description='useful when the questions includes the term: @docsearch.\n',
             return_direct=True
+        ),
+        Tool(
+            name = "@chatgpt",
+            func=chatgpt_search.run,
+            description='useful when the questions includes the term: @chatgpt.\n',
+            return_direct=False
         ),
     ]
     
@@ -57,9 +64,10 @@ class MyBot(ActivityHandler):
     agent = ConversationalChatAgent.from_llm_and_tools(llm=llm, tools=tools, system_message=CUSTOM_CHATBOT_PREFIX, human_message=CUSTOM_CHATBOT_SUFFIX)
     memory = ConversationBufferWindowMemory(memory_key="chat_history", return_messages=True, k=10)
     agent_chain = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True, memory=memory)
+    
 
     async def on_message_activity(self, turn_context: TurnContext):
-        answer = self.agent_chain.run(input=turn_context.activity.text) 
+        answer = run_agent(question=turn_context.activity.text, agent_chain=self.agent_chain)
         await turn_context.send_activity(answer)
 
     async def on_members_added_activity(

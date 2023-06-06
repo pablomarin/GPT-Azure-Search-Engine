@@ -25,7 +25,7 @@ CONFIG = DefaultConfig()
 # See https://aka.ms/about-bot-adapter to learn more about how bots work.
 SETTINGS = BotFrameworkAdapterSettings(CONFIG.APP_ID, CONFIG.APP_PASSWORD)
 ADAPTER = BotFrameworkAdapter(SETTINGS)
-ADAPTER.use(ShowTypingMiddleware(delay=1, period=3.0))
+ADAPTER.use(ShowTypingMiddleware(delay=0, period=2.0))
 
 
 # Catch-all for errors.

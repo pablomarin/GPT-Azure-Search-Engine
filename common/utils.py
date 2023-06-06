@@ -11,6 +11,7 @@ from langchain.docstore.document import Document
 from langchain.llms import AzureOpenAI
 from langchain.chat_models import AzureChatOpenAI
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.schema import BaseOutputParser, OutputParserException
 from langchain.vectorstores import VectorStore
 from langchain.vectorstores.faiss import FAISS
 from langchain.chains import LLMChain
@@ -21,6 +22,7 @@ from langchain.chains.qa_with_sources import load_qa_with_sources_chain
 from langchain.chains import ConversationalRetrievalChain
 from langchain.chains.conversational_retrieval.prompts import CONDENSE_QUESTION_PROMPT
 from langchain.tools import BaseTool
+from langchain.prompts import PromptTemplate
 from openai.error import AuthenticationError
 from langchain.docstore.document import Document
 from pypdf import PdfReader
@@ -113,16 +115,16 @@ def text_to_docs(text: str | List[str]) -> List[Document]:
 
 
 # @st.cache_data(show_spinner=False)
-def embed_docs(docs: List[Document], chunks_limit: int=100) -> VectorStore:
+def embed_docs(docs: List[Document], chunks_limit: int=100, verbose: bool = False) -> VectorStore:
     """Embeds a list of Documents and returns a FAISS index"""
  
     # Select the Embedder model'
-    print("Number of chunks:",len(docs))
+    if verbose: print("Number of chunks:",len(docs))
     embedder = OpenAIEmbeddings(deployment="text-embedding-ada-002", chunk_size=1) 
     
     if len(docs) > chunks_limit:
         docs = docs[:chunks_limit]
-        print("Truncated Number of chunks:",len(docs))
+        if verbose: print("Truncated Number of chunks:",len(docs))
 
     index = FAISS.from_documents(docs, embedder)
 
@@ -150,53 +152,6 @@ def get_sources(answer: Dict[str, Any], docs: List[Document]) -> List[Document]:
             source_docs.append(doc)
 
     return source_docs
-
-
-
-def get_answer(docs: List[Document], 
-               query: str, 
-               language: str,
-               deployment: str, 
-               chain_type: str,
-               memory: ConversationBufferMemory = None,
-               temperature: float = 0.5, 
-               max_tokens: int = 500
-              ) -> Dict[str, Any]:
-    
-    """Gets an answer to a question from a list of Documents."""
-
-    # Get the answer
-    
-    if (deployment in ["gpt-35-turbo", "gpt-4", "gpt-4-32k"]) :
-        llm = AzureChatOpenAI(deployment_name=deployment, temperature=temperature, max_tokens=max_tokens)
-    else:
-        llm = AzureOpenAI(deployment_name=deployment, temperature=temperature, max_tokens=max_tokens)
-    
-    if chain_type == "stuff":
-        if memory == None:
-            chain = load_qa_with_sources_chain(llm, chain_type=chain_type,
-                                               prompt=COMBINE_PROMPT)
-        else:
-            chain = load_qa_with_sources_chain(llm, chain_type=chain_type, 
-                                               prompt=COMBINE_CHAT_PROMPT,
-                                               memory=memory)
-
-    elif chain_type == "map_reduce":
-        if memory == None:
-            chain = load_qa_with_sources_chain(llm, chain_type=chain_type, 
-                                               question_prompt=COMBINE_QUESTION_PROMPT,
-                                               combine_prompt=COMBINE_PROMPT)
-        else:
-            chain = load_qa_with_sources_chain(llm, chain_type=chain_type, 
-                                               question_prompt=COMBINE_QUESTION_PROMPT,
-                                               combine_prompt=COMBINE_CHAT_PROMPT,
-                                               memory=memory)
-    else:
-        print("Error: chain_type", chain_type, "not supported")
-    
-    answer = chain( {"input_documents": docs, "question": query, "language": language}, return_only_outputs=True)
-
-    return answer
 
 
 
@@ -291,11 +246,69 @@ def order_search_results( agg_search_results: List[dict], reranker_threshold: in
     return ordered_content
 
 
+def get_answer(docs: List[Document], 
+               query: str, 
+               language: str,
+               deployment: str, 
+               chain_type: str,
+               memory: ConversationBufferMemory = None,
+               temperature: float = 0.5, 
+               max_tokens: int = 500
+              ) -> Dict[str, Any]:
+    
+    """Gets an answer to a question from a list of Documents."""
+
+    # Get the answer
+    
+    if (deployment in ["gpt-35-turbo", "gpt-4", "gpt-4-32k"]) :
+        llm = AzureChatOpenAI(deployment_name=deployment, temperature=temperature, max_tokens=max_tokens)
+    else:
+        llm = AzureOpenAI(deployment_name=deployment, temperature=temperature, max_tokens=max_tokens)
+    
+    if chain_type == "stuff":
+        if memory == None:
+            chain = load_qa_with_sources_chain(llm, chain_type=chain_type,
+                                               prompt=COMBINE_PROMPT)
+        else:
+            chain = load_qa_with_sources_chain(llm, chain_type=chain_type, 
+                                               prompt=COMBINE_CHAT_PROMPT,
+                                               memory=memory)
+
+    elif chain_type == "map_reduce":
+        if memory == None:
+            chain = load_qa_with_sources_chain(llm, chain_type=chain_type, 
+                                               question_prompt=COMBINE_QUESTION_PROMPT,
+                                               combine_prompt=COMBINE_PROMPT)
+        else:
+            chain = load_qa_with_sources_chain(llm, chain_type=chain_type, 
+                                               question_prompt=COMBINE_QUESTION_PROMPT,
+                                               combine_prompt=COMBINE_CHAT_PROMPT,
+                                               memory=memory)
+    else:
+        print("Error: chain_type", chain_type, "not supported")
+    
+    answer = chain( {"input_documents": docs, "question": query, "language": language}, return_only_outputs=True)
+
+    return answer
+
+
+def run_agent(question:str, agent_chain: AgentExecutor) -> str:
+    """Function to run the brain agent and deal with potential parsing errors"""
+    
+    try:
+        return agent_chain.run(input=question)
+    except OutputParserException as e:
+        return str(e).split("Could not parse LLM output:")[1]
+    
+
+######## TOOL CLASSES #####################################
+###########################################################
+    
 class DocSearchWrapper(BaseTool):
     """Wrapper for Azure GPT Smart Search Engine"""
     
     name = "Doc Search"
-    description = 'useful for when you need to answer questions that **DO NOT** begin with "Hey Bing" or "Hey ChatGPT".\n'
+    description = ""
 
     indexes: List[str]
     k: int = 10
@@ -306,6 +319,7 @@ class DocSearchWrapper(BaseTool):
     temperature: float = 0.5
     chunks_limit:int = 100
     similarity_k: int = 4
+    verbose: bool = False
     
     def _run(self, query: str) -> str:
 
@@ -322,21 +336,23 @@ class DocSearchWrapper(BaseTool):
 
             if(len(docs)>0):
                 num_tokens = num_tokens_from_docs(docs)
-                print("Custom token limit for", self.deployment_name, ":", tokens_limit)
-                print("Combined docs tokens count:",num_tokens)
+                if self.verbose:
+                    print("Custom token limit for", self.deployment_name, ":", tokens_limit)
+                    print("Combined docs tokens count:",num_tokens)
 
             else:
                 return "No Results Found in my knowledge base"
 
             if num_tokens > tokens_limit:
-                index = embed_docs(docs, chunks_limit = self.chunks_limit)
+                index = embed_docs(docs, chunks_limit = self.chunks_limit, verbose=self.verbose)
                 top_docs = search_docs(index, query, k = self.similarity_k)
 
                 # Now we need to recalculate the tokens count of the top results from similarity vector search
                 # in order to select the chain type: stuff or map_reduce
 
-                num_tokens = num_tokens_from_docs(top_docs)   
-                print("Token count after similarity search:", num_tokens)
+                num_tokens = num_tokens_from_docs(top_docs)
+                if self.verbose:
+                    print("Token count after similarity search:", num_tokens)
                 chain_type = "map_reduce" if num_tokens > tokens_limit else "stuff"
 
             else:
@@ -344,7 +360,8 @@ class DocSearchWrapper(BaseTool):
                 top_docs = docs
                 chain_type = "stuff"
 
-            print("Chain Type selected:", chain_type)
+            if self.verbose:
+                print("Chain Type selected:", chain_type)
 
             response = get_answer(docs=top_docs, query=query, language=self.response_language, 
                                   deployment=self.deployment_name, chain_type=chain_type,
@@ -383,7 +400,7 @@ class CSVTabularWrapper(BaseTool):
     """Wrapper CSV agent"""
     
     name = "CSV Search"
-    description = 'useful for when you need to answer questions about number of cases, deaths, hospitalizations, tests, people in ICU, people in Ventilator, in the United States related to Covid-19.\n'
+    description = ""
 
     path: str
     deployment_name: str = "gpt-4"
@@ -419,7 +436,7 @@ class SQLDbWrapper(BaseTool):
     """Wrapper SQLDB Agent"""
     
     name = "SQL Search"
-    description = 'useful for when you need to answer questions about number of cases, deaths, hospitalizations, tests, people in ICU, people in Ventilator, in the United States related to Covid-19.\n'
+    description = ""
 
     deployment_name: str = "gpt-35-turbo"
     max_tokens: int = 500
@@ -474,7 +491,7 @@ class ChatGPTWrapper(BaseTool):
     """Wrapper for a ChatGPT clone"""
     
     name = "ChatGPT Search"
-    description = 'useful **ONLY** when you need to answer questions that begin with "Hey ChatGPT".\n'
+    description = ""
 
     deployment_name: str = "gpt-35-turbo"
     max_tokens: int = 500
@@ -486,7 +503,7 @@ class ChatGPTWrapper(BaseTool):
             llm = AzureChatOpenAI(deployment_name=self.deployment_name, temperature=self.temperature, max_tokens=self.max_tokens)
             chatgpt_chain = LLMChain(
                 llm=llm, 
-                prompt=CHATGPT_PROMPT, 
+                prompt=PromptTemplate(input_variables=["question"],template="{question}"), 
                 verbose=self.verbose
             )
 
