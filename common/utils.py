@@ -297,8 +297,19 @@ def run_agent(question:str, agent_chain: AgentExecutor) -> str:
     
     try:
         return agent_chain.run(input=question)
+    
     except OutputParserException as e:
-        return str(e).split("Could not parse LLM output:")[1]
+        # If the agent has a parsing error, we use OpenAI model again to reformat the error and give a good answer
+        MODEL = os.environ["AZURE_OPENAI_MODEL_NAME"] if "AZURE_OPENAI_MODEL_NAME" in os.environ else "gpt-35-turbo"
+        llm = AzureChatOpenAI(deployment_name=MODEL, temperature=0, max_tokens=500)
+        chatgpt_chain = LLMChain(
+                llm=llm, 
+                    prompt=PromptTemplate(input_variables=["error"],template='Remove any json formating from the below text, also remove any portion that says someting similar this "Could not parse LLM output: ". Reformat your response in beautiful Markdown. Just give me the reformated text, nothing else.\n Text: {error}'), 
+                verbose=False
+            )
+
+        response = chatgpt_chain.run(str(e))
+        return response
     
 
 ######## TOOL CLASSES #####################################
@@ -503,7 +514,7 @@ class ChatGPTWrapper(BaseTool):
             llm = AzureChatOpenAI(deployment_name=self.deployment_name, temperature=self.temperature, max_tokens=self.max_tokens)
             chatgpt_chain = LLMChain(
                 llm=llm, 
-                prompt=PromptTemplate(input_variables=["question"],template="{question}"), 
+                prompt=CHATGPT_PROMPT, 
                 verbose=self.verbose
             )
 

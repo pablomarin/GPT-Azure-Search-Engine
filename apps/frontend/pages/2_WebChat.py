@@ -21,10 +21,10 @@ with st.sidebar:
 This Chatbot is hosted in an independent Backend Azure Web App and was created using the Bot Framework SDK.
 It has access to the following tools/pluggins:
 
-- Bing Search (use @bing in your question)
-- ChatGPT for common knowledge (use @chatgpt in your question)
-- Azure SQL for covid statistics data (use @covidstats in your question)
-- Azure Search for corporate knowledge - Arxiv papers and Covid Articles (use @docsearch in your question)
+- Bing Search (***use @bing in your question***)
+- ChatGPT for common knowledge (***use @chatgpt in your question***)
+- Azure SQL for covid statistics data (***use @covidstats in your question***)
+- Azure Search for corporate knowledge - Arxiv papers and Covid Articles (***use @docsearch in your question***)
 
 Note: If you don't use any of the tool names beginning with @, the bot will try to use it's own knowledge or tool available to answer the question.
 
