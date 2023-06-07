@@ -1,6 +1,7 @@
 ![image](https://user-images.githubusercontent.com/113465005/226238596-cc76039e-67c2-46b6-b0bb-35d037ae66e1.png)
 
 # 3-5 days POC VBD powered by: Azure Search + Azure OpenAI + Bot Framework + Langchain + Azure SQL + CosmosDB + Bing Search API
+
 Your organization requires a Multi-Channel Smart Chatbot and a search engine capable of comprehending diverse types of data scattered across various locations. Additionally, the conversational chatbot should be able to provide answers to inquiries, along with the source and an explanation of how and where the answer was obtained. In other words, you want **private and secured ChatGPT for your organization that can interpret, comprehend, and answer questions about your business data**.
 
 The goal of the MVP POC is to show/prove the value of a GPT Virtual Assistant built with Azure Services, with your own data in your own environment. The deliverables are:
@@ -109,6 +110,10 @@ pip install -r ./common/requirements.txt
 
 ---
 
+<details>
+
+<summary>FAQs</summary>
+  
 ## **FAQs**
 
 1. **Why the vector similarity is done in memory using FAISS versus having a separate vector database like RedisSearch or Pinecone?**
@@ -127,7 +132,12 @@ Fine-tuning improves on few-shot learning by training on many more examples than
 However, fine-tuning the model requires providing hundreds or thousands of Prompt and Completion tuples, which are essentially query-response samples. The purpose of fine-tuning is not to give the LLM knowledge of the company's data but to provide it with examples so it can perform tasks really well without requiring examples on every prompt.
 
 There are cases where fine-tuning is necessary, such as when the examples contain proprietary data that should not be exposed in prompts or when the language used is highly specialized, as in healthcare, pharmacy, or other industries or use cases where the language used is not commonly found on the internet.
+</details>
 
+<details>
+
+<summary>Troubleshooting</summary>
+  
 ## Troubleshooting
 
 Steps to clone a private repo:
@@ -147,5 +157,6 @@ cat ~/.ssh/id_ed25519.pub
 ```bash
 git clone git@github.com:YOUR-USERNAME/YOUR-REPOSITORY.git
 ```
+</details>
 
 
