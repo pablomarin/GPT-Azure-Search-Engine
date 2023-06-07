@@ -36,7 +36,7 @@
         },
         "AZURE_OPENAI_MODEL_NAME": {
             "type": "string",
-            "defaultValue": "gpt-35-turbo"
+            "defaultValue": "gpt-4"
         },
         "AZURE_OPENAI_API_VERSION": {
             "type": "string",

@@ -16,15 +16,15 @@ The repo is made to teach customers step-by-step on how to build a OpenAI based 
 | **Item**                   | **Description**                                                                                                     | **Link**                                                                                                                                                |
 |----------------------------|---------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
 | VBD SKU Info and Datasheet                   | CSAM must dispatch it as "Customer Invested" against credits/hours of Unified Support Contract                                      | [ESXP SKU page](https://esxp.microsoft.com/#/omexplanding/services/14205/geo/USA/details/1)                                                                                              |
-| VBD Accreditation for CSAs     | Link for CSAs to get the Accreditation needed to deliver the workshop                                                                      | [Accreditation Link 1](https://learningplayer.microsoft.com/activity/s9239623/launch/), [Accreditation Link 2](https://learningplayer.microsoft.com/activity/s9239638/launch/)  |
+| VBD Accreditation for CSAs     | Links for CSAs to get the Accreditation needed to deliver the workshop                                                                      | [Accreditation Link 1](https://learningplayer.microsoft.com/activity/s9239623/launch/), [Accreditation Link 2](https://learningplayer.microsoft.com/activity/s9239638/launch/)  |
 | VBD 3-5 day POC Asset (IP)  | The MVP to be delivered  (this GitHub repo)                                     | [Azure-Cognitive-Search-Azure-OpenAI-Accelerator](https://github.com/MSUSAzureAccelerators/Azure-Cognitive-Search-Azure-OpenAI-Accelerator)                |
-| VBD Workshop Deck          | The deck introducing and explaining the workshop                                                                    | [Azure OpenAI Accelerator - GPT Smart Search Pitch Deck.pdf](https://github.com/MSUSAzureAccelerators/Azure-Cognitive-Search-Azure-OpenAI-Accelerator/blob/main/Azure%20OpenAI%20Accelerator%20-%20GPT%20Smart%20Search%20Pitch%20Deck.pdf) |
+| VBD Workshop Deck          | The deck introducing and explaining the workshop                                                                    | [Intro AOAI GPT Azure Smart Search Engine Accelerator.pptx](https://github.com/MSUSAzureAccelerators/Azure-Cognitive-Search-Azure-OpenAI-Accelerator/blob/main/Azure%20OpenAI%20Accelerator%20-%20GPT%20Smart%20Search%20Pitch%20Deck.pdf) |
 
 
 ---
 **Prerequisites Client 3-5 Days POC**
 * Azure subscription
-* Accepted Application to Azure Open AI
+* Accepted Application to Azure Open AI, including GPT-4 (mandatory)
 * Microsoft members need to be added as Guests in clients Azure AD
 * A Resource Group (RG)  needs to be set for this Workshop POC, in the customer Azure tenant
 * The customer team and the Microsoft team must have Contributor permissions to this resource group so they can set everything up 2 weeks prior to the workshop
@@ -101,12 +101,7 @@ _Note: If you have never created a cognitive multi-service account before, pleas
 ```
 pip install -r ./common/requirements.txt
 ```
-8. Run 01-Load-Data-ACogSearch.ipynb:
-  - Loads 9.8k PDFs into your Search Engine and create the first index with AI skills
-9. Run 02-LoadCSVOneToMany-ACogSearch.ipynb and:
-  - Ingests 52k documents into your Search Engine coming from 1 CSV file
-10. **Run the remaining Notebooks in order**. They build up on top of each other.
-11. **After you ran all the notebooks**, Go to the apps/ folder and follow the instructions to deploy the Backend Bot and the Frontend UI web applications.
+9. **Run the Notebooks in order**. They build up on top of each other.
 
 ---
 
@@ -120,11 +115,7 @@ pip install -r ./common/requirements.txt
 
 A: True, doing the embeddings of the documents pages everytime that there is a query is not efficient. The ideal scenario is to vectorize the docs chunks once (first time they are needed) and then retrieve them from a database the next time they are needed. For this a special vector database is necessary. The ideal scenario though, is Azure Search to save and retreive the vectors as part of the search results, along with the document chunks. Azure Search will soon allow this in a few months, let's wait for it. As of right now the embedding process doesn't take that much time or money, so it is worth the wait versus using another database just for vectors. Once Azure Cog Search gets vector capabilities, the search/retrieval/answer process will be a lot faster.
 
-2. **Why use the MAP_REDUCE type in LangChaing sometimes versus STUFF type everytime?**
-
-A: Because using STUFF type with all the content of the pages as context, in many ocoasions, uses too many tokens. So the best way to deal with large documents is to find the answer by going trough all of the search results and doing many calls to the LLM looking for summarized chunks, then combine this summaries and put them all in the call as context. However as time goes by, the tokens will not be a limitation anymore, GPT-4-32k models is a lot of tokens. Imagine GPT-5 or 6. For more information of the difference between STUFF and MAP_REDUCE, see [HERE](https://github.com/hwchase17/langchain/tree/master/langchain/chains/question_answering)
-
-3. **Why use Azure Cognitive Search engine to provide the context for the LLM and not fine tune the LLM instead?**
+2. **Why use Azure Cognitive Search engine to provide the context for the LLM and not fine tune the LLM instead?**
 
 A: Quoting the [OpenAI documentation](https://platform.openai.com/docs/guides/fine-tuning): "GPT-3 has been pre-trained on a vast amount of text from the open internet. When given a prompt with just a few examples, it can often intuit what task you are trying to perform and generate a plausible completion. This is often called "few-shot learning.
 Fine-tuning improves on few-shot learning by training on many more examples than can fit in the prompt, letting you achieve better results on a wide number of tasks. Once a model has been fine-tuned, you won't need to provide examples in the prompt anymore. This **saves costs and enables lower-latency requests**"
