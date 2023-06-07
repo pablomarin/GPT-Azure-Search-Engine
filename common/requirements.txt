@@ -1,4 +1,4 @@
-langchain
+langchain==0.0.191
 faiss-cpu
 openai
 tiktoken
