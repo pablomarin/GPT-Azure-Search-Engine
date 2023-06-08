@@ -9,7 +9,7 @@ The goal of the MVP POC is to show/prove the value of a GPT Virtual Assistant bu
 1. Backend Bot API built with Bot Framework and exposed to multiple channels (Web Chat, MS Teams, SMS, Email, Slack, etc)
 2. Frontend web application with a Search and a Bot UI.
 
-The repo is made to teach customers step-by-step on how to build a OpenAI based Smart Search Engine. Each Notebook builds on top of each other and ends in building the two applications.
+The repo is made to teach you step-by-step on how to build a OpenAI based Smart Search Engine. Each Notebook builds on top of each other and ends in building the two applications.
 
 **For Microsoft FTEs:** This is a customer funded VBD, below the assets for the delivery.
 
