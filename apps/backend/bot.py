@@ -2,6 +2,8 @@
 # Licensed under the MIT License.
 import os
 import re
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 from langchain.chat_models import AzureChatOpenAI
 from langchain.utilities import BingSearchAPIWrapper
 from langchain.memory import ConversationBufferWindowMemory
@@ -12,7 +14,7 @@ from utils import DocSearchWrapper, CSVTabularWrapper, SQLDbWrapper, ChatGPTWrap
 from prompts import CUSTOM_CHATBOT_PREFIX, CUSTOM_CHATBOT_SUFFIX
 
 from botbuilder.core import ActivityHandler, TurnContext
-from botbuilder.schema import ChannelAccount
+from botbuilder.schema import ChannelAccount, Activity, ActivityTypes
 
 
 os.environ["OPENAI_API_BASE"] = os.environ.get("AZURE_OPENAI_ENDPOINT")
@@ -65,16 +67,20 @@ class MyBot(ActivityHandler):
     memory = ConversationBufferWindowMemory(memory_key="chat_history", return_messages=True, k=10)
     agent_chain = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True, memory=memory)
     
-
+    
     async def on_message_activity(self, turn_context: TurnContext):
-        answer = run_agent(question=turn_context.activity.text, agent_chain=self.agent_chain)
+        typing_activity = Activity(type=ActivityTypes.typing)
+        await turn_context.send_activity(typing_activity)
+
+        # Please note below that running a non-async function like run_agent in a separate thread won't make it truly asynchronous. It allows the function to be called without blocking the event loop, but it may still have synchronous behavior internally.
+        
+        loop = asyncio.get_event_loop()
+        answer = await loop.run_in_executor(ThreadPoolExecutor(), run_agent, turn_context.activity.text, self.agent_chain)
+
         await turn_context.send_activity(answer)
 
-    async def on_members_added_activity(
-        self,
-        members_added: ChannelAccount,
-        turn_context: TurnContext
-    ):
+
+    async def on_members_added_activity(self, members_added: ChannelAccount, turn_context: TurnContext):
         for member_added in members_added:
             if member_added.id != turn_context.activity.recipient.id:
                 await turn_context.send_activity("Hello and welcome!")
