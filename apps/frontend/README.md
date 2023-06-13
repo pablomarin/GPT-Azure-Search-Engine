@@ -23,7 +23,7 @@ az login -i
 az webapp deployment source config-zip --resource-group "<resource-group-name>" --name "<name-of-frontend-app-service>" --src "frontend.zip"
 ```
 
-**Note**: Some FDPO Azure Subscriptions disable Azure Web Apps Basic Authentication every minute (don't know why). So before running the above az webapp deployment command, make sure that your frontend azure web app has Basic Authentication ON. In the Azure Portal, you can find this settting in: Configuration->General Settings. Don't worry if after running the command it says retrying many times, the zip files already uploaded and is building.
+**Note**: Some FDPO Azure Subscriptions disable Azure Web Apps Basic Authentication every minute (don't know why). So before running the above `az webapp deployment` command, make sure that your frontend azure web app has Basic Authentication ON. In the Azure Portal, you can find this settting in: `Configuration->General Settings`. Don't worry if after running the command it says retrying many times, the zip files already uploaded and is building.
 
 4. In a few minutes (5-10) your App should be working now. Go to the Azure Portal and get the URL.
 
