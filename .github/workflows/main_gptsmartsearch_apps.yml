@@ -3,6 +3,8 @@
 # More info on Python, GitHub Actions, and Azure App Service: https://aka.ms/python-webapps-actions
 
 name: GPTSmartSearch Apps Deployment
+env:
+  DO_BUILD_DURING_DEPLOYMENT: true
 
 on:
   push:
@@ -35,31 +37,31 @@ jobs:
           else
               echo "DEPLOY_ENVIRONMENT=Development" >> "$GITHUB_OUTPUT"
           fi
-          echo "Setting deploying enviroment to [${{ steps.set-deploy-env.outputs.DEPLOY_ENVIRONMENT }}]"
       - name: merge backend and common folder 
         run: |
-          
+          echo "Prepare backend source for enviroment [${{ steps.set-deploy-env.outputs.DEPLOY_ENVIRONMENT }}]"
           mkdir -p ./target/backend
           cp -r ./apps/backend ./target
           cp -r ./common/*.* ./target/backend
 
       - name: Create and start virtual environment in backend folder
+        if: ${{ !env.DO_BUILD_DURING_DEPLOYMENT }}
         run: |
           python -m venv ./target/backend/venv
           source ./target/backend/venv/bin/activate
       
       - name: Install backend dependencies
+        if: ${{ !env.DO_BUILD_DURING_DEPLOYMENT }}
         run: pip install -r ./target/backend/requirements.txt
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
       
-      - name: Upload artifact for deployment jobs
+      - name: Upload artifacts for deployment jobs
         uses: actions/upload-artifact@v2
         with:
           name: python-backend-app
           path: |
             ./target/backend
-            !./target/backend/venv/
   
   deploy:
     runs-on: ubuntu-latest
