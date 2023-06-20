@@ -318,8 +318,8 @@ def run_agent(question:str, agent_chain: AgentExecutor) -> str:
 class DocSearchWrapper(BaseTool):
     """Wrapper for Azure GPT Smart Search Engine"""
     
-    name = "Doc Search"
-    description = ""
+    name = "@docsearch"
+    description = "useful when the questions includes the term: @docsearch.\n"
 
     indexes: List[str]
     k: int = 10
@@ -410,8 +410,8 @@ class DocSearchWrapper(BaseTool):
 class CSVTabularWrapper(BaseTool):
     """Wrapper CSV agent"""
     
-    name = "CSV Search"
-    description = ""
+    name = "@csvfile"
+    description = "useful when the questions includes the term: @csvfile.\n"
 
     path: str
     deployment_name: str = "gpt-4"
@@ -446,8 +446,8 @@ class CSVTabularWrapper(BaseTool):
 class SQLDbWrapper(BaseTool):
     """Wrapper SQLDB Agent"""
     
-    name = "SQL Search"
-    description = ""
+    name = "@covidstats"
+    description = "useful when the questions includes the term: @covidstats.\n"
 
     deployment_name: str = "gpt-35-turbo"
     max_tokens: int = 500
@@ -478,12 +478,12 @@ class SQLDbWrapper(BaseTool):
                 verbose=self.verbose
             )
             
-            for i in range(5):
+            for i in range(2):
                 try:
                     response = agent_executor.run(query) 
                     break
-                except:
-                    response = "Error too many failed retries"
+                except Exception as e:
+                    response = str(e)
                     continue
         
             return response
@@ -498,11 +498,12 @@ class SQLDbWrapper(BaseTool):
         raise NotImplementedError("SQLDbWrapper does not support async")
         
         
+        
 class ChatGPTWrapper(BaseTool):
     """Wrapper for a ChatGPT clone"""
     
-    name = "ChatGPT Search"
-    description = ""
+    name = "@chatgpt"
+    description = "useful when the questions includes the term: @chatgpt.\n"
 
     deployment_name: str = "gpt-35-turbo"
     max_tokens: int = 500

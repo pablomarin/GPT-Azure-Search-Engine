@@ -4,7 +4,8 @@
 .github/
 .ipynb_checkpoints/
 .ipynb_aml_checkpoints/ 
-.__pycache__/
+__pycache__/
+common/__pycache__/
 .streamlit/
 *.amltmp 
 *.amltemp

@@ -28,7 +28,7 @@ zip -j backend.zip ../../common/* ./*
 az login -i
 az webapp deployment source config-zip --resource-group "<resource-group-name>" --name "<name-of-backend-app-service>" --src "backend.zip"
 ```
-**Note**: Some FDPO Azure Subscriptions disable Azure Web Apps Basic Authentication every minute (don't know why). So before running the above `az webapp deployment` command, make sure that your backend azure web app has Basic Authentication ON. In the Azure Portal, you can find this settting in: `Configuration->General Settings`.
+**Note**: If you get this error: `An error occured during deployment. Status Code: 401`. **Cause**: Some FDPO Azure Subscriptions disable Azure Web Apps Basic Authentication every minute (don't know why). **Solution**:  before running the above `az webapp deployment` command, make sure that your backend azure web app has Basic Authentication ON. In the Azure Portal, you can find this settting in: `Configuration->General Settings`.
 Don't worry if after running the command it says retrying many times, the zip files already uploaded and is building.
 
 5. In the Azure Portal: **Wait around 5 minutes** and test your bot by going to your Azure Bot Service created in Step 2 and clicking on: **Test in Web Chat**

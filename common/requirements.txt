@@ -1,4 +1,4 @@
-langchain==0.0.189
+langchain==0.0.205
 faiss-cpu
 openai
 tiktoken
@@ -12,3 +12,4 @@ tabulate
 azure-cosmos
 botbuilder-integration-aiohttp>=4.14.4
 streamlit
+python-dotenv

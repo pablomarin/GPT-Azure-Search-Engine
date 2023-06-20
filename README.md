@@ -91,20 +91,22 @@ Note: (Pre-requisite) You need to have an Azure OpenAI service already created
 
 [![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fpablomarin%2FGPT-Azure-Search-Engine%2Fmain%2Fazuredeploy.json) 
 
-_Note: If you have never created a cognitive multi-service account before, please create one manually in the azure portal to read and accept the Responsible AI terms. Once this is deployed, delete this and then use the above deployment button._
+**Note**: If you have never created a `Cognitive services Multi-Service account` before, please create one manually in the azure portal to read and accept the Responsible AI terms. Once this is deployed, delete this and then use the above deployment button.
 
-5. Enable Semantic Search on your Azure Cognitive Search Service:
+5. Make sure that Semantic Search is enabled on your Azure Cognitive Search Service:
    - On the left-nav pane, select Semantic Search (Preview).
-   - Select either the Free plan or the Standard plan. You can switch between the free plan and the standard plan at any time.
+   - If not already selected, select either the Free plan or the Standard plan. You can switch between the free plan and the standard plan at any time.
 
 6. Clone your Forked repo to your local machine or AML Compute Instance. If your repo is private, see below in Troubleshooting section how to clone a private repo.
 
 7. Make sure you run the notebooks on a **Python 3.10 conda enviroment**
-8. Install the dependencies on your machine (make sure you do the below comand on the same conda environment that you are going to run the notebooks:
+8. Install the dependencies on your machine (make sure you do the below pip comand on the same conda environment that you are going to run the notebooks. For example, in AZML compute instance run:
 ```
+conda activate azureml_py310_sdkv2
 pip install -r ./common/requirements.txt
 ```
-9. **Run the Notebooks in order**. They build up on top of each other.
+9. Edit the file `credentials.env` with your own values from the services created in step 4.
+10. **Run the Notebooks in order**. They build up on top of each other.
 
 ---
 
