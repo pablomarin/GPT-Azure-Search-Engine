@@ -28,14 +28,14 @@ jobs:
         run: |
           if [[ $GITHUB_REF_NAME == 'refs/heads/main' ]]; then
               echo "DEPLOY_ENVIRONMENT=Development" >> "$GITHUB_OUTPUT"
-          elseif [[ $GITHUB_REF_NAME == 'refs/heads/develop' ]]; then
+          elif [[ $GITHUB_REF_NAME == 'refs/heads/develop' ]]; then
               echo "DEPLOY_ENVIRONMENT=Development" >> "$GITHUB_OUTPUT"
-          elseif [[ $GITHUB_REF_NAME == 'refs/heads/release' ]]; then
+          elif [[ $GITHUB_REF_NAME == 'refs/heads/release' ]]; then
                echo "DEPLOY_ENVIRONMENT=Development" >> "$GITHUB_OUTPUT"
           else
               echo "DEPLOY_ENVIRONMENT=Development" >> "$GITHUB_OUTPUT"
           fi
-          echo "Setting deploying enviroment to [${{ env.DEPLOY_ENVIRONMENT }}]"
+          echo "Setting deploying enviroment to [${{ steps.set-deploy-env.outputs.DEPLOY_ENVIRONMENT }}]"
       - name: merge backend and common folder 
         run: |
           
