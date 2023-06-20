@@ -13,7 +13,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    outputs:
+      env-name: ${{steps.set-deploy-env.outputs.DEPLOY_ENVIRONMENT}}
     steps:
       - uses: actions/checkout@v2
 
@@ -23,15 +24,16 @@ jobs:
           python-version: '3.10'
 
       - name: Set environment for branch
+        id: set-deploy-env
         run: |
           if [[ $GITHUB_REF_NAME == 'refs/heads/main' ]]; then
-              echo "DEPLOY_ENVIRONMENT=Development" >> "$GITHUB_ENV"
+              echo "DEPLOY_ENVIRONMENT=Development" >> "$GITHUB_OUTPUT"
           elseif [[ $GITHUB_REF_NAME == 'refs/heads/develop' ]]; then
-              echo "DEPLOY_ENVIRONMENT=Development" >> "$GITHUB_ENV"
+              echo "DEPLOY_ENVIRONMENT=Development" >> "$GITHUB_OUTPUT"
           elseif [[ $GITHUB_REF_NAME == 'refs/heads/release' ]]; then
-               echo "DEPLOY_ENVIRONMENT=Development" >> "$GITHUB_ENV"
+               echo "DEPLOY_ENVIRONMENT=Development" >> "$GITHUB_OUTPUT"
           else
-              echo "DEPLOY_ENVIRONMENT=Development" >> "$GITHUB_ENV"
+              echo "DEPLOY_ENVIRONMENT=Development" >> "$GITHUB_OUTPUT"
           fi
           echo "Setting deploying enviroment to [${{ env.DEPLOY_ENVIRONMENT }}]"
       - name: merge backend and common folder 
@@ -58,12 +60,12 @@ jobs:
           path: |
             ./target/backend
             !./target/backend/venv/
-
+  
   deploy:
     runs-on: ubuntu-latest
     needs: build
     environment:
-      name: ${{ env.DEPLOY_ENVIRONMENT }}
+      name: ${{ needs.build.outputs.env-name}}
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
