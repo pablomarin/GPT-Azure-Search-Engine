@@ -10,6 +10,7 @@ on:
   push:
     branches:
       - github-actions-apps
+      - main
   workflow_dispatch:
 
 jobs:
