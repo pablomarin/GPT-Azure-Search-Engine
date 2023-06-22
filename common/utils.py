@@ -1,11 +1,13 @@
 import re
 from io import BytesIO
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 import requests
 import os
 from collections import OrderedDict
 
 import docx2txt
+import tiktoken
+
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.docstore.document import Document
 from langchain.llms import AzureOpenAI
@@ -29,21 +31,22 @@ from pypdf import PdfReader
 from sqlalchemy.engine.url import URL
 from langchain.sql_database import SQLDatabase
 from langchain import SQLDatabaseChain
-from langchain.agents import AgentExecutor
+from langchain.agents import AgentExecutor, initialize_agent, AgentType
+from langchain.tools import BaseTool
+from langchain.utilities import BingSearchAPIWrapper
 from langchain.agents import create_sql_agent
 from langchain.agents.agent_toolkits import SQLDatabaseToolkit
-
-import tiktoken
+from langchain.callbacks.base import BaseCallbackManager
 
 try:
     from .prompts import (COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT,
                           CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX, MSSQL_PROMPT, MSSQL_AGENT_PREFIX, 
-                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT)
+                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT, BING_PROMPT_PREFIX)
 except Exception as e:
     print(e)
     from prompts import (COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT,
                           CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX, MSSQL_PROMPT, MSSQL_AGENT_PREFIX, 
-                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT)
+                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT, BING_PROMPT_PREFIX)
 
 
 
@@ -82,7 +85,7 @@ def parse_txt(file: BytesIO) -> str:
 
 
 # @st.cache_data
-def text_to_docs(text: str | List[str]) -> List[Document]:
+def text_to_docs(text: List[str]) -> List[Document]:
     """Converts a string or list of strings to a list of Documents
     with metadata."""
     if isinstance(text, str):
@@ -155,7 +158,7 @@ def get_sources(answer: Dict[str, Any], docs: List[Document]) -> List[Document]:
 
 
 
-def wrap_text_in_html(text: str | List[str]) -> str:
+def wrap_text_in_html(text: List[str]) -> str:
     """Wraps each text block separated by newlines in <p> tags"""
     if isinstance(text, list):
         # Add horizontal rules between pages
@@ -246,44 +249,42 @@ def order_search_results( agg_search_results: List[dict], reranker_threshold: in
     return ordered_content
 
 
-def get_answer(docs: List[Document], 
+def get_answer(llm: AzureChatOpenAI,
+               docs: List[Document], 
                query: str, 
-               language: str,
-               deployment: str, 
+               language: str, 
                chain_type: str,
                memory: ConversationBufferMemory = None,
-               temperature: float = 0.5, 
-               max_tokens: int = 500
+               callback_manager: BaseCallbackManager = None
               ) -> Dict[str, Any]:
     
     """Gets an answer to a question from a list of Documents."""
 
     # Get the answer
-    
-    if (deployment in ["gpt-35-turbo", "gpt-4", "gpt-4-32k"]) :
-        llm = AzureChatOpenAI(deployment_name=deployment, temperature=temperature, max_tokens=max_tokens)
-    else:
-        llm = AzureOpenAI(deployment_name=deployment, temperature=temperature, max_tokens=max_tokens)
-    
+        
     if chain_type == "stuff":
         if memory == None:
             chain = load_qa_with_sources_chain(llm, chain_type=chain_type,
-                                               prompt=COMBINE_PROMPT)
+                                               prompt=COMBINE_PROMPT,
+                                               callback_manager=callback_manager)
         else:
             chain = load_qa_with_sources_chain(llm, chain_type=chain_type, 
                                                prompt=COMBINE_CHAT_PROMPT,
-                                               memory=memory)
+                                               memory=memory,
+                                               callback_manager=callback_manager)
 
     elif chain_type == "map_reduce":
         if memory == None:
             chain = load_qa_with_sources_chain(llm, chain_type=chain_type, 
                                                question_prompt=COMBINE_QUESTION_PROMPT,
-                                               combine_prompt=COMBINE_PROMPT)
+                                               combine_prompt=COMBINE_PROMPT,
+                                               callback_manager=callback_manager)
         else:
             chain = load_qa_with_sources_chain(llm, chain_type=chain_type, 
                                                question_prompt=COMBINE_QUESTION_PROMPT,
                                                combine_prompt=COMBINE_CHAT_PROMPT,
-                                               memory=memory)
+                                               memory=memory,
+                                               callback_manager=callback_manager)
     else:
         print("Error: chain_type", chain_type, "not supported")
     
@@ -300,10 +301,8 @@ def run_agent(question:str, agent_chain: AgentExecutor) -> str:
     
     except OutputParserException as e:
         # If the agent has a parsing error, we use OpenAI model again to reformat the error and give a good answer
-        MODEL = os.environ["AZURE_OPENAI_MODEL_NAME"] if "AZURE_OPENAI_MODEL_NAME" in os.environ else "gpt-35-turbo"
-        llm = AzureChatOpenAI(deployment_name=MODEL, temperature=0, max_tokens=500)
         chatgpt_chain = LLMChain(
-                llm=llm, 
+                llm=agent_chain.agent.llm_chain.llm, 
                     prompt=PromptTemplate(input_variables=["error"],template='Remove any json formating from the below text, also remove any portion that says someting similar this "Could not parse LLM output: ". Reformat your response in beautiful Markdown. Just give me the reformated text, nothing else.\n Text: {error}'), 
                 verbose=False
             )
@@ -315,22 +314,20 @@ def run_agent(question:str, agent_chain: AgentExecutor) -> str:
 ######## TOOL CLASSES #####################################
 ###########################################################
     
-class DocSearchWrapper(BaseTool):
-    """Wrapper for Azure GPT Smart Search Engine"""
+class DocSearchTool(BaseTool):
+    """Tool for Azure GPT Smart Search Engine"""
     
     name = "@docsearch"
     description = "useful when the questions includes the term: @docsearch.\n"
 
+    llm: AzureChatOpenAI
     indexes: List[str]
     k: int = 10
-    deployment_name: str = "gpt-35-turbo"
     response_language: str = "English"
     reranker_th: int = 1
-    max_tokens: int = 500
-    temperature: float = 0.5
     chunks_limit:int = 100
     similarity_k: int = 4
-    verbose: bool = False
+
     
     def _run(self, query: str) -> str:
 
@@ -343,12 +340,12 @@ class DocSearchWrapper(BaseTool):
                     docs.append(Document(page_content=page, metadata={"source": value["location"]}))
 
             # Calculate number of tokens of our docs
-            tokens_limit = model_tokens_limit(self.deployment_name)
+            tokens_limit = model_tokens_limit(self.llm.deployment_name)
 
             if(len(docs)>0):
                 num_tokens = num_tokens_from_docs(docs)
                 if self.verbose:
-                    print("Custom token limit for", self.deployment_name, ":", tokens_limit)
+                    print("Custom token limit for", self.llm.deployment_name, ":", tokens_limit)
                     print("Combined docs tokens count:",num_tokens)
 
             else:
@@ -374,9 +371,7 @@ class DocSearchWrapper(BaseTool):
             if self.verbose:
                 print("Chain Type selected:", chain_type)
 
-            response = get_answer(docs=top_docs, query=query, language=self.response_language, 
-                                  deployment=self.deployment_name, chain_type=chain_type,
-                                  temperature=self.temperature, max_tokens=self.max_tokens)
+            response = get_answer(llm=self.llm, query=query, docs=top_docs, chain_type=chain_type, language=self.response_language)
             
             answer = response['output_text']
             
@@ -404,26 +399,22 @@ class DocSearchWrapper(BaseTool):
     
     async def _arun(self, query: str) -> str:
         """Use the tool asynchronously."""
-        raise NotImplementedError("SmartSearchWrapper does not support async")
+        raise NotImplementedError("DocSearchTool does not support async")
     
 
-class CSVTabularWrapper(BaseTool):
-    """Wrapper CSV agent"""
+class CSVTabularTool(BaseTool):
+    """Tool CSV agent"""
     
     name = "@csvfile"
     description = "useful when the questions includes the term: @csvfile.\n"
 
     path: str
-    deployment_name: str = "gpt-4"
-    max_tokens: int = 500
-    temperature: float = 0
-    verbose: bool = False
+    llm: AzureChatOpenAI
     
     def _run(self, query: str) -> str:
         
         try:
-            llm = AzureChatOpenAI(deployment_name=self.deployment_name, temperature=self.temperature, max_tokens=self.max_tokens)
-            agent = create_csv_agent(llm, self.path, verbose=self.verbose)
+            agent = create_csv_agent(self.llm, self.path, verbose=self.verbose, callback_manager=self.callbacks,)
             for i in range(5):
                 try:
                     response = agent.run(CSV_PROMPT_PREFIX + query + CSV_PROMPT_SUFFIX) 
@@ -440,82 +431,71 @@ class CSVTabularWrapper(BaseTool):
     
     async def _arun(self, query: str) -> str:
         """Use the tool asynchronously."""
-        raise NotImplementedError("CSVTabularWrapper does not support async")
+        raise NotImplementedError("CSVTabularTool does not support async")
         
         
-class SQLDbWrapper(BaseTool):
-    """Wrapper SQLDB Agent"""
+class SQLDbTool(BaseTool):
+    """Tool SQLDB Agent"""
     
     name = "@covidstats"
     description = "useful when the questions includes the term: @covidstats.\n"
 
-    deployment_name: str = "gpt-35-turbo"
-    max_tokens: int = 500
-    temperature: float = 0
-    verbose: bool = False
+    llm: AzureChatOpenAI
     
     def _run(self, query: str) -> str:
-        try:
-            db_config = {
-                'drivername': 'mssql+pyodbc',
-                'username': os.environ["SQL_SERVER_USERNAME"] +'@'+ os.environ["SQL_SERVER_ENDPOINT"],
-                'password': os.environ["SQL_SERVER_PASSWORD"],
-                'host': os.environ["SQL_SERVER_ENDPOINT"],
-                'port': 1433,
-                'database': os.environ["SQL_SERVER_DATABASE"],
-                'query': {'driver': 'ODBC Driver 17 for SQL Server'}
-            }
+        db_config = {
+            'drivername': 'mssql+pyodbc',
+            'username': os.environ["SQL_SERVER_USERNAME"] +'@'+ os.environ["SQL_SERVER_ENDPOINT"],
+            'password': os.environ["SQL_SERVER_PASSWORD"],
+            'host': os.environ["SQL_SERVER_ENDPOINT"],
+            'port': 1433,
+            'database': os.environ["SQL_SERVER_DATABASE"],
+            'query': {'driver': 'ODBC Driver 17 for SQL Server'}
+        }
 
-            db_url = URL.create(**db_config)
-            db = SQLDatabase.from_uri(db_url)
-            llm = AzureChatOpenAI(deployment_name=self.deployment_name, temperature=self.temperature, max_tokens=self.max_tokens)
-            toolkit = SQLDatabaseToolkit(db=db, llm=llm)
-            agent_executor = create_sql_agent(
-                prefix=MSSQL_AGENT_PREFIX,
-                format_instructions = MSSQL_AGENT_FORMAT_INSTRUCTIONS,
-                llm=llm,
-                toolkit=toolkit,
-                verbose=self.verbose
-            )
-            
-            for i in range(2):
-                try:
-                    response = agent_executor.run(query) 
-                    break
-                except Exception as e:
-                    response = str(e)
-                    continue
+        db_url = URL.create(**db_config)
+        db = SQLDatabase.from_uri(db_url)
+        toolkit = SQLDatabaseToolkit(db=db, llm=self.llm)
+        agent_executor = create_sql_agent(
+            prefix=MSSQL_AGENT_PREFIX,
+            format_instructions = MSSQL_AGENT_FORMAT_INSTRUCTIONS,
+            llm=self.llm,
+            toolkit=toolkit,
+            callback_manager=self.callbacks,
+            verbose=self.verbose
+        )
+
+        for i in range(2):
+            try:
+                response = agent_executor.run(query) 
+                break
+            except Exception as e:
+                response = str(e)
+                continue
+
+        return response
         
-            return response
-        
-        except Exception as e:
-            response = e
-            print(e)
-            return response
     
     async def _arun(self, query: str) -> str:
         """Use the tool asynchronously."""
-        raise NotImplementedError("SQLDbWrapper does not support async")
+        raise NotImplementedError("SQLDbTool does not support async")
         
         
         
-class ChatGPTWrapper(BaseTool):
-    """Wrapper for a ChatGPT clone"""
+class ChatGPTTool(BaseTool):
+    """Tool for a ChatGPT clone"""
     
     name = "@chatgpt"
     description = "useful when the questions includes the term: @chatgpt.\n"
 
-    deployment_name: str = "gpt-35-turbo"
-    max_tokens: int = 500
-    temperature: float = 0.5
-    verbose: bool = False
+    llm: AzureChatOpenAI
     
     def _run(self, query: str) -> str:
         try:
-            llm = AzureChatOpenAI(deployment_name=self.deployment_name, temperature=self.temperature, max_tokens=self.max_tokens)
             chatgpt_chain = LLMChain(
-                llm=llm, 
-                prompt=CHATGPT_PROMPT, 
+                llm=self.llm, 
+                prompt=CHATGPT_PROMPT,
+                callback_manager=self.callbacks,
                 verbose=self.verbose
             )
 
@@ -527,4 +507,90 @@ class ChatGPTWrapper(BaseTool):
             
     async def _arun(self, query: str) -> str:
         """Use the tool asynchronously."""
-        raise NotImplementedError("ChatGPTWrapper does not support async")
+        raise NotImplementedError("ChatGPTTool does not support async")
+        
+
+# class BingSearchTool(BaseTool):
+#     """Tool for a Bing Search Wrapper"""
+    
+#     name = "@bing"
+#     description = "useful when the questions includes the term: @bing.\n"
+
+#     llm: AzureChatOpenAI
+#     k: int = 5
+    
+#     def _run(self, query: str) -> str:
+#         try:
+#             bing = BingSearchAPIWrapper(k=self.k)
+#             context = str(bing.results(query,num_results=self.k))
+#             chatgpt_chain = LLMChain(
+#                 llm=self.llm, 
+#                 prompt=PromptTemplate(input_variables=["context","question"],template='Only using the following pieces of texts with its corresponding titles and links: \n "{context}".\n Answer this question: {question}.\n\n If the answer to the question is not in the above pieces of texts, say "The answer is not in the context provided". Do not make up an answer. If you can provide the answer based on the pieces of texts, please also provide the link along with the answer. Nothing else.'),
+#                 callback_manager=self.callbacks,
+#                 verbose=self.verbose
+#             )
+
+#             response = chatgpt_chain({"question": query, "context": context})['text']
+
+#             return response
+        
+#         except Exception as e:
+#             print(e)
+            
+#     async def _arun(self, query: str) -> str:
+#         """Use the tool asynchronously."""
+#         raise NotImplementedError("ChatGPTTool does not support async")
+    
+    
+class BingSearchResults(BaseTool):
+    """Tool for a Bing Search Wrapper"""
+
+    name = "@bing"
+    description = "useful when the questions includes the term: @bing.\n"
+
+    k: int = 5
+
+    def _run(self, query: str) -> str:
+        bing = BingSearchAPIWrapper(k=self.k)
+        return bing.results(query,num_results=self.k)
+    
+    async def _arun(self, query: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError("BingSearchResults does not support async")
+            
+
+class BingSearchTool(BaseTool):
+    """Tool for a Bing Search Wrapper"""
+    
+    name = "@bing"
+    description = "useful when the questions includes the term: @bing.\n"
+    
+    llm: AzureChatOpenAI
+    k: int = 5
+    
+    def _run(self, query: str) -> str:
+        try:
+            tools = [BingSearchResults(k=self.k)]
+            agent_executor = initialize_agent(tools=tools, 
+                                              llm=self.llm, 
+                                              agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, 
+                                              agent_kwargs={'prefix':BING_PROMPT_PREFIX},
+                                              callback_manager=self.callbacks,
+                                              verbose=self.verbose)
+            
+            for i in range(2):
+                try:
+                    response = agent_executor.run(query) 
+                    break
+                except Exception as e:
+                    response = str(e)
+                    continue
+
+            return response
+        
+        except Exception as e:
+            print(e)
+    
+    async def _arun(self, query: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError("BingSearchTool does not support async")
