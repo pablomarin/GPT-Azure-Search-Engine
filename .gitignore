@@ -1,7 +1,6 @@
 .amlignore
 .zip
 .chroma/
-.github/
 .ipynb_checkpoints/
 .ipynb_aml_checkpoints/ 
 __pycache__/
