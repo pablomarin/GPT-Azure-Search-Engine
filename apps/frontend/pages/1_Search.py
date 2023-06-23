@@ -7,6 +7,7 @@ import random
 from collections import OrderedDict
 from openai.error import OpenAIError
 from langchain.docstore.document import Document
+from langchain.chat_models import AzureChatOpenAI
 
 from utils import (
     get_search_results,
@@ -84,6 +85,7 @@ else:
     os.environ["OPENAI_API_TYPE"] = "azure"
     
     MODEL = os.environ.get("AZURE_OPENAI_MODEL_NAME")
+    llm = AzureChatOpenAI(deployment_name=MODEL, temperature=0, max_tokens=500)
                            
     if button or st.session_state.get("submit"):
         if not query:
@@ -132,7 +134,8 @@ else:
                                     top_docs = docs
                                     chain_type = "stuff"
                                 
-                                answer = get_answer(top_docs, query, language=language, deployment=MODEL, chain_type = chain_type)
+                                answer = get_answer(llm=llm, docs=top_docs, query=query, language=language, chain_type=chain_type)
+                                
                             else:
                                 answer = {"output_text":"No results found" }
                     else:

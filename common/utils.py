@@ -578,7 +578,7 @@ class BingSearchTool(BaseTool):
                                               callback_manager=self.callbacks,
                                               verbose=self.verbose)
             
-            for i in range(2):
+            for i in range(3):
                 try:
                     response = agent_executor.run(query) 
                     break
