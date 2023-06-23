@@ -10,8 +10,9 @@ from langchain.memory import ConversationBufferWindowMemory
 from langchain.agents import ConversationalChatAgent, AgentExecutor, Tool
 
 #custom libraries that we will use later in the app
-from utils import DocSearchWrapper, CSVTabularWrapper, SQLDbWrapper, ChatGPTWrapper, run_agent
-from prompts import CUSTOM_CHATBOT_PREFIX, CUSTOM_CHATBOT_SUFFIX
+from utils import DocSearchTool, CSVTabularTool, SQLDbTool, ChatGPTTool, BingSearchTool, run_agent
+from callbacks import MyCustomHandler
+from prompts import CUSTOM_CHATBOT_PREFIX, CUSTOM_CHATBOT_SUFFIX 
 
 from botbuilder.core import ActivityHandler, TurnContext
 from botbuilder.schema import ChannelAccount, Activity, ActivityTypes
@@ -27,19 +28,23 @@ class MyBot(ActivityHandler):
     # See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
     
     # Set a Deployment model name
-    MODEL = os.environ.get("AZURE_OPENAI_MODEL_NAME")
+    MODEL_DEPLOYMENT_NAME = os.environ.get("AZURE_OPENAI_MODEL_NAME")
+    
+    llm = AzureChatOpenAI(deployment_name=MODEL_DEPLOYMENT_NAME, temperature=0.5, max_tokens=500)
     
     # Initialize our Tools/Experts
-    doc_search = DocSearchWrapper(indexes=["cogsrch-index-files", "cogsrch-index-csv"],k=5, deployment_name=MODEL, chunks_limit=100, similarity_k=5, verbose=False)
-    www_search = BingSearchAPIWrapper(k=5)
-    sql_search = SQLDbWrapper(deployment_name=MODEL, verbose=False)
-    chatgpt_search = ChatGPTWrapper(deployment_name=MODEL, verbose=False)
+    indexes = ["cogsrch-index-files", "cogsrch-index-csv"]
+    doc_search = DocSearchTool(llm=llm, indexes=indexes, k=10, chunks_limit=100, similarity_k=5)
+    www_search = BingSearchTool(llm=llm, k=5)
+    sql_search = SQLDbTool(llm=llm)
+    chatgpt_search = ChatGPTTool(llm=llm)
     
     tools = [
         Tool(
             name = "@bing",
             func=www_search.run,
-            description='useful when the questions includes the term: @bing.\n'
+            description='useful when the questions includes the term: @bing.\n',
+            return_direct=True
             ),
         Tool(
             name = "@covidstats",
@@ -57,15 +62,15 @@ class MyBot(ActivityHandler):
             name = "@chatgpt",
             func=chatgpt_search.run,
             description='useful when the questions includes the term: @chatgpt.\n',
-            return_direct=False
+            return_direct=True
         ),
     ]
     
     # Set main Agent
-    llm = AzureChatOpenAI(deployment_name=MODEL, temperature=0.5, max_tokens=500)
-    agent = ConversationalChatAgent.from_llm_and_tools(llm=llm, tools=tools, system_message=CUSTOM_CHATBOT_PREFIX, human_message=CUSTOM_CHATBOT_SUFFIX)
+    llm_a = AzureChatOpenAI(deployment_name=MODEL_DEPLOYMENT_NAME, temperature=0.5, max_tokens=500)
+    agent = ConversationalChatAgent.from_llm_and_tools(llm=llm_a, tools=tools, system_message=CUSTOM_CHATBOT_PREFIX, human_message=CUSTOM_CHATBOT_SUFFIX)
     memory = ConversationBufferWindowMemory(memory_key="chat_history", return_messages=True, k=10)
-    agent_chain = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True, memory=memory)
+    agent_chain = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, memory=memory)
     
     
     async def on_message_activity(self, turn_context: TurnContext):

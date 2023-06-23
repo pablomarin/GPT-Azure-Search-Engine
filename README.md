@@ -67,7 +67,7 @@ To open the Bot in MS Teams, click [HERE](https://teams.microsoft.com/l/chat/0/0
    - Uses [Bot Framework](https://dev.botframework.com/) and [Bot Service](https://azure.microsoft.com/en-us/products/bot-services/) to Host the Bot API Backend and to expose it to multiple channels including MS Teams.
    - 100% Python.
    - Uses [Azure Cognitive Services](https://azure.microsoft.com/en-us/products/cognitive-services/) to index and enrich unstructured documents: Detect Language, OCR images, Key-phrases extraction, entity recognition (persons, emails, addresses, organizations, urls).
-   - Uses [LangChain](https://langchain.readthedocs.io/en/latest/) as a wrapper for interacting with Azure OpenAI , vector stores, constructing prompts and creating agents.
+   - Uses [LangChain](https://langchain.readthedocs.io/en/latest/) as a wrapper for interacting with Azure OpenAI , vector stores, callbacks, Pluggins/Tools, constructing prompts and creating agents.
    - Multi-Lingual (ingests, indexes and understand any language)
    - Multi-Index -> multiple search indexes
    - Tabular Data Q&A with CSV files and SQL Databases
