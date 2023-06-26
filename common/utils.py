@@ -1,6 +1,6 @@
 import re
 from io import BytesIO
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Awaitable, Callable, Tuple, Type, Union
 import requests
 import os
 from collections import OrderedDict
@@ -376,8 +376,7 @@ class DocSearchTool(BaseTool):
             answer = response['output_text']
             
             try:
-                split_word = "Source"
-                split_regex = re.compile(f"{split_word}s:?\\W*", re.IGNORECASE)
+                split_regex = re.compile(f"sources?:?\\W*", re.IGNORECASE)
                 answer_text = split_regex.split(answer)[0]
                 sources_list = split_regex.split(answer)[1].replace(" ","").split(",")
 
@@ -568,9 +567,11 @@ class BingSearchTool(BaseTool):
     llm: AzureChatOpenAI
     k: int = 5
     
-    def _run(self, query: str) -> str:
+    def _run(self, tool_input: Union[str, Dict],) -> str:
         try:
             tools = [BingSearchResults(k=self.k)]
+            parsed_input = self._parse_input(tool_input)
+
             agent_executor = initialize_agent(tools=tools, 
                                               llm=self.llm, 
                                               agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, 
@@ -580,7 +581,7 @@ class BingSearchTool(BaseTool):
             
             for i in range(3):
                 try:
-                    response = agent_executor.run(query) 
+                    response = agent_executor.run(parsed_input) 
                     break
                 except Exception as e:
                     response = str(e)
