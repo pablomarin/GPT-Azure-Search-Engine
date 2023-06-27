@@ -26,8 +26,9 @@ os.environ["OPENAI_API_KEY"] = os.environ.get("AZURE_OPENAI_API_KEY")
 os.environ["OPENAI_API_VERSION"] = os.environ.get("AZURE_OPENAI_API_VERSION")
 os.environ["OPENAI_API_TYPE"] = "azure"
 
-# Define the callbacks that tells the client the process to get to the answer
-class LangchainBotServiceHandler(BaseCallbackHandler):
+
+# Callback hanlder used for the bot service to inform the client of the thought process before the final response
+class BotServiceCallbackHandler(BaseCallbackHandler):
     """Callback handler to use in Bot Builder Application"""
     
     def __init__(self, turn_context: TurnContext) -> None:
@@ -46,7 +47,6 @@ class LangchainBotServiceHandler(BaseCallbackHandler):
             asyncio.run(self.tc.send_activity(f"\u2705 Searching: {action} ..."))
             asyncio.run(self.tc.send_activity(Activity(type=ActivityTypes.typing)))
 
-
 class MyBot(ActivityHandler):
     # See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
     
@@ -58,7 +58,7 @@ class MyBot(ActivityHandler):
         typing_activity = Activity(type=ActivityTypes.typing)
         await turn_context.send_activity(typing_activity)
         
-        cb_handler = LangchainBotServiceHandler(turn_context)
+        cb_handler = BotServiceCallbackHandler(turn_context)
         cb_manager = CallbackManager(handlers=[cb_handler])
 
         llm = AzureChatOpenAI(deployment_name=self.MODEL_DEPLOYMENT_NAME, temperature=0.5, max_tokens=500, callback_manager=cb_manager)
@@ -67,7 +67,7 @@ class MyBot(ActivityHandler):
         indexes = ["cogsrch-index-files", "cogsrch-index-csv"]
         doc_search = DocSearchTool(llm=llm, indexes=indexes, k=10, chunks_limit=100, similarity_k=5, callback_manager=cb_manager, return_direct=True)
         www_search = BingSearchTool(llm=llm, k=5, callback_manager=cb_manager, return_direct=True)
-        sql_search = SQLDbTool(llm=llm, callback_manager=cb_manager, return_direct=True)
+        sql_search = SQLDbTool(llm=llm, k=10, callback_manager=cb_manager, return_direct=True)
         chatgpt_search = ChatGPTTool(llm=llm, callback_manager=cb_manager, return_direct=True)
 
         tools = [www_search, sql_search, doc_search, chatgpt_search]

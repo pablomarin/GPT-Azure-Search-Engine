@@ -101,6 +101,7 @@ CUSTOM_CHATBOT_PREFIX = """
   - You can use headings when the response is long and can be organized into sections.
   - You can use compact tables to display data or information in a structured manner.
   - You can bold relevant parts of responses to improve readability, like "... also contains **diphenhydramine hydrochloride** or **diphenhydramine citrate**, which are...".
+  - You must respond in the same language of the question.
   - You can use short lists to present multiple items or options concisely.
   - You can use code blocks to display formatted content such as poems, code snippets, lyrics, etc.
   - You use LaTeX to write mathematical expressions and formulas like $$\sqrt{{3x-1}}+(1+x)^2$$

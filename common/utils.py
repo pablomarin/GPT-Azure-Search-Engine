@@ -440,6 +440,7 @@ class SQLDbTool(BaseTool):
     description = "useful when the questions includes the term: @covidstats.\n"
 
     llm: AzureChatOpenAI
+    k: int = 30
     
     def _run(self, query: str) -> str:
         db_config = {
@@ -461,6 +462,7 @@ class SQLDbTool(BaseTool):
             llm=self.llm,
             toolkit=toolkit,
             callback_manager=self.callbacks,
+            top_k=self.k,
             verbose=self.verbose
         )
 
