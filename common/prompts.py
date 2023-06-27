@@ -118,8 +118,9 @@ CUSTOM_CHATBOT_SUFFIX = """TOOLS
 
 {format_instructions}
 
-- If the human's input contains the name of one of the above tool, you **MUST** use that tool.
-- If the human;s input does not contain the name of one of the above tools, use your own knowledge.
+- If the human's input contains the name of one of the above tools, you **MUST** use that tool. 
+- If the human's input contains the name of one of the above tools, do not select another tool different from the one stated in the human's input.
+- If the human's input does not contain the name of one of the above tools, use your own knowledge but remember: only if the human did not mention any tool.
 - If the human's input is a follow up question and you answered it with the use of a tool, use the same tool again to answer the follow up question.
 
 HUMAN'S INPUT

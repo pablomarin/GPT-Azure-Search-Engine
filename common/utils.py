@@ -508,37 +508,6 @@ class ChatGPTTool(BaseTool):
         """Use the tool asynchronously."""
         raise NotImplementedError("ChatGPTTool does not support async")
         
-
-# class BingSearchTool(BaseTool):
-#     """Tool for a Bing Search Wrapper"""
-    
-#     name = "@bing"
-#     description = "useful when the questions includes the term: @bing.\n"
-
-#     llm: AzureChatOpenAI
-#     k: int = 5
-    
-#     def _run(self, query: str) -> str:
-#         try:
-#             bing = BingSearchAPIWrapper(k=self.k)
-#             context = str(bing.results(query,num_results=self.k))
-#             chatgpt_chain = LLMChain(
-#                 llm=self.llm, 
-#                 prompt=PromptTemplate(input_variables=["context","question"],template='Only using the following pieces of texts with its corresponding titles and links: \n "{context}".\n Answer this question: {question}.\n\n If the answer to the question is not in the above pieces of texts, say "The answer is not in the context provided". Do not make up an answer. If you can provide the answer based on the pieces of texts, please also provide the link along with the answer. Nothing else.'),
-#                 callback_manager=self.callbacks,
-#                 verbose=self.verbose
-#             )
-
-#             response = chatgpt_chain({"question": query, "context": context})['text']
-
-#             return response
-        
-#         except Exception as e:
-#             print(e)
-            
-#     async def _arun(self, query: str) -> str:
-#         """Use the tool asynchronously."""
-#         raise NotImplementedError("ChatGPTTool does not support async")
     
     
 class BingSearchResults(BaseTool):
@@ -581,7 +550,7 @@ class BingSearchTool(BaseTool):
             
             for i in range(3):
                 try:
-                    response = agent_executor.run(parsed_input) 
+                    response = run_agent(parsed_input, agent_executor)
                     break
                 except Exception as e:
                     response = str(e)

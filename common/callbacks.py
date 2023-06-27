@@ -2,8 +2,6 @@ import sys
 from typing import Any, Dict, List, Optional, Union
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain.schema import AgentAction, AgentFinish, LLMResult
-
-DEFAULT_ANSWER_PREFIX_TOKENS = ["Final", "Answer", ":"]
         
 class MyCustomHandler(BaseCallbackHandler):
     """Callback handler for streaming in agents.
@@ -28,5 +26,4 @@ class MyCustomHandler(BaseCallbackHandler):
 
     def on_agent_action(self, action: AgentAction, **kwargs: Any) -> Any:
         sys.stdout.write(f"{action.log}\n")
-        
-        
+               
