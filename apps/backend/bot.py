@@ -44,7 +44,7 @@ class BotServiceCallbackHandler(BaseCallbackHandler):
     def on_agent_action(self, action: AgentAction, **kwargs: Any) -> Any:
         if "Action Input" in action.log:
             action = action.log.split("Action Input:")[1]
-            asyncio.run(self.tc.send_activity(f"\u2705 Searching: {action} ..."))
+            asyncio.run(self.tc.send_activity(f"\u2611 Searching: {action} ..."))
             asyncio.run(self.tc.send_activity(Activity(type=ActivityTypes.typing)))
 
 class MyBot(ActivityHandler):
