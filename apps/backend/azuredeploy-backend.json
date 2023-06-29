@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.18.4.5664",
-      "templateHash": "16951122425128118335"
+      "templateHash": "3736650606403293203"
     }
   },
   "parameters": {
@@ -32,8 +32,7 @@
       "type": "string"
     },
     "Azure_Search_Name": {
-      "type": "string",
-      "defaultValue": "[format('cog-search-{0}', uniqueString(parameters('resourceGroupSearch')))]"
+      "type": "string"
     },
     "AZURE_SEARCH_API_VERSION": {
       "type": "string",
