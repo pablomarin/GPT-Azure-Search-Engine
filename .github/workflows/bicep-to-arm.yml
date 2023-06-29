@@ -24,11 +24,9 @@ jobs:
     - name: Run Bicep build
       run: |
         bicep build azuredeploy.bicep
-        ls -l azuredeploy.json
         bicep build apps\backend\azuredeploy-backend.bicep
-        ls -l apps\backend\azuredeploy-backend.json
         bicep build apps\frontend\azuredeploy-frontend.bicep
-        ls -l apps\frontend\azuredeploy-frontend.json
+        ls -l *.json
 
     - uses: EndBug/add-and-commit@v7.0.0
       with:
