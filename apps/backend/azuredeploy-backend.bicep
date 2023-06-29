@@ -10,7 +10,7 @@ param DATASOURCE_SAS_TOKEN string = '?sv=2022-11-02&ss=bf&srt=sco&sp=rltfx&se=20
 
 // Reference to existing Azure Search service
 param resourceGroupSearch string
-param Azure_Search_Name string = 'cog-search-${uniqueString(resourceGroupSearch)}'
+param Azure_Search_Name string 
 
 resource azureSearch 'Microsoft.Search/searchServices@2021-04-01-preview' existing = {
   name: Azure_Search_Name
