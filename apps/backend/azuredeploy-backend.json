@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.18.4.5664",
-      "templateHash": "10784875396146033010"
+      "templateHash": "3557824953551353858"
     }
   },
   "parameters": {
@@ -28,17 +28,12 @@
         "description": "Optional. The SAS token for the Azure Storage Account"
       }
     },
-    "AZURE_SEARCH_ENDPOINT": {
+    "Azure_Search_Name": {
       "type": "string",
-      "metadata": {
-        "description": "Required. The endpoint of the Azure Search service."
-      }
+      "defaultValue": "[format('cog-search-{0}', uniqueString(resourceGroup().id))]"
     },
-    "AZURE_SEARCH_KEY": {
-      "type": "securestring",
-      "metadata": {
-        "description": "Required. The API key for the Azure Search service."
-      }
+    "resourceGroupSearch": {
+      "type": "string"
     },
     "AZURE_SEARCH_API_VERSION": {
       "type": "string",
@@ -246,11 +241,11 @@
             },
             {
               "name": "AZURE_SEARCH_ENDPOINT",
-              "value": "[parameters('AZURE_SEARCH_ENDPOINT')]"
+              "value": "[format('https://{0}.search.windows.net', parameters('Azure_Search_Name'))]"
             },
             {
               "name": "AZURE_SEARCH_KEY",
-              "value": "[parameters('AZURE_SEARCH_KEY')]"
+              "value": "[listKeys(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupSearch')), 'Microsoft.Search/searchServices', parameters('Azure_Search_Name')), '2021-04-01-preview').keys[0].value]"
             },
             {
               "name": "AZURE_SEARCH_API_VERSION",
