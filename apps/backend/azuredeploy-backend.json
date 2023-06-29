@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.18.4.5664",
-      "templateHash": "3557824953551353858"
+      "templateHash": "16951122425128118335"
     }
   },
   "parameters": {
@@ -28,12 +28,12 @@
         "description": "Optional. The SAS token for the Azure Storage Account"
       }
     },
-    "Azure_Search_Name": {
-      "type": "string",
-      "defaultValue": "[format('cog-search-{0}', uniqueString(resourceGroup().id))]"
-    },
     "resourceGroupSearch": {
       "type": "string"
+    },
+    "Azure_Search_Name": {
+      "type": "string",
+      "defaultValue": "[format('cog-search-{0}', uniqueString(parameters('resourceGroupSearch')))]"
     },
     "AZURE_SEARCH_API_VERSION": {
       "type": "string",
