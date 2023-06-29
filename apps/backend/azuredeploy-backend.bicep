@@ -8,12 +8,16 @@ param MicrosoftAppPassword string
 @description('Optional. The SAS token for the Azure Storage Account')
 param DATASOURCE_SAS_TOKEN string = '?sv=2022-11-02&ss=bf&srt=sco&sp=rltfx&se=2023-11-29T01:50:59Z&st=2023-05-10T16:50:59Z&spr=https&sig=ZT7MLy%2BnlvAxUKKj5v0RwoWObXaab3gO4ec2%2Fci6iL0%3D'
 
-@description('Required. The endpoint of the Azure Search service.')
-param AZURE_SEARCH_ENDPOINT string
+// Reference to existing Azure Search service
+param Azure_Search_Name string = 'cog-search-${uniqueString(resourceGroup().id)}'
+param resourceGroupSearch string
 
-@description('Required. The API key for the Azure Search service.')
-@secure()
-param AZURE_SEARCH_KEY string
+resource azureSearch 'Microsoft.Search/searchServices@2021-04-01-preview' existing = {
+  name: Azure_Search_Name
+  scope: resourceGroup(resourceGroupSearch)
+}
+
+// End reference to existing Azure Search service
 
 @description('Optional. The API version for the Azure Search service.')
 param AZURE_SEARCH_API_VERSION string = '2021-04-30-Preview'
@@ -151,11 +155,11 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'AZURE_SEARCH_ENDPOINT'
-          value: AZURE_SEARCH_ENDPOINT
+          value: 'https://${Azure_Search_Name}.search.windows.net'
         }
         {
           name: 'AZURE_SEARCH_KEY'
-          value: AZURE_SEARCH_KEY
+          value: azureSearch.listKeys().keys[0].value
         }
         {
           name: 'AZURE_SEARCH_API_VERSION'
