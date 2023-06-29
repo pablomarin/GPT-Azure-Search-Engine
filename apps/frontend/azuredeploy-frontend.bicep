@@ -21,8 +21,9 @@ param BOT_SERVICE_NAME string
 @secure()
 param BOT_DIRECTLINE_SECRET_KEY string
 
-@description('Optional. The SAS token of the Azure Storage Account.')
-param DATASOURCE_SAS_TOKEN string = '?sv=2022-11-02&ss=bf&srt=sco&sp=rltfx&se=2023-11-29T01:50:59Z&st=2023-05-10T16:50:59Z&spr=https&sig=ZT7MLy%2BnlvAxUKKj5v0RwoWObXaab3gO4ec2%2Fci6iL0%3D'
+@description('Required. The SAS token for the Azure Storage Account hosting your data')
+@secure()
+param DATASOURCE_SAS_TOKEN string 
 
 @description('Required. The endpoint of the Azure Search.')
 param AZURE_SEARCH_ENDPOINT string
