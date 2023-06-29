@@ -9,8 +9,8 @@ param MicrosoftAppPassword string
 param DATASOURCE_SAS_TOKEN string = '?sv=2022-11-02&ss=bf&srt=sco&sp=rltfx&se=2023-11-29T01:50:59Z&st=2023-05-10T16:50:59Z&spr=https&sig=ZT7MLy%2BnlvAxUKKj5v0RwoWObXaab3gO4ec2%2Fci6iL0%3D'
 
 // Reference to existing Azure Search service
-param Azure_Search_Name string = 'cog-search-${uniqueString(resourceGroup().id)}'
 param resourceGroupSearch string
+param Azure_Search_Name string = 'cog-search-${uniqueString(resourceGroupSearch)}'
 
 resource azureSearch 'Microsoft.Search/searchServices@2021-04-01-preview' existing = {
   name: Azure_Search_Name
