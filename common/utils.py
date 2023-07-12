@@ -377,8 +377,14 @@ class DocSearchTool(BaseTool):
             
             try:
                 split_regex = re.compile(f"sources?:?\\W*", re.IGNORECASE)
-                answer_text = split_regex.split(answer)[0]
-                sources_list = split_regex.split(answer)[1].replace(" ","").split(",")
+                # answer_text = split_regex.split(answer)[0]
+                # sources_list = split_regex.split(answer)[1].replace(" ","").split(",")
+                
+                # sometimes the answer has 'sources:' keyword in its content, if so, just try to 'rebuild' it event we don't what else letters extractly be replaced 
+                if len(split_regex.split(answer)) >2:
+                    answer_text = 'source'.join(split_regex.split(answer)[0:-1])
+                else:
+                    answer_text = split_regex.split(answer)[0]
 
                 sources_html = '<br><u>Sources</u>: '
                 for index, value in enumerate(sources_list):
