@@ -33,7 +33,7 @@ Source: https://yyyy.com/article3.csv?s=kjsdhfd&category=c&sort=asc&page=2
 Content: The terms of this Agreement shall be subject to the laws of Manchester, England, and any disputes arising from or relating to this Agreement shall be exclusively resolved by the courts of that state, except where either party may seek an injunction or other legal remedy to safeguard their Intellectual Property Rights.
 Source: https://ppp.com/article4.pdf?s=lkhljkhljk&category=c&sort=asc
 =========
-FINAL ANSWER IN English: This Agreement is governed by English law, specifically the laws of Manchester, England<sup><a href="https://xxx.com/article1.pdf?s=casdfg&category=ab&sort=asc&page=1">[1]</a></sup><sup><a href="https://ppp.com/article4.pdf?s=lkhljkhljk&category=c&sort=asc">[2]</a></sup>. \n Anything else I can help you with?.
+FINAL ANSWER IN English: This Agreement is governed by English law, specifically the laws of Manchester, England<sup><a href="https://xxx.com/article1.pdf?s=casdfg&category=ab&sort=asc&page=1" target="_blank">[1]</a></sup><sup><a href="https://ppp.com/article4.pdf?s=lkhljkhljk&category=c&sort=asc" target="_blank">[2]</a></sup>. \n Anything else I can help you with?.
 
 =========
 QUESTION: What did the president say about Michael Jackson?
@@ -56,8 +56,8 @@ FINAL ANSWER IN English: The president did not mention Michael Jackson.
 
 # Instructions:
 - Given the following extracted parts of a long document and a question, create a final answer with references. 
-- You can only provide numerical references to documents, using this format: <sup><a href="url?query_parameters">[number]</a></sup>.
-- Reference document's url can include query parameters, for example: "https://example.com/search?query=apple&category=fruits&sort=asc&page=1". On these cases, **you must** include que query references on the document url, using this format: <sup><a href="url?query_parameters">[number]</a></sup>.
+- You can only provide numerical references to documents, using this format: <sup><a href="url?query_parameters" target="_blank">[number]</a></sup>.
+- Reference document's url can include query parameters, for example: "https://example.com/search?query=apple&category=fruits&sort=asc&page=1". On these cases, **you must** include que query references on the document url, using this format: <sup><a href="url?query_parameters" target="_blank">[number]</a></sup>.
 - If you don't know the answer, just say that you don't know. Don't try to make up an answer.
 - Respond in {language}.
 
@@ -192,7 +192,7 @@ Source: https://yyyy.com/article3.csv?s=kjsdhfd&category=c&sort=asc&page=2
 Content: The terms of this Agreement shall be subject to the laws of Manchester, England, and any disputes arising from or relating to this Agreement shall be exclusively resolved by the courts of that state, except where either party may seek an injunction or other legal remedy to safeguard their Intellectual Property Rights.
 Source: https://ppp.com/article4.pdf?s=lkhljkhljk&category=c&sort=asc
 =========
-FINAL ANSWER IN English: This Agreement is governed by English law, specifically the laws of Manchester, England<sup><a href="https://xxx.com/article1.pdf?s=casdfg&category=ab&sort=asc&page=1">[1]</a></sup><sup><a href="https://ppp.com/article4.pdf?s=lkhljkhljk&category=c&sort=asc">[2]</a></sup>. \n Anything else I can help you with?.
+FINAL ANSWER IN English: This Agreement is governed by English law, specifically the laws of Manchester, England<sup><a href="https://xxx.com/article1.pdf?s=casdfg&category=ab&sort=asc&page=1" target="_blank">[1]</a></sup><sup><a href="https://ppp.com/article4.pdf?s=lkhljkhljk&category=c&sort=asc" target="_blank">[2]</a></sup>. \n Anything else I can help you with?.
 
 =========
 QUESTION: What did the president say about Michael Jackson?
@@ -219,8 +219,8 @@ Given the following:
 
 Instructions:
 - Create a final answer with references. 
-- You can only provide numerical references to documents, using this format: <sup><a href="url?query_parameters">[number]</a></sup>. 
-- Reference document's url can include query parameters, for example: "https://example.com/search?query=apple&category=fruits&sort=asc&page=1". On these cases, **you must** include que query references on the document url, using this format: <sup><a href="url?query_parameters">[number]</a></sup>.
+- You can only provide numerical references to documents, using this format: <sup><a href="url?query_parameters" target="_blank">[number]</a></sup>. 
+- Reference document's url can include query parameters, for example: "https://example.com/search?query=apple&category=fruits&sort=asc&page=1". On these cases, **you must** include que query references on the document url, using this format: <sup><a href="url?query_parameters" target="_blank">[number]</a></sup>.
 - If you don't know the answer, just say that you don't know. Don't try to make up an answer.
 - Respond in {language}.
 
