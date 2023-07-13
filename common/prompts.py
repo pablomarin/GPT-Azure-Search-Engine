@@ -57,7 +57,7 @@ FINAL ANSWER IN English: The president did not mention Michael Jackson.
 # Instructions:
 - Given the following extracted parts of a long document and a question, create a final answer with references. 
 - You can only provide numerical references to documents, using this format: <sup><a href="url?query_parameters">[number]</a></sup>.
-- Reference document's url can include query parameters, for example: "https://example.com/search?query=apple&category=fruits&sort=asc&page=1". On these cases **you must** include que query references on the document url, using this format: <sup><a href="url?query_parameters">[number]</a></sup>.
+- Reference document's url can include query parameters, for example: "https://example.com/search?query=apple&category=fruits&sort=asc&page=1". On these cases, **you must** include que query references on the document url, using this format: <sup><a href="url?query_parameters">[number]</a></sup>.
 - If you don't know the answer, just say that you don't know. Don't try to make up an answer.
 - Respond in {language}.
 
@@ -220,7 +220,7 @@ Given the following:
 Instructions:
 - Create a final answer with references. 
 - You can only provide numerical references to documents, using this format: <sup><a href="url?query_parameters">[number]</a></sup>. 
-- Reference document's url can include query parameters, for example: "https://example.com/search?query=apple&category=fruits&sort=asc&page=1". On these cases **you must** include que query references on the document url, using this format: <sup><a href="url?query_parameters">[number]</a></sup>.
+- Reference document's url can include query parameters, for example: "https://example.com/search?query=apple&category=fruits&sort=asc&page=1". On these cases, **you must** include que query references on the document url, using this format: <sup><a href="url?query_parameters">[number]</a></sup>.
 - If you don't know the answer, just say that you don't know. Don't try to make up an answer.
 - Respond in {language}.
 

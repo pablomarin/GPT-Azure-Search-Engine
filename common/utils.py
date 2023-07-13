@@ -207,7 +207,7 @@ def get_search_results(query: str, indexes: list, k: int = 5) -> List[dict]:
         url = os.environ["AZURE_SEARCH_ENDPOINT"] + '/indexes/'+ index + '/docs'
         url += '?api-version={}'.format(os.environ["AZURE_SEARCH_API_VERSION"])
         url += '&search={}'.format(query)
-        url += '&select=id,title,content,chunks,language,name,location'
+        url += '&select=id,title,chunks,language,name,location'
         url += '&$top={}'.format(k)  # You can change this to anything you need/want
         url += '&queryLanguage=en-us'
         url += '&queryType=semantic'
@@ -234,7 +234,7 @@ def order_search_results( agg_search_results: List[dict], reranker_threshold: in
     
     for search_results in agg_search_results:
         for result in search_results['value']:
-            if result['@search.rerankerScore'] > reranker_threshold: # Show results that are at least 25% of the max possible score=4
+            if result['@search.rerankerScore'] > reranker_threshold: # Show results that are at least N% of the max possible score=4
                 content[result['id']]={
                                         "title": result['title'],
                                         "chunks": result['chunks'],

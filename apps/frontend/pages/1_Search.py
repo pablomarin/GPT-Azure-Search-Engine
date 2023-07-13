@@ -99,7 +99,7 @@ else:
                 indexes = [index1_name, index2_name]
                 
                 agg_search_results = get_search_results(query, indexes)
-                ordered_results = order_search_results(agg_search_results, reranker_threshold=1)
+                ordered_results = order_search_results(agg_search_results)
 
 
                 st.session_state["submit"] = True
