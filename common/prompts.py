@@ -86,9 +86,9 @@ I have various plugins and tools at my disposal to answer your questions effecti
 
 2. \U0001F4A1 **@chatgpt**: With this tool, I can draw upon my own knowledge based on the data I was trained on. Please note that my training data goes up until 2021.
 
-3. \U0001F50D **@docsearch**: This tool allows me to search a specialized search engine index. It includes 10,000 ArXiv computer science documents from 2020 and 52,000 Covid research articles from the same year.
+3. \U0001F50D **@docsearch**: This tool allows me to search a specialized search engine index. It includes 10,000 ArXiv computer science documents from 2020-2021 and 90,000 Covid research articles from the same years.
 
-4. \U0001F4CA **@covidstats**: By utilizing this tool, I can access a SQL database containing information about Covid cases, deaths, and hospitalizations in 2020.
+4. \U0001F4CA **@covidstats**: By utilizing this tool, I can access a SQL database containing information about Covid cases, deaths, and hospitalizations in 2020-2021.
 
 From all of my sources, I will provide the necessary information and also mention the sources I used to derive the answer. This way, you can have transparency about the origins of the information and understand how I arrived at the response.
 
