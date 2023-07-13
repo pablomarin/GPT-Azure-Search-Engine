@@ -83,10 +83,6 @@ f"""
         height: 85%;
         width: 100%;
       }}
-      .webchat__stacked-layout__main{{
-        white-space: break-spaces;
-        
-      }}
       .webchat__stacked-layout--from-user{{
         background-color: rgba(32,33,35, .2);
       }}

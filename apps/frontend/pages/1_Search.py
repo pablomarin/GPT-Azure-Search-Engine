@@ -39,7 +39,7 @@ def clear_submit():
 with st.sidebar:
     st.markdown("""# Instructions""")
     st.markdown("""
-Ask a question that you think can be answered with the information in about 10k Arxiv Computer Science publications from 2020-2021 or in 52k Medical Covid-19 Publications from 2020.
+Ask a question that you think can be answered with the information in about 10k Arxiv Computer Science publications from 2020-2021 or in 90k Medical Covid-19 Publications.
 
 For example:
 - What are markov chains?
@@ -115,7 +115,8 @@ else:
                     docs = []
                     for key,value in ordered_results.items():
                         for page in value["chunks"]:
-                            docs.append(Document(page_content=page, metadata={"source": value["location"]}))
+                            location = value["location"] if value["location"] is not None else ""
+                            docs.append(Document(page_content=page, metadata={"source": location+os.environ.get("DATASOURCE_SAS_TOKEN")}))
                             add_text = "Reading the source documents to provide the best answer... ⏳"
 
                     if "add_text" in locals():
@@ -127,7 +128,7 @@ else:
                                 
                                 if num_tokens > tokens_limit:
                                     index = embed_docs(docs)
-                                    top_docs = search_docs(index,query)
+                                    top_docs = search_docs(index,query,k=4)
                                     num_tokens = num_tokens_from_docs(top_docs)
                                     chain_type = "map_reduce" if num_tokens > tokens_limit else "stuff"
                                 else:
@@ -145,26 +146,14 @@ else:
                     with placeholder.container():
 
                         st.markdown("#### Answer")
-                        split_word = "Source"
-                        split_regex = re.compile(f"{split_word}s:?\\W*", re.IGNORECASE)
-                        answer_text = split_regex.split(answer["output_text"])[0]
-                        st.markdown(answer_text)
-                        try:
-                            sources_list = split_regex.split(answer["output_text"])[1].replace(" ","").split(",")
-                            #sources_list = answer["output_text"].split("SOURCES:")[1].replace(" ","").split(",")
-                            sources_markdown = "Sources: "
-                            for index, value in enumerate(sources_list):
-                                sources_markdown += "[[" + str(index+1) + "]](" + value + os.environ.get("DATASOURCE_SAS_TOKEN") + ")"
-                            st.markdown(sources_markdown)
-                        except Exception as e:
-                            st.markdown("Sources: N/A")
-                            
+                        st.markdown(answer["output_text"], unsafe_allow_html=True)
                         st.markdown("---")
                         st.markdown("#### Search Results")
 
                         if(len(docs)>0):
                             for key, value in ordered_results.items():
-                                url = value['location'] + os.environ.get("DATASOURCE_SAS_TOKEN")
+                                location = value["location"] if value["location"] is not None else ""
+                                url = location + os.environ.get("DATASOURCE_SAS_TOKEN")
                                 title = str(value['title']) if (value['title']) else value['name']
                                 score = str(round(value['score']*100/4,2))
                                 st.markdown("[" + title +  "](" + url + ")" + "  (Score: " + score + "%)")

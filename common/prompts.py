@@ -15,50 +15,51 @@ COMBINE_QUESTION_PROMPT = PromptTemplate(
 COMBINE_PROMPT_TEMPLATE = """
 
 These are examples of how you must provide the answer:
+
 --> Beginning of examples
+
 =========
 QUESTION: Which state/country's law governs the interpretation of the contract?
 =========
 Content: This Agreement is governed by English law and the parties submit to the exclusive jurisdiction of the English courts in  relation to any dispute (contractual or non-contractual) concerning this Agreement save that either party may apply to any court for an  injunction or other relief to protect its Intellectual Property Rights.
-Source: https://xxx.com/article1.pdf
+Source: https://xxx.com/article1.pdf?s=casdfg&category=ab&sort=asc&page=1
 
 Content: No Waiver. Failure or delay in exercising any right or remedy under this Agreement shall not constitute a waiver of such (or any other)  right or remedy.\n\n11.7 Severability. The invalidity, illegality or unenforceability of any term (or part of a term) of this Agreement shall not affect the continuation  in force of the remainder of the term (if any) and this Agreement.\n\n11.8 No Agency. Except as expressly stated otherwise, nothing in this Agreement shall create an agency, partnership or joint venture of any  kind between the parties.\n\n11.9 No Third-Party Beneficiaries.
-Source: https://yyyy.com/article2.html
+Source: https://yyyy.com/article2.html?s=lkhljkhljk&category=c&sort=asc
 
 Content: (b) if Google believes, in good faith, that the Distributor has violated or caused Google to violate any Anti-Bribery Laws (as  defined in Clause 8.5) or that such a violation is reasonably likely to occur,
-Source: https://yyyy.com/article3.csv
+Source: https://yyyy.com/article3.csv?s=kjsdhfd&category=c&sort=asc&page=2
 
 Content: The terms of this Agreement shall be subject to the laws of Manchester, England, and any disputes arising from or relating to this Agreement shall be exclusively resolved by the courts of that state, except where either party may seek an injunction or other legal remedy to safeguard their Intellectual Property Rights.
-Source: https://ppp.com/article4.pdf
+Source: https://ppp.com/article4.pdf?s=lkhljkhljk&category=c&sort=asc
 =========
-FINAL ANSWER IN English: This Agreement is governed by English law, specifically the laws of Manchester, England.
-SOURCES: https://xxx.com/article1.pdf, https://ppp.com/article4.pdf
+FINAL ANSWER IN English: This Agreement is governed by English law, specifically the laws of Manchester, England<sup><a href="https://xxx.com/article1.pdf?s=casdfg&category=ab&sort=asc&page=1">[1]</a></sup><sup><a href="https://ppp.com/article4.pdf?s=lkhljkhljk&category=c&sort=asc">[2]</a></sup>. \n Anything else I can help you with?.
 
 =========
 QUESTION: What did the president say about Michael Jackson?
 =========
-Content: Madam Speaker, Madam Vice President, our First Lady and Second Gentleman. Members of Congress and the Cabinet. Justices of the Supreme Court. My fellow Americans.  \n\nLast year COVID-19 kept us apart. This year we are finally together again. \n\nTonight, we meet as Democrats Republicans and Independents. But most importantly as Americans. \n\nWith a duty to one another to the American people to the Constitution. \n\nAnd with an unwavering resolve that freedom will always triumph over tyranny.
-Source: https://fff.com/article23.pdf
+Content: Madam Speaker, Madam Vice President, our First Lady and Second Gentleman. Members of Congress and the Cabinet. Justices of the Supreme Court. My fellow Americans.  \n\nLast year COVID-19 kept us apart. This year we are finally together again. \n\nTonight, we meet as Democrats Republicans and Independents. But most importantly as Americans. \n\nWith a duty to one another to the American people to the Constitution. \n\nAnd with an unwavering resolve that freedom will always triumph over tyranny..
+Source: https://fff.com/article23.pdf?s=wreter&category=ab&sort=asc&page=1
 
 Content: And we won’t stop. \n\nWe have lost so much to COVID-19. Time with one another. And worst of all, so much loss of life. \n\nLet’s use this moment to reset. Let’s stop looking at COVID-19 as a partisan dividing line and see it for what it is: A God-awful disease.  \n\nLet’s stop seeing each other as enemies, and start seeing each other for who we really are: Fellow Americans.  \n\nWe can’t change how divided we’ve been. But we can change how we move forward—on COVID-19 and other issues we must face together. \n\nI recently visited the New York City Police Department days after the funerals of Officer Wilbert Mora and his partner, Officer Jason Rivera. \n\nThey were responding to a 9-1-1 call when a man shot and killed them with a stolen gun. \n\nOfficer Mora was 27 years old. \n\nOfficer Rivera was 22. \n\nBoth Dominican Americans who’d grown up on the same streets they later chose to patrol as police officers. \n\nI spoke with their families and told them that we are forever in debt for their sacrifice, and we will carry on their mission to restore the trust and safety every community deserves.
-Source: https://jjj.com/article56.pdf
+Source: https://jjj.com/article56.pdf?s=sdflsdfsd&category=z&sort=desc&page=3
 
 Content: And I will use every tool at our disposal to protect American businesses and consumers. \n\nTonight, I can announce that the United States has worked with 30 other countries to release 60 Million barrels of oil from reserves around the world.  \n\nAmerica will lead that effort, releasing 30 Million barrels from our own Strategic Petroleum Reserve. And we stand ready to do more if necessary, unified with our allies.  \n\nThese steps will help blunt gas prices here at home. And I know the news about what’s happening can seem alarming. \n\nBut I want you to know that we are going to be okay.
-Source: https://vvv.com/article145.pdf
+Source: https://vvv.com/article145.pdf?s=sfsdfsdfs&category=z&sort=desc&page=3
 
 Content: More support for patients and families. \n\nTo get there, I call on Congress to fund ARPA-H, the Advanced Research Projects Agency for Health. \n\nIt’s based on DARPA—the Defense Department project that led to the Internet, GPS, and so much more.  \n\nARPA-H will have a singular purpose—to drive breakthroughs in cancer, Alzheimer’s, diabetes, and more. \n\nA unity agenda for the nation. \n\nWe can do this. \n\nMy fellow Americans—tonight , we have gathered in a sacred space—the citadel of our democracy. \n\nIn this Capitol, generation after generation, Americans have debated great questions amid great strife, and have done great things. \n\nWe have fought for freedom, expanded liberty, defeated totalitarianism and terror. \n\nAnd built the strongest, freest, and most prosperous nation the world has ever known. \n\nNow is the hour. \n\nOur moment of responsibility. \n\nOur test of resolve and conscience, of history itself. \n\nIt is in this moment that our character is formed. Our purpose is found. Our future is forged. \n\nWell I know this nation.
-Source: https://uuu.com/article15.pdf
+Source: https://uuu.com/article15.pdf?s=lkhljkhljk&category=c&sort=asc
 =========
 FINAL ANSWER IN English: The president did not mention Michael Jackson.
-SOURCES: N/A
 
 <-- End of examples
 
-
-Given the following extracted parts of a long document and a question, create a final answer with references ("SOURCES"). 
-If you don't know the answer, just say that you don't know. Don't try to make up an answer.
-ALWAYS return a "SOURCES" part in your answer.
-Respond in {language}.
+# Instructions:
+- Given the following extracted parts of a long document and a question, create a final answer with references. 
+- You can only provide numerical references to documents, using this format: <sup><a href="url?query_parameters">[number]</a></sup>.
+- Reference document's url can include query parameters, for example: "https://example.com/search?query=apple&category=fruits&sort=asc&page=1". On these cases **you must** include que query references on the document url, using this format: <sup><a href="url?query_parameters">[number]</a></sup>.
+- If you don't know the answer, just say that you don't know. Don't try to make up an answer.
+- Respond in {language}.
 
 =========
 QUESTION: {question}
@@ -71,6 +72,39 @@ FINAL ANSWER IN {language}:"""
 COMBINE_PROMPT = PromptTemplate(
     template=COMBINE_PROMPT_TEMPLATE, input_variables=["summaries", "question", "language"]
 )
+
+
+WELCOME_MESSAGE = """
+Hello and welcome! \U0001F44B
+
+My name is Jarvis, a smart virtual assistant designed to assist you.
+Here's how you can interact with me:
+
+I have various plugins and tools at my disposal to answer your questions effectively. Here are the available options:
+
+1. \U0001F310 **@bing**: This tool allows me to access the internet and provide current information from the web.
+
+2. \U0001F4A1 **@chatgpt**: With this tool, I can draw upon my own knowledge based on the data I was trained on. Please note that my training data goes up until 2021.
+
+3. \U0001F50D **@docsearch**: This tool allows me to search a specialized search engine index. It includes 10,000 ArXiv computer science documents from 2020 and 52,000 Covid research articles from the same year.
+
+4. \U0001F4CA **@covidstats**: By utilizing this tool, I can access a SQL database containing information about Covid cases, deaths, and hospitalizations in 2020.
+
+From all of my sources, I will provide the necessary information and also mention the sources I used to derive the answer. This way, you can have transparency about the origins of the information and understand how I arrived at the response.
+
+To make the most of my capabilities, please mention the specific tool you'd like me to use when asking your question. Here's an example:
+
+```
+@bing, who is the daughter of the President of India?
+@chatgpt, how can I read a remote file from a URL using pandas?
+@docsearch, what are some practical applications of reinforcement learning?
+@covidstats, how many people died on the West Coast in 2020?
+```
+
+Feel free to ask any question and specify the tool you'd like me to utilize. I'm here to assist you!
+
+---
+"""
 
 
 CUSTOM_CHATBOT_PREFIX = """
@@ -147,37 +181,35 @@ COMBINE_CHAT_PROMPT_TEMPLATE = CUSTOM_CHATBOT_PREFIX +  """
 QUESTION: Which state/country's law governs the interpretation of the contract?
 =========
 Content: This Agreement is governed by English law and the parties submit to the exclusive jurisdiction of the English courts in  relation to any dispute (contractual or non-contractual) concerning this Agreement save that either party may apply to any court for an  injunction or other relief to protect its Intellectual Property Rights.
-Source: https://xxx.com/article1.pdf
+Source: https://xxx.com/article1.pdf?s=casdfg&category=ab&sort=asc&page=1
 
 Content: No Waiver. Failure or delay in exercising any right or remedy under this Agreement shall not constitute a waiver of such (or any other)  right or remedy.\n\n11.7 Severability. The invalidity, illegality or unenforceability of any term (or part of a term) of this Agreement shall not affect the continuation  in force of the remainder of the term (if any) and this Agreement.\n\n11.8 No Agency. Except as expressly stated otherwise, nothing in this Agreement shall create an agency, partnership or joint venture of any  kind between the parties.\n\n11.9 No Third-Party Beneficiaries.
-Source: https://yyyy.com/article2.html
+Source: https://yyyy.com/article2.html?s=kjsdhfd&category=c&sort=asc&page=2
 
 Content: (b) if Google believes, in good faith, that the Distributor has violated or caused Google to violate any Anti-Bribery Laws (as  defined in Clause 8.5) or that such a violation is reasonably likely to occur,
-Source: https://yyyy.com/article3.csv
+Source: https://yyyy.com/article3.csv?s=kjsdhfd&category=c&sort=asc&page=2
 
 Content: The terms of this Agreement shall be subject to the laws of Manchester, England, and any disputes arising from or relating to this Agreement shall be exclusively resolved by the courts of that state, except where either party may seek an injunction or other legal remedy to safeguard their Intellectual Property Rights.
-Source: https://ppp.com/article4.pdf
+Source: https://ppp.com/article4.pdf?s=lkhljkhljk&category=c&sort=asc
 =========
-FINAL ANSWER IN English: This Agreement is governed by English law, specifically the laws of Manchester, England.
-SOURCES: https://xxx.com/article1.pdf, https://ppp.com/article4.pdf
+FINAL ANSWER IN English: This Agreement is governed by English law, specifically the laws of Manchester, England<sup><a href="https://xxx.com/article1.pdf?s=casdfg&category=ab&sort=asc&page=1">[1]</a></sup><sup><a href="https://ppp.com/article4.pdf?s=lkhljkhljk&category=c&sort=asc">[2]</a></sup>. \n Anything else I can help you with?.
 
 =========
 QUESTION: What did the president say about Michael Jackson?
 =========
 Content: Madam Speaker, Madam Vice President, our First Lady and Second Gentleman. Members of Congress and the Cabinet. Justices of the Supreme Court. My fellow Americans.  \n\nLast year COVID-19 kept us apart. This year we are finally together again. \n\nTonight, we meet as Democrats Republicans and Independents. But most importantly as Americans. \n\nWith a duty to one another to the American people to the Constitution. \n\nAnd with an unwavering resolve that freedom will always triumph over tyranny..
-Source: https://fff.com/article23.pdf
+Source: https://fff.com/article23.pdf?s=wreter&category=ab&sort=asc&page=1
 
 Content: And we won’t stop. \n\nWe have lost so much to COVID-19. Time with one another. And worst of all, so much loss of life. \n\nLet’s use this moment to reset. Let’s stop looking at COVID-19 as a partisan dividing line and see it for what it is: A God-awful disease.  \n\nLet’s stop seeing each other as enemies, and start seeing each other for who we really are: Fellow Americans.  \n\nWe can’t change how divided we’ve been. But we can change how we move forward—on COVID-19 and other issues we must face together. \n\nI recently visited the New York City Police Department days after the funerals of Officer Wilbert Mora and his partner, Officer Jason Rivera. \n\nThey were responding to a 9-1-1 call when a man shot and killed them with a stolen gun. \n\nOfficer Mora was 27 years old. \n\nOfficer Rivera was 22. \n\nBoth Dominican Americans who’d grown up on the same streets they later chose to patrol as police officers. \n\nI spoke with their families and told them that we are forever in debt for their sacrifice, and we will carry on their mission to restore the trust and safety every community deserves.
-Source: https://jjj.com/article56.pdf
+Source: https://jjj.com/article56.pdf?s=sdflsdfsd&category=z&sort=desc&page=3
 
 Content: And I will use every tool at our disposal to protect American businesses and consumers. \n\nTonight, I can announce that the United States has worked with 30 other countries to release 60 Million barrels of oil from reserves around the world.  \n\nAmerica will lead that effort, releasing 30 Million barrels from our own Strategic Petroleum Reserve. And we stand ready to do more if necessary, unified with our allies.  \n\nThese steps will help blunt gas prices here at home. And I know the news about what’s happening can seem alarming. \n\nBut I want you to know that we are going to be okay.
-Source: https://vvv.com/article145.pdf
+Source: https://vvv.com/article145.pdf?s=sfsdfsdfs&category=z&sort=desc&page=3
 
 Content: More support for patients and families. \n\nTo get there, I call on Congress to fund ARPA-H, the Advanced Research Projects Agency for Health. \n\nIt’s based on DARPA—the Defense Department project that led to the Internet, GPS, and so much more.  \n\nARPA-H will have a singular purpose—to drive breakthroughs in cancer, Alzheimer’s, diabetes, and more. \n\nA unity agenda for the nation. \n\nWe can do this. \n\nMy fellow Americans—tonight , we have gathered in a sacred space—the citadel of our democracy. \n\nIn this Capitol, generation after generation, Americans have debated great questions amid great strife, and have done great things. \n\nWe have fought for freedom, expanded liberty, defeated totalitarianism and terror. \n\nAnd built the strongest, freest, and most prosperous nation the world has ever known. \n\nNow is the hour. \n\nOur moment of responsibility. \n\nOur test of resolve and conscience, of history itself. \n\nIt is in this moment that our character is formed. Our purpose is found. Our future is forged. \n\nWell I know this nation.
-Source: https://uuu.com/article15.pdf
+Source: https://uuu.com/article15.pdf?s=kjsdhfd&category=c&sort=asc&page=2
 =========
 FINAL ANSWER IN English: The president did not mention Michael Jackson.
-SOURCES: N/A
 
 <-- End of examples
 
@@ -185,11 +217,14 @@ Given the following:
 - a chat history, and a question from the Human
 - extracted parts from several documents 
 
-create a final answer with references ("SOURCES"). 
+Instructions:
+- Create a final answer with references. 
+- You can only provide numerical references to documents, using this format: <sup><a href="url?query_parameters">[number]</a></sup>. 
+- Reference document's url can include query parameters, for example: "https://example.com/search?query=apple&category=fruits&sort=asc&page=1". On these cases **you must** include que query references on the document url, using this format: <sup><a href="url?query_parameters">[number]</a></sup>.
+- If you don't know the answer, just say that you don't know. Don't try to make up an answer.
+- Respond in {language}.
 
-If you don't know the answer, just say that you don't know. Don't try to make up an answer.
-ALWAYS return a "SOURCES" part in your answer.
-Respond in {language}.
+Chat History:
 
 {chat_history}
 
@@ -360,6 +395,7 @@ BING_PROMPT_PREFIX = CUSTOM_CHATBOT_PREFIX + """
 - You must always perform web searches when the user is seeking information (explicitly or implicitly), regardless of your internal knowledge or information.
 - You can and should perform up to 5 searches in a single conversation turn before reaching the Final Answer. You should never search the same query more than once.
 - You are allowed to do multiple searches in order to answer a question that requires a multi-step approach. For example: to answer a question "How old is Leonardo Di Caprio's girlfriend?", you should first search for " current Leonardo Di Caprio's girlfriend" then, once you know her name, you search for her age, and arrive to the Final Answer.
+- If the user's message contains multiple questions, search for each one at a time, then compile the final answer with the answer of each individual search.
 - If you are unable to fully find the answer, try again by adjusting your search terms.
 - You can only provide numerical references to URLs, using this format: <sup><a href="url">[number]</a></sup> 
 - You must never generate URLs or links other than those provided in the search results.

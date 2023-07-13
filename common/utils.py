@@ -134,7 +134,7 @@ def embed_docs(docs: List[Document], chunks_limit: int=100, verbose: bool = Fals
     return index
 
 
-def search_docs(index: VectorStore, query: str, k: int=4) -> List[Document]:
+def search_docs(index: VectorStore, query: str, k: int=2) -> List[Document]:
     """Searches a FAISS index for similar chunks to the query
     and returns a list of Documents."""
 
@@ -178,13 +178,15 @@ def num_tokens_from_string(string: str) -> int:
 def model_tokens_limit(model: str) -> int:
     """Returns the number of tokens limits in a text model."""
     if model == "gpt-35-turbo":
-        token_limit = 3000
+        token_limit = 2500
     elif model == "gpt-4":
-        token_limit = 7000
+        token_limit = 6500
+    elif model == "gpt-35-turbo-16k":
+        token_limit = 14500
     elif model == "gpt-4-32k":
-        token_limit = 31000
+        token_limit = 30500
     else:
-        token_limit = 3000
+        token_limit = 2500
     return token_limit
 
 # Returns num of toknes used on a list of Documents objects
@@ -205,7 +207,7 @@ def get_search_results(query: str, indexes: list, k: int = 5) -> List[dict]:
         url = os.environ["AZURE_SEARCH_ENDPOINT"] + '/indexes/'+ index + '/docs'
         url += '?api-version={}'.format(os.environ["AZURE_SEARCH_API_VERSION"])
         url += '&search={}'.format(query)
-        url += '&select=*'
+        url += '&select=id,title,content,chunks,language,name,location'
         url += '&$top={}'.format(k)  # You can change this to anything you need/want
         url += '&queryLanguage=en-us'
         url += '&queryType=semantic'
@@ -223,7 +225,7 @@ def get_search_results(query: str, indexes: list, k: int = 5) -> List[dict]:
     return agg_search_results
     
 
-def order_search_results( agg_search_results: List[dict], reranker_threshold: int) -> OrderedDict:
+def order_search_results( agg_search_results: List[dict], reranker_threshold: int = 0) -> OrderedDict:
     
     """Orders based on score the results from get_search_results function"""
     
@@ -235,12 +237,12 @@ def order_search_results( agg_search_results: List[dict], reranker_threshold: in
             if result['@search.rerankerScore'] > reranker_threshold: # Show results that are at least 25% of the max possible score=4
                 content[result['id']]={
                                         "title": result['title'],
-                                        "chunks": result['pages'],
-                                        "language": result['language'],
+                                        "chunks": result['chunks'],
+                                        "language": result['language'], 
+                                        "name": result['name'], 
+                                        "location": result['location'] ,
                                         "caption": result['@search.captions'][0]['text'],
-                                        "score": result['@search.rerankerScore'],
-                                        "name": result['metadata_storage_name'],
-                                        "location": result['metadata_storage_path']                  
+                                        "score": result['@search.rerankerScore']                   
                                     }
     #After results have been filtered we will Sort and add them as an Ordered list
     for id in sorted(content, key= lambda x: content[x]["score"], reverse=True):
@@ -324,9 +326,10 @@ class DocSearchTool(BaseTool):
     indexes: List[str]
     k: int = 10
     response_language: str = "English"
-    reranker_th: int = 1
+    reranker_th: int = 0
     chunks_limit:int = 100
-    similarity_k: int = 4
+    similarity_k: int = 2
+    sas_token: str = ""
 
     
     def _run(self, query: str) -> str:
@@ -337,7 +340,8 @@ class DocSearchTool(BaseTool):
             docs = []
             for key,value in ordered_results.items():
                 for page in value["chunks"]:
-                    docs.append(Document(page_content=page, metadata={"source": value["location"]}))
+                    location = value["location"] if value["location"] is not None else ""
+                    docs.append(Document(page_content=page, metadata={"source": location+self.sas_token}))
 
             # Calculate number of tokens of our docs
             tokens_limit = model_tokens_limit(self.llm.deployment_name)
@@ -370,25 +374,10 @@ class DocSearchTool(BaseTool):
 
             if self.verbose:
                 print("Chain Type selected:", chain_type)
-
-            response = get_answer(llm=self.llm, query=query, docs=top_docs, chain_type=chain_type, language=self.response_language)
+                
+            response = get_answer(llm=self.llm, query=query, docs=top_docs, chain_type=chain_type, language=self.response_language, callback_manager=self.callbacks)
             
             answer = response['output_text']
-            
-            try:
-                split_regex = re.compile(f"sources?:?\\W*", re.IGNORECASE)
-                answer_text = split_regex.split(answer)[0]
-                sources_list = split_regex.split(answer)[1].replace(" ","").split(",")
-
-                sources_html = '<br><u>Sources</u>: '
-                for index, value in enumerate(sources_list):
-                    url = value + os.environ["DATASOURCE_SAS_TOKEN"]
-                    sources_html +='<sup><a href="'+ url + '">[' + str(index+1) + ']</a></sup>'
-                    
-                answer = answer_text + sources_html
-
-            except Exception as e:
-                print(e)
                 
             return answer
 
@@ -413,7 +402,7 @@ class CSVTabularTool(BaseTool):
     def _run(self, query: str) -> str:
         
         try:
-            agent = create_csv_agent(self.llm, self.path, verbose=self.verbose, callback_manager=self.callbacks,)
+            agent = create_csv_agent(self.llm, self.path, verbose=self.verbose, callback_manager=self.callbacks)
             for i in range(5):
                 try:
                     response = agent.run(CSV_PROMPT_PREFIX + query + CSV_PROMPT_SUFFIX) 
@@ -550,7 +539,7 @@ class BingSearchTool(BaseTool):
                                               callback_manager=self.callbacks,
                                               verbose=self.verbose)
             
-            for i in range(3):
+            for i in range(2):
                 try:
                     response = run_agent(parsed_input, agent_executor)
                     break
