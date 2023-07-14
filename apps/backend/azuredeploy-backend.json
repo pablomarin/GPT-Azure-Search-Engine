@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.19.5.34762",
-      "templateHash": "1941251474212859971"
+      "templateHash": "16396897643437323274"
     }
   },
   "parameters": {
@@ -31,7 +31,7 @@
       "type": "string",
       "defaultValue": "[resourceGroup().name]",
       "metadata": {
-        "description": "Required. The name of the resource group where the resources (Azure Search etc.) where deployed previously. Defaults to current resource group."
+        "description": "Optional. The name of the resource group where the resources (Azure Search etc.) where deployed previously. Defaults to current resource group."
       }
     },
     "azureSearchName": {
@@ -125,7 +125,7 @@
         "description": "Optional. The globally unique and immutable bot ID. Also used to configure the displayName of the bot, which is mutable."
       }
     },
-    "botSku": {
+    "botSKU": {
       "type": "string",
       "defaultValue": "F0",
       "allowedValues": [
@@ -374,7 +374,7 @@
       "location": "global",
       "kind": "azurebot",
       "sku": {
-        "name": "[parameters('botSku')]"
+        "name": "[parameters('botSKU')]"
       },
       "properties": {
         "displayName": "[parameters('botId')]",
