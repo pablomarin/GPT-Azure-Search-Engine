@@ -17,8 +17,6 @@ param appServicePlanName string = 'AppServicePlan-Frontend-${uniqueString(resour
 @description('Required. The name of your Bot Service.')
 param botDirectLineChannelName string
 
-param channelKey string
-
 @description('Optional. The name of the resource group where the backend resources (bot etc.) where deployed previously. Defaults to current resource group.')
 param resourceGroupBackend string = resourceGroup().name
 
@@ -95,7 +93,7 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'BOT_DIRECTLINE_SECRET_KEY'
-          value: channelKey
+          value: botDirectLineChannel.listChannelWithKeys().properties.sites.key
         }
         {
           name: 'DATASOURCE_SAS_TOKEN'
