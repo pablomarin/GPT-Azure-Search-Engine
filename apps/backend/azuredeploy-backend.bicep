@@ -9,7 +9,7 @@ param appPassword string
 @secure()
 param datasourceSASToken string 
 
-@description('Required. The name of the resource group where the resources (Azure Search etc.) where deployed previously.')
+@description('Required. The name of the resource group where the resources (Azure Search etc.) where deployed previously. Defaults to current resource group.')
 param resourceGroupSearch string = resourceGroup().name
 
 @description('Required. The name of the Azure Search service deployed previously.')
@@ -18,7 +18,7 @@ param azureSearchName string
 @description('Optional. The API version for the Azure Search service.')
 param azureSearchAPIVersion string = '2021-04-30-Preview'
 
-@description('Required. The name of the resource group where Azure Open AI was deployed previously.')
+@description('Required. The name of the resource group where Azure Open AI was deployed previously. Defaults to current resource group.')
 param resourceGroupOpenAI string = resourceGroup().name
 
 @description('Required. The name of the Azure OpenAI resource deployed previously.')
