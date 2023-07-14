@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.19.5.34762",
-      "templateHash": "14553927602714490900"
+      "templateHash": "10517906348267560571"
     }
   },
   "parameters": {
@@ -42,9 +42,6 @@
       "metadata": {
         "description": "Required. The name of your Bot Service."
       }
-    },
-    "channelKey": {
-      "type": "string"
     },
     "resourceGroupBackend": {
       "type": "string",
@@ -143,7 +140,7 @@
             },
             {
               "name": "BOT_DIRECTLINE_SECRET_KEY",
-              "value": "[parameters('channelKey')]"
+              "value": "[listChannelWithKeys(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupBackend')), 'Microsoft.BotService/botServices/channels', split(parameters('botDirectLineChannelName'), '/')[0], split(parameters('botDirectLineChannelName'), '/')[1]), '2022-09-15').properties.sites.key]"
             },
             {
               "name": "DATASOURCE_SAS_TOKEN",
