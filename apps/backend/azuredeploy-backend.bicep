@@ -205,7 +205,7 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'SQL_SERVER_ENDPOINT'
-          value: 'https://${sqlServer}.database.windows.net/'
+          value: 'https://${sqlServerName}.database.windows.net/'
         }
         {
           name: 'SQL_SERVER_DATABASE'
