@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.19.5.34762",
-      "templateHash": "11311335911552811785"
+      "templateHash": "640244339709671693"
     }
   },
   "parameters": {
@@ -233,7 +233,7 @@
             },
             {
               "name": "AZURE_SEARCH_KEY",
-              "value": "[listKeys(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupSearch')), 'Microsoft.Search/searchServices', parameters('azureSearchName')), '2021-04-01-preview').keys[0].value]"
+              "value": "[listAdminKeys(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupSearch')), 'Microsoft.Search/searchServices', parameters('azureSearchName')), '2021-04-01-preview').primaryKey]"
             },
             {
               "name": "AZURE_SEARCH_API_VERSION",
