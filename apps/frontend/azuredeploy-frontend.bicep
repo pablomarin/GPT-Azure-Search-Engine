@@ -93,7 +93,7 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'BOT_DIRECTLINE_SECRET_KEY'
-          value: botDirectLineChannel.listChannelWithKeys().properties.sites.key
+          value: botDirectLineChannel.listChannelWithKeys().properties.sites[0].key
         }
         {
           name: 'DATASOURCE_SAS_TOKEN'
