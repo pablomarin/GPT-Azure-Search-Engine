@@ -17,6 +17,9 @@ param appServicePlanName string = 'AppServicePlan-Frontend-${uniqueString(resour
 @description('Required. The name of your Bot Service.')
 param botDirectLineChannelName string
 
+@description('Required. The key to the direct line channel of your bot.')
+param botDirectLineChannelKey string
+
 @description('Optional. The name of the resource group where the backend resources (bot etc.) where deployed previously. Defaults to current resource group.')
 param resourceGroupBackend string = resourceGroup().name
 
@@ -47,12 +50,6 @@ param azureOpenAIAPIVersion string = '2023-03-15-preview'
 
 @description('Optional, defaults to resource group location. The location of the resources.')
 param location string = resourceGroup().location
-
-// Existing direct line channel of bot.
-resource botDirectLineChannel 'Microsoft.BotService/botServices/channels@2022-09-15' existing = {
-  name: botDirectLineChannelName
-  scope: resourceGroup(resourceGroupBackend)
-}
 
 // Existing Azure Search service.
 resource azureSearch 'Microsoft.Search/searchServices@2021-04-01-preview' existing = {
@@ -93,7 +90,7 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'BOT_DIRECTLINE_SECRET_KEY'
-          value: botDirectLineChannel.listChannelWithKeys().properties.sites[0].key
+          value: botDirectLineChannelKey
         }
         {
           name: 'DATASOURCE_SAS_TOKEN'
