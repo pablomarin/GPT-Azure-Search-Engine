@@ -292,12 +292,7 @@ resource webAppConfig 'Microsoft.Web/sites/config@2022-09-01' = {
         virtualDirectories: null
       }
     ]
-    winAuthAdminState: 0
-    winAuthTenantState: 0
-    customAppPoolIdentityAdminState: false
-    customAppPoolIdentityTenantState: false
     loadBalancing: 'LeastRequests'
-    routingRules: []
     experiments: {
       rampUpRules: []
     }
@@ -305,7 +300,6 @@ resource webAppConfig 'Microsoft.Web/sites/config@2022-09-01' = {
     vnetName: ''
     minTlsVersion: '1.2'
     ftpsState: 'AllAllowed'
-    reservedInstanceCount: 0
   }
 }
 
