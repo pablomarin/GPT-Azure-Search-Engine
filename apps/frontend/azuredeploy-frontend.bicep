@@ -15,32 +15,29 @@ param appServicePlanSKU string = 'S3'
 param appServicePlanName string = 'AppServicePlan-Frontend-${uniqueString(resourceGroup().id)}'
 
 @description('Required. The name of your Bot Service.')
-param botName string
+param botDirectLineChannelName string
 
-@description('Required. The secret key of the Direct Line Channel of the Bot Service.')
-@secure()
-param botKey string
+@description('Optional. The name of the resource group where the backend resources (bot etc.) where deployed previously. Defaults to current resource group.')
+param resourceGroupBackend string = resourceGroup().name
 
 @description('Required. The SAS token for the Azure Storage Account hosting your data')
 @secure()
 param datasourceSASToken string 
 
-@description('Required. The endpoint of the Azure Search.')
-param azureSearchEndpoint string
+@description('Optional. The name of the resource group where the resources (Azure Search etc.) where deployed previously. Defaults to current resource group.')
+param resourceGroupSearch string = resourceGroup().name
 
-@description('Required. The key of the Azure Search.')
-@secure()
-param azureSearchKey string
+@description('Required. The name of the Azure Search service deployed previously.')
+param azureSearchName string 
 
 @description('Optional. The API version of the Azure Search.')
 param azureSearchAPIVersion string = '2021-04-30-Preview'
 
-@description('Required. The endpoint of the Azure OpenAI.')
-param azureOpenAIEndpoint string
+@description('Required. The name of the resource group where Azure Open AI was deployed previously. Defaults to current resource group.')
+param resourceGroupOpenAI string = resourceGroup().name
 
-@description('Required. The key of the Azure OpenAI.')
-@secure()
-param azureOpenAIAPIKey string
+@description('Required. The name of the Azure OpenAI resource deployed previously.')
+param azureOpenAIName string 
 
 @description('Optional. The model name of the Azure OpenAI.')
 param azureOpenAIModelName string = 'gpt-35-turbo'
@@ -50,6 +47,24 @@ param azureOpenAIAPIVersion string = '2023-03-15-preview'
 
 @description('Optional, defaults to resource group location. The location of the resources.')
 param location string = resourceGroup().location
+
+// Existing direct line channel of bot.
+resource botDirectLineChannel 'Microsoft.BotService/botServices/channels@2022-09-15' existing = {
+  name: botDirectLineChannelName
+  scope: resourceGroup(resourceGroupBackend)
+}
+
+// Existing Azure Search service.
+resource azureSearch 'Microsoft.Search/searchServices@2021-04-01-preview' existing = {
+  name: azureSearchName
+  scope: resourceGroup(resourceGroupSearch)
+}
+
+// Existing Azure OpenAI resource.
+resource azureOpenAI 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
+  name: azureOpenAIName
+  scope: resourceGroup(resourceGroupOpenAI)
+}
 
 // Create a new Linux App Service Plan.
 resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
@@ -74,11 +89,11 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
       appSettings: [
         {
           name: 'BOT_SERVICE_NAME'
-          value: botName
+          value: botDirectLineChannelName
         }
         {
           name: 'BOT_DIRECTLINE_SECRET_KEY'
-          value: botKey
+          value: botDirectLineChannel.listChannelWithKeys().properties.properties.channelSecret
         }
         {
           name: 'DATASOURCE_SAS_TOKEN'
@@ -86,11 +101,11 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'AZURE_SEARCH_ENDPOINT'
-          value: azureSearchEndpoint
+          value: 'https://${azureSearchName}.search.windows.net'
         }
         {
           name: 'AZURE_SEARCH_KEY'
-          value: azureSearchKey
+          value: azureSearch.listAdminKeys().primaryKey
         }
         {
           name: 'AZURE_SEARCH_API_VERSION'
@@ -98,11 +113,11 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'AZURE_OPENAI_ENDPOINT'
-          value: azureOpenAIEndpoint
+          value: 'https://${azureOpenAIName}.openai.azure.com/'
         }
         {
           name: 'AZURE_OPENAI_API_KEY'
-          value: azureOpenAIAPIKey
+          value: azureOpenAI.listKeys().key1
         }
         {
           name: 'AZURE_OPENAI_MODEL_NAME'
