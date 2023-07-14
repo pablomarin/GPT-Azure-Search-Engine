@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.19.5.34762",
-      "templateHash": "5001533756462563331"
+      "templateHash": "5548135554022392086"
     }
   },
   "parameters": {
@@ -18,7 +18,7 @@
         "description": "Optional. Web app name must be between 2 and 60 characters."
       }
     },
-    "sku": {
+    "appServicePlanSKU": {
       "type": "string",
       "defaultValue": "S3",
       "allowedValues": [
@@ -30,77 +30,77 @@
         "description": "Optional, defaults to S3. The SKU of App Service Plan. The allowed values are B3, S3 and P2v3."
       }
     },
-    "AppServicePlanName": {
+    "appServicePlanName": {
       "type": "string",
       "defaultValue": "[format('AppServicePlan-Frontend-{0}', uniqueString(resourceGroup().id))]",
       "metadata": {
         "description": "Optional. The name of the App Service Plan."
       }
     },
-    "BOT_SERVICE_NAME": {
+    "botName": {
       "type": "string",
       "metadata": {
         "description": "Required. The name of your Bot Service."
       }
     },
-    "BOT_DIRECTLINE_SECRET_KEY": {
+    "botKey": {
       "type": "securestring",
       "metadata": {
         "description": "Required. The secret key of the Direct Line Channel of the Bot Service."
       }
     },
-    "DATASOURCE_SAS_TOKEN": {
+    "datasourceSASToken": {
       "type": "securestring",
       "metadata": {
         "description": "Required. The SAS token for the Azure Storage Account hosting your data"
       }
     },
-    "AZURE_SEARCH_ENDPOINT": {
+    "azureSearchEndpoint": {
       "type": "string",
       "metadata": {
         "description": "Required. The endpoint of the Azure Search."
       }
     },
-    "AZURE_SEARCH_KEY": {
+    "azureSearchKey": {
       "type": "securestring",
       "metadata": {
         "description": "Required. The key of the Azure Search."
       }
     },
-    "AZURE_SEARCH_API_VERSION": {
+    "azureSearchAPIVersion": {
       "type": "string",
       "defaultValue": "2021-04-30-Preview",
       "metadata": {
         "description": "Optional. The API version of the Azure Search."
       }
     },
-    "AZURE_OPENAI_ENDPOINT": {
+    "azureOpenAIEndpoint": {
       "type": "string",
       "metadata": {
         "description": "Required. The endpoint of the Azure OpenAI."
       }
     },
-    "AZURE_OPENAI_API_KEY": {
+    "azureOpenAIAPIKey": {
       "type": "securestring",
       "metadata": {
         "description": "Required. The key of the Azure OpenAI."
       }
     },
-    "AZURE_OPENAI_MODEL_NAME": {
+    "azureOpenAIModelName": {
       "type": "string",
       "defaultValue": "gpt-35-turbo",
       "metadata": {
         "description": "Optional. The model name of the Azure OpenAI."
       }
     },
-    "AZURE_OPENAI_API_VERSION": {
+    "azureOpenAIAPIVersion": {
       "type": "string",
       "defaultValue": "2023-03-15-preview",
       "metadata": {
         "description": "Optional. The API version of the Azure OpenAI."
       }
     },
-    "resourcesLocation": {
+    "location": {
       "type": "string",
       "defaultValue": "[resourceGroup().location]",
       "metadata": {
@@ -112,10 +112,10 @@
     {
       "type": "Microsoft.Web/serverfarms",
       "apiVersion": "2022-09-01",
-      "name": "[parameters('AppServicePlanName')]",
-      "location": "[parameters('resourcesLocation')]",
+      "name": "[parameters('appServicePlanName')]",
+      "location": "[parameters('location')]",
       "sku": {
-        "name": "[parameters('sku')]"
+        "name": "[parameters('appServicePlanSKU')]"
       },
       "kind": "linux",
       "properties": {
@@ -126,50 +126,50 @@
       "type": "Microsoft.Web/sites",
       "apiVersion": "2022-09-01",
       "name": "[parameters('webAppName')]",
-      "location": "[parameters('resourcesLocation')]",
+      "location": "[parameters('location')]",
       "properties": {
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('AppServicePlanName'))]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]",
         "siteConfig": {
           "appSettings": [
             {
               "name": "BOT_SERVICE_NAME",
-              "value": "[parameters('BOT_SERVICE_NAME')]"
+              "value": "[parameters('botName')]"
             },
             {
               "name": "BOT_DIRECTLINE_SECRET_KEY",
-              "value": "[parameters('BOT_DIRECTLINE_SECRET_KEY')]"
+              "value": "[parameters('botKey')]"
             },
             {
               "name": "DATASOURCE_SAS_TOKEN",
-              "value": "[parameters('DATASOURCE_SAS_TOKEN')]"
+              "value": "[parameters('datasourceSASToken')]"
             },
             {
               "name": "AZURE_SEARCH_ENDPOINT",
-              "value": "[parameters('AZURE_SEARCH_ENDPOINT')]"
+              "value": "[parameters('azureSearchEndpoint')]"
             },
             {
               "name": "AZURE_SEARCH_KEY",
-              "value": "[parameters('AZURE_SEARCH_KEY')]"
+              "value": "[parameters('azureSearchKey')]"
             },
             {
               "name": "AZURE_SEARCH_API_VERSION",
-              "value": "[parameters('AZURE_SEARCH_API_VERSION')]"
+              "value": "[parameters('azureSearchAPIVersion')]"
             },
             {
               "name": "AZURE_OPENAI_ENDPOINT",
-              "value": "[parameters('AZURE_OPENAI_ENDPOINT')]"
+              "value": "[parameters('azureOpenAIEndpoint')]"
             },
             {
               "name": "AZURE_OPENAI_API_KEY",
-              "value": "[parameters('AZURE_OPENAI_API_KEY')]"
+              "value": "[parameters('azureOpenAIAPIKey')]"
             },
             {
               "name": "AZURE_OPENAI_MODEL_NAME",
-              "value": "[parameters('AZURE_OPENAI_MODEL_NAME')]"
+              "value": "[parameters('azureOpenAIModelName')]"
             },
             {
               "name": "AZURE_OPENAI_API_VERSION",
-              "value": "[parameters('AZURE_OPENAI_API_VERSION')]"
+              "value": "[parameters('azureOpenAIAPIVersion')]"
             },
             {
               "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
@@ -179,7 +179,7 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Web/serverfarms', parameters('AppServicePlanName'))]"
+        "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]"
       ]
     },
     {
