@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.18.4.5664",
-      "templateHash": "17346526833950119557"
+      "templateHash": "769434746632281065"
     }
   },
   "parameters": {
@@ -50,10 +50,9 @@
       }
     },
     "DATASOURCE_SAS_TOKEN": {
-      "type": "string",
-      "defaultValue": "?sv=2022-11-02&ss=bf&srt=sco&sp=rltfx&se=2023-11-29T01:50:59Z&st=2023-05-10T16:50:59Z&spr=https&sig=ZT7MLy%2BnlvAxUKKj5v0RwoWObXaab3gO4ec2%2Fci6iL0%3D",
+      "type": "securestring",
       "metadata": {
-        "description": "Optional. The SAS token of the Azure Storage Account."
+        "description": "Required. The SAS token for the Azure Storage Account hosting your data"
       }
     },
     "AZURE_SEARCH_ENDPOINT": {
