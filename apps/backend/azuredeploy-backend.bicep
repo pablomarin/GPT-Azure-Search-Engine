@@ -60,7 +60,7 @@ param botId string = 'BotId-${uniqueString(resourceGroup().id)}'
   'F0'
   'S1'
 ])
-param botSku string = 'F0'
+param botSKU string = 'F0'
 
 @description('Optional. The name of the new App Service Plan.')
 param appServicePlanName string = 'AppServicePlan-Backend-${uniqueString(resourceGroup().id)}'
@@ -307,7 +307,7 @@ resource bot 'Microsoft.BotService/botServices@2022-09-15' = {
   location: 'global'
   kind: 'azurebot'
   sku: {
-    name: botSku
+    name: botSKU
   }
   properties: {
     displayName: botId
