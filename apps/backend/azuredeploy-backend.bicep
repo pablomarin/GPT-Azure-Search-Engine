@@ -9,7 +9,7 @@ param appPassword string
 @secure()
 param datasourceSASToken string 
 
-@description('Required. The name of the resource group where the resources (Azure Search etc.) where deployed previously. Defaults to current resource group.')
+@description('Optional. The name of the resource group where the resources (Azure Search etc.) where deployed previously. Defaults to current resource group.')
 param resourceGroupSearch string = resourceGroup().name
 
 @description('Required. The name of the Azure Search service deployed previously.')
