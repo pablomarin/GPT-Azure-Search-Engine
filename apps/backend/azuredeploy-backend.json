@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.19.5.34762",
-      "templateHash": "640244339709671693"
+      "templateHash": "14248816394241902113"
     }
   },
   "parameters": {
@@ -265,7 +265,7 @@
             },
             {
               "name": "SQL_SERVER_ENDPOINT",
-              "value": "[format('https://{0}.database.windows.net/', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupSearch')), 'Microsoft.Sql/servers', parameters('sqlServerName')), '2022-11-01-preview', 'full'))]"
+              "value": "[format('https://{0}.database.windows.net/', parameters('sqlServerName'))]"
             },
             {
               "name": "SQL_SERVER_DATABASE",
