@@ -37,17 +37,17 @@ param bingSearchUrl string = 'https://api.bing.microsoft.com/v7.0/search'
 param bingSearchName string
 
 @description('Required. The name of the SQL server deployed previously.')
-param sqlServerName string
+param SQLServerName string
 
 @description('Required. The name of the SQL Server database.')
-param sqlServerDatabase string = 'SampleDB'
+param SQLServerDatabase string = 'SampleDB'
 
 @description('Required. The password for the SQL Server.')
 @secure()
-param sqlServerPassword string
+param SQLServerPassword string
 
 @description('Required. The name of the Azure CosmosDB.')
-param cosmosDBName string
+param cosmosDBAccountName string
 
 @description('Required. The name of the Azure CosmosDB container.')
 param cosmosDBContainerName string
@@ -63,7 +63,7 @@ param botId string = 'BotId-${uniqueString(resourceGroup().id)}'
 param botSku string = 'F0'
 
 @description('Optional. The name of the new App Service Plan.')
-param newAppServicePlanName string = 'AppServicePlan-Backend-${uniqueString(resourceGroup().id)}'
+param appServicePlanName string = 'AppServicePlan-Backend-${uniqueString(resourceGroup().id)}'
 
 @description('Optional, defaults to S3. The SKU of the App Service Plan. Acceptable values are B3, S3 and P2v3.')
 @allowed([
@@ -71,12 +71,11 @@ param newAppServicePlanName string = 'AppServicePlan-Backend-${uniqueString(reso
   'S3'
   'P2v3'
 ])
-param newAppServicePlanSku string = 'S3'
+param appServicePlanSKU string = 'S3'
 
 @description('Optional, defaults to resource group location. The location of the resources.')
 param location string = resourceGroup().location
 
-var servicePlanName = newAppServicePlanName
 var publishingUsername = '$${botId}'
 var webAppName = 'webApp-Backend-${botId}'
 var siteHost = '${webAppName}.azurewebsites.net'
@@ -102,22 +101,22 @@ resource bingSearch 'Microsoft.Bing/accounts@2020-06-10' existing = {
 
 // Existing SQL Server resource.
 resource sqlServer 'Microsoft.Sql/servers@2022-11-01-preview' existing = {
-  name: sqlServerName
+  name: SQLServerName
   scope: resourceGroup(resourceGroupSearch)
 }
 
 // Existing Azure CosmosDB resource.
 resource cosmosDB 'Microsoft.DocumentDB/databaseAccounts@2023-04-15' existing = {
-  name: cosmosDBName
+  name: cosmosDBAccountName
   scope: resourceGroup(resourceGroupSearch)
 }
 
 // Create a new Linux App Service Plan if no existing App Service Plan name was passed in.
 resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
-  name: servicePlanName
+  name: appServicePlanName
   location: location
   sku: {
-    name: newAppServicePlanSku
+    name: appServicePlanSKU
   }
   kind: 'linux'
   properties: {
@@ -205,11 +204,11 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'SQL_SERVER_ENDPOINT'
-          value: 'https://${sqlServerName}${environment().suffixes.sqlServerHostname}'
+          value: 'https://${SQLServerName}${environment().suffixes.sqlServerHostname}'
         }
         {
           name: 'SQL_SERVER_DATABASE'
-          value: sqlServerDatabase
+          value: SQLServerDatabase
         }
         {
           name: 'SQL_SERVER_USERNAME'
@@ -217,15 +216,15 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'SQL_SERVER_PASSWORD'
-          value: sqlServerPassword
+          value: SQLServerPassword
         }
         {
           name: 'AZURE_COSMOSDB_ENDPOINT'
-          value: 'https://${cosmosDBName}.documents.azure.com:443/'
+          value: 'https://${cosmosDBAccountName}.documents.azure.com:443/'
         }
         {
           name: 'AZURE_COSMOSDB_NAME'
-          value: cosmosDBName
+          value: cosmosDBAccountName
         }
         {
           name: 'AZURE_COSMOSDB_CONTAINER_NAME'
