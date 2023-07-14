@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.19.5.34762",
-      "templateHash": "2833153611435020724"
+      "templateHash": "1941251474212859971"
     }
   },
   "parameters": {
@@ -31,7 +31,7 @@
       "type": "string",
       "defaultValue": "[resourceGroup().name]",
       "metadata": {
-        "description": "Required. The name of the resource group where the resources (Azure Search etc.) where deployed previously."
+        "description": "Required. The name of the resource group where the resources (Azure Search etc.) where deployed previously. Defaults to current resource group."
       }
     },
     "azureSearchName": {
@@ -51,7 +51,7 @@
       "type": "string",
       "defaultValue": "[resourceGroup().name]",
       "metadata": {
-        "description": "Required. The name of the resource group where Azure Open AI was deployed previously."
+        "description": "Required. The name of the resource group where Azure Open AI was deployed previously. Defaults to current resource group."
       }
     },
     "azureOpenAIName": {
@@ -87,26 +87,26 @@
         "description": "Required. The name of the Bing Search service deployed previously."
       }
     },
-    "sqlServerName": {
+    "SQLServerName": {
       "type": "string",
       "metadata": {
         "description": "Required. The name of the SQL server deployed previously."
       }
     },
-    "sqlServerDatabase": {
+    "SQLServerDatabase": {
       "type": "string",
       "defaultValue": "SampleDB",
       "metadata": {
         "description": "Required. The name of the SQL Server database."
       }
     },
-    "sqlServerPassword": {
+    "SQLServerPassword": {
       "type": "securestring",
       "metadata": {
         "description": "Required. The password for the SQL Server."
       }
     },
-    "cosmosDBName": {
+    "cosmosDBAccountName": {
       "type": "string",
       "metadata": {
         "description": "Required. The name of the Azure CosmosDB."
@@ -136,14 +136,14 @@
         "description": "Optional, defaults to F0. The pricing tier of the Bot Service Registration. Acceptable values are F0 and S1."
       }
     },
-    "newAppServicePlanName": {
+    "appServicePlanName": {
       "type": "string",
       "defaultValue": "[format('AppServicePlan-Backend-{0}', uniqueString(resourceGroup().id))]",
       "metadata": {
         "description": "Optional. The name of the new App Service Plan."
       }
     },
-    "newAppServicePlanSku": {
+    "appServicePlanSKU": {
       "type": "string",
       "defaultValue": "S3",
       "allowedValues": [
@@ -164,7 +164,6 @@
     }
   },
   "variables": {
-    "servicePlanName": "[parameters('newAppServicePlanName')]",
     "publishingUsername": "[format('${0}', parameters('botId'))]",
     "webAppName": "[format('webApp-Backend-{0}', parameters('botId'))]",
     "siteHost": "[format('{0}.azurewebsites.net', variables('webAppName'))]",
@@ -174,10 +173,10 @@
     {
       "type": "Microsoft.Web/serverfarms",
       "apiVersion": "2022-09-01",
-      "name": "[variables('servicePlanName')]",
+      "name": "[parameters('appServicePlanName')]",
       "location": "[parameters('location')]",
       "sku": {
-        "name": "[parameters('newAppServicePlanSku')]"
+        "name": "[parameters('appServicePlanSKU')]"
       },
       "kind": "linux",
       "properties": {
@@ -204,7 +203,7 @@
             "hostType": "Repository"
           }
         ],
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('servicePlanName'))]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]",
         "reserved": true,
         "scmSiteAlsoStopped": false,
         "clientAffinityEnabled": false,
@@ -265,27 +264,27 @@
             },
             {
               "name": "SQL_SERVER_ENDPOINT",
-              "value": "[format('https://{0}{1}', parameters('sqlServerName'), environment().suffixes.sqlServerHostname)]"
+              "value": "[format('https://{0}{1}', parameters('SQLServerName'), environment().suffixes.sqlServerHostname)]"
             },
             {
               "name": "SQL_SERVER_DATABASE",
-              "value": "[parameters('sqlServerDatabase')]"
+              "value": "[parameters('SQLServerDatabase')]"
             },
             {
               "name": "SQL_SERVER_USERNAME",
-              "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupSearch')), 'Microsoft.Sql/servers', parameters('sqlServerName')), '2022-11-01-preview').administratorLogin]"
+              "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupSearch')), 'Microsoft.Sql/servers', parameters('SQLServerName')), '2022-11-01-preview').administratorLogin]"
             },
             {
               "name": "SQL_SERVER_PASSWORD",
-              "value": "[parameters('sqlServerPassword')]"
+              "value": "[parameters('SQLServerPassword')]"
             },
             {
               "name": "AZURE_COSMOSDB_ENDPOINT",
-              "value": "[format('https://{0}.documents.azure.com:443/', parameters('cosmosDBName'))]"
+              "value": "[format('https://{0}.documents.azure.com:443/', parameters('cosmosDBAccountName'))]"
             },
             {
               "name": "AZURE_COSMOSDB_NAME",
-              "value": "[parameters('cosmosDBName')]"
+              "value": "[parameters('cosmosDBAccountName')]"
             },
             {
               "name": "AZURE_COSMOSDB_CONTAINER_NAME",
@@ -293,7 +292,7 @@
             },
             {
               "name": "AZURE_COMOSDB_CONNECTION_STRING",
-              "value": "[listConnectionStrings(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupSearch')), 'Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBName')), '2023-04-15').connectionStrings[0].connectionString]"
+              "value": "[listConnectionStrings(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupSearch')), 'Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBAccountName')), '2023-04-15').connectionStrings[0].connectionString]"
             },
             {
               "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
@@ -309,7 +308,7 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Web/serverfarms', variables('servicePlanName'))]"
+        "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]"
       ]
     },
     {
