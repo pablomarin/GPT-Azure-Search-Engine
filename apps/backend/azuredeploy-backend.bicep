@@ -173,7 +173,7 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'AZURE_SEARCH_KEY'
-          value: azureSearch.listKeys().keys[0].value
+          value: azureSearch.listAdminKeys().primaryKey
         }
         {
           name: 'AZURE_SEARCH_API_VERSION'
