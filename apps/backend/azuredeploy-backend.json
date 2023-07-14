@@ -4,128 +4,118 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.18.4.5664",
-      "templateHash": "16187096216676067146"
+      "version": "0.19.5.34762",
+      "templateHash": "11311335911552811785"
     }
   },
   "parameters": {
-    "MicrosoftAppId": {
+    "appId": {
       "type": "string",
       "metadata": {
         "description": "Required. Active Directory App ID."
       }
     },
-    "MicrosoftAppPassword": {
+    "appPassword": {
       "type": "securestring",
       "metadata": {
         "description": "Required. Active Directory App Secret Value."
       }
     },
-    "DATASOURCE_SAS_TOKEN": {
+    "datasourceSASToken": {
       "type": "securestring",
       "metadata": {
         "description": "Required. The SAS token for the Azure Storage Account hosting your data"
       }
     },
     "resourceGroupSearch": {
-      "type": "string"
+      "type": "string",
+      "defaultValue": "[resourceGroup().name]",
+      "metadata": {
+        "description": "Required. The name of the resource group where the resources (Azure Search etc.) where deployed previously."
+      }
     },
-    "Azure_Search_Name": {
-      "type": "string"
+    "azureSearchName": {
+      "type": "string",
+      "metadata": {
+        "description": "Required. The name of the Azure Search service deployed previously."
+      }
     },
-    "AZURE_SEARCH_API_VERSION": {
+    "azureSearchAPIVersion": {
       "type": "string",
       "defaultValue": "2021-04-30-Preview",
       "metadata": {
         "description": "Optional. The API version for the Azure Search service."
       }
     },
-    "AZURE_OPENAI_ENDPOINT": {
+    "resourceGroupOpenAI": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().name]",
+      "metadata": {
+        "description": "Required. The name of the resource group where Azure Open AI was deployed previously."
+      }
+    },
+    "azureOpenAIName": {
       "type": "string",
       "metadata": {
-        "description": "Required. The endpoint of the Azure OpenAI service."
+        "description": "Required. The name of the Azure OpenAI resource deployed previously."
       }
     },
-    "AZURE_OPENAI_API_KEY": {
-      "type": "securestring",
-      "metadata": {
-        "description": "Required. The API key for the Azure OpenAI service."
-      }
-    },
-    "AZURE_OPENAI_MODEL_NAME": {
+    "azureOpenAIModelName": {
       "type": "string",
       "defaultValue": "gpt-4",
       "metadata": {
         "description": "Optional. The model name for the Azure OpenAI service."
       }
     },
-    "AZURE_OPENAI_API_VERSION": {
+    "azureOpenAIAPIVersion": {
       "type": "string",
       "defaultValue": "2023-03-15-preview",
       "metadata": {
         "description": "Optional. The API version for the Azure OpenAI service."
       }
     },
-    "BING_SEARCH_URL": {
+    "bingSearchUrl": {
       "type": "string",
       "defaultValue": "https://api.bing.microsoft.com/v7.0/search",
       "metadata": {
         "description": "Optional. The URL for the Bing Search service."
       }
     },
-    "BING_SUBSCRIPTION_KEY": {
-      "type": "securestring",
-      "metadata": {
-        "description": "Required. The subscription key for the Bing Search service."
-      }
-    },
-    "SQL_SERVER_ENDPOINT": {
+    "bingSearchName": {
       "type": "string",
       "metadata": {
-        "description": "Required. The endpoint of the SQL Server."
+        "description": "Required. The name of the Bing Search service deployed previously."
       }
     },
-    "SQL_SERVER_DATABASE": {
+    "sqlServerName": {
+      "type": "string",
+      "metadata": {
+        "description": "Required. The name of the SQL server deployed previously."
+      }
+    },
+    "sqlServerDatabase": {
       "type": "string",
       "defaultValue": "SampleDB",
       "metadata": {
         "description": "Required. The name of the SQL Server database."
       }
     },
-    "SQL_SERVER_USERNAME": {
-      "type": "string",
-      "metadata": {
-        "description": "Required. The username for the SQL Server."
-      }
-    },
-    "SQL_SERVER_PASSWORD": {
+    "sqlServerPassword": {
       "type": "securestring",
       "metadata": {
         "description": "Required. The password for the SQL Server."
       }
     },
-    "AZURE_COSMOSDB_ENDPOINT": {
-      "type": "string",
-      "metadata": {
-        "description": "Required. The endpoint of the Azure CosmosDB."
-      }
-    },
-    "AZURE_COSMOSDB_NAME": {
+    "cosmosDBName": {
       "type": "string",
       "metadata": {
         "description": "Required. The name of the Azure CosmosDB."
       }
     },
-    "AZURE_COSMOSDB_CONTAINER_NAME": {
+    "cosmosDBContainerName": {
       "type": "string",
       "metadata": {
         "description": "Required. The name of the Azure CosmosDB container."
-      }
-    },
-    "AZURE_COMOSDB_CONNECTION_STRING": {
-      "type": "securestring",
-      "metadata": {
-        "description": "Required. The connection string of the Azure CosmosDB."
       }
     },
     "botId": {
@@ -165,7 +155,7 @@
         "description": "Optional, defaults to S3. The SKU of the App Service Plan. Acceptable values are B3, S3 and P2v3."
       }
     },
-    "resourcesLocation": {
+    "location": {
       "type": "string",
       "defaultValue": "[resourceGroup().location]",
       "metadata": {
@@ -185,7 +175,7 @@
       "type": "Microsoft.Web/serverfarms",
       "apiVersion": "2022-09-01",
       "name": "[variables('servicePlanName')]",
-      "location": "[parameters('resourcesLocation')]",
+      "location": "[parameters('location')]",
       "sku": {
         "name": "[parameters('newAppServicePlanSku')]"
       },
@@ -198,7 +188,7 @@
       "type": "Microsoft.Web/sites",
       "apiVersion": "2022-09-01",
       "name": "[variables('webAppName')]",
-      "location": "[parameters('resourcesLocation')]",
+      "location": "[parameters('location')]",
       "kind": "app,linux",
       "properties": {
         "enabled": true,
@@ -227,83 +217,83 @@
           "appSettings": [
             {
               "name": "MicrosoftAppId",
-              "value": "[parameters('MicrosoftAppId')]"
+              "value": "[parameters('appId')]"
             },
             {
               "name": "MicrosoftAppPassword",
-              "value": "[parameters('MicrosoftAppPassword')]"
+              "value": "[parameters('appPassword')]"
             },
             {
               "name": "DATASOURCE_SAS_TOKEN",
-              "value": "[parameters('DATASOURCE_SAS_TOKEN')]"
+              "value": "[parameters('datasourceSASToken')]"
             },
             {
               "name": "AZURE_SEARCH_ENDPOINT",
-              "value": "[format('https://{0}.search.windows.net', parameters('Azure_Search_Name'))]"
+              "value": "[format('https://{0}.search.windows.net', parameters('azureSearchName'))]"
             },
             {
               "name": "AZURE_SEARCH_KEY",
-              "value": "[listKeys(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupSearch')), 'Microsoft.Search/searchServices', parameters('Azure_Search_Name')), '2021-04-01-preview').keys[0].value]"
+              "value": "[listKeys(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupSearch')), 'Microsoft.Search/searchServices', parameters('azureSearchName')), '2021-04-01-preview').keys[0].value]"
             },
             {
               "name": "AZURE_SEARCH_API_VERSION",
-              "value": "[parameters('AZURE_SEARCH_API_VERSION')]"
+              "value": "[parameters('azureSearchAPIVersion')]"
             },
             {
               "name": "AZURE_OPENAI_ENDPOINT",
-              "value": "[parameters('AZURE_OPENAI_ENDPOINT')]"
+              "value": "[format('https://{0}.openai.azure.com/', parameters('azureOpenAIName'))]"
             },
             {
               "name": "AZURE_OPENAI_API_KEY",
-              "value": "[parameters('AZURE_OPENAI_API_KEY')]"
+              "value": "[listKeys(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupOpenAI')), 'Microsoft.CognitiveServices/accounts', parameters('azureOpenAIName')), '2023-05-01').key1]"
             },
             {
               "name": "AZURE_OPENAI_MODEL_NAME",
-              "value": "[parameters('AZURE_OPENAI_MODEL_NAME')]"
+              "value": "[parameters('azureOpenAIModelName')]"
             },
             {
               "name": "AZURE_OPENAI_API_VERSION",
-              "value": "[parameters('AZURE_OPENAI_API_VERSION')]"
+              "value": "[parameters('azureOpenAIAPIVersion')]"
             },
             {
               "name": "BING_SEARCH_URL",
-              "value": "[parameters('BING_SEARCH_URL')]"
+              "value": "[parameters('bingSearchUrl')]"
             },
             {
               "name": "BING_SUBSCRIPTION_KEY",
-              "value": "[parameters('BING_SUBSCRIPTION_KEY')]"
+              "value": "[listKeys(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupSearch')), 'Microsoft.Bing/accounts', parameters('bingSearchName')), '2020-06-10').key1]"
             },
             {
               "name": "SQL_SERVER_ENDPOINT",
-              "value": "[parameters('SQL_SERVER_ENDPOINT')]"
+              "value": "[format('https://{0}.database.windows.net/', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupSearch')), 'Microsoft.Sql/servers', parameters('sqlServerName')), '2022-11-01-preview', 'full'))]"
             },
             {
               "name": "SQL_SERVER_DATABASE",
-              "value": "[parameters('SQL_SERVER_DATABASE')]"
+              "value": "[parameters('sqlServerDatabase')]"
             },
             {
               "name": "SQL_SERVER_USERNAME",
-              "value": "[parameters('SQL_SERVER_USERNAME')]"
+              "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupSearch')), 'Microsoft.Sql/servers', parameters('sqlServerName')), '2022-11-01-preview').administratorLogin]"
             },
             {
               "name": "SQL_SERVER_PASSWORD",
-              "value": "[parameters('SQL_SERVER_PASSWORD')]"
+              "value": "[parameters('sqlServerPassword')]"
             },
             {
               "name": "AZURE_COSMOSDB_ENDPOINT",
-              "value": "[parameters('AZURE_COSMOSDB_ENDPOINT')]"
+              "value": "[format('https://{0}.documents.azure.com:443/', parameters('cosmosDBName'))]"
             },
             {
               "name": "AZURE_COSMOSDB_NAME",
-              "value": "[parameters('AZURE_COSMOSDB_NAME')]"
+              "value": "[parameters('cosmosDBName')]"
             },
             {
               "name": "AZURE_COSMOSDB_CONTAINER_NAME",
-              "value": "[parameters('AZURE_COSMOSDB_CONTAINER_NAME')]"
+              "value": "[parameters('cosmosDBContainerName')]"
             },
             {
               "name": "AZURE_COMOSDB_CONNECTION_STRING",
-              "value": "[parameters('AZURE_COMOSDB_CONNECTION_STRING')]"
+              "value": "[listConnectionStrings(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupSearch')), 'Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBName')), '2023-04-15').connectionStrings[0].connectionString]"
             },
             {
               "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
@@ -365,20 +355,14 @@
             "virtualDirectories": null
           }
         ],
-        "winAuthAdminState": 0,
-        "winAuthTenantState": 0,
-        "customAppPoolIdentityAdminState": false,
-        "customAppPoolIdentityTenantState": false,
         "loadBalancing": "LeastRequests",
-        "routingRules": [],
         "experiments": {
           "rampUpRules": []
         },
         "autoHealEnabled": false,
         "vnetName": "",
         "minTlsVersion": "1.2",
-        "ftpsState": "AllAllowed",
-        "reservedInstanceCount": 0
+        "ftpsState": "AllAllowed"
       },
       "dependsOn": [
         "[resourceId('Microsoft.Web/sites', variables('webAppName'))]"
@@ -397,7 +381,7 @@
         "displayName": "[parameters('botId')]",
         "iconUrl": "https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png",
         "endpoint": "[variables('botEndpoint')]",
-        "msaAppId": "[parameters('MicrosoftAppId')]",
+        "msaAppId": "[parameters('appId')]",
         "luisAppIds": [],
         "schemaTransformationVersion": "1.3",
         "isCmekEnabled": false
