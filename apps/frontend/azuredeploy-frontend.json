@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.19.5.34762",
-      "templateHash": "5548135554022392086"
+      "templateHash": "18279868977548256709"
     }
   },
   "parameters": {
@@ -37,16 +37,17 @@
         "description": "Optional. The name of the App Service Plan."
       }
     },
-    "botName": {
+    "botDirectLineChannelName": {
       "type": "string",
       "metadata": {
         "description": "Required. The name of your Bot Service."
       }
     },
-    "botKey": {
-      "type": "securestring",
+    "resourceGroupBackend": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().name]",
       "metadata": {
-        "description": "Required. The secret key of the Direct Line Channel of the Bot Service."
+        "description": "Optional. The name of the resource group where the backend resources (bot etc.) where deployed previously. Defaults to current resource group."
       }
     },
     "datasourceSASToken": {
@@ -55,16 +56,17 @@
         "description": "Required. The SAS token for the Azure Storage Account hosting your data"
       }
     },
-    "azureSearchEndpoint": {
+    "resourceGroupSearch": {
       "type": "string",
+      "defaultValue": "[resourceGroup().name]",
       "metadata": {
-        "description": "Required. The endpoint of the Azure Search."
+        "description": "Optional. The name of the resource group where the resources (Azure Search etc.) where deployed previously. Defaults to current resource group."
       }
     },
-    "azureSearchKey": {
-      "type": "securestring",
+    "azureSearchName": {
+      "type": "string",
       "metadata": {
-        "description": "Required. The key of the Azure Search."
+        "description": "Required. The name of the Azure Search service deployed previously."
       }
     },
     "azureSearchAPIVersion": {
@@ -74,16 +76,17 @@
         "description": "Optional. The API version of the Azure Search."
       }
     },
-    "azureOpenAIEndpoint": {
+    "resourceGroupOpenAI": {
       "type": "string",
+      "defaultValue": "[resourceGroup().name]",
       "metadata": {
-        "description": "Required. The endpoint of the Azure OpenAI."
+        "description": "Required. The name of the resource group where Azure Open AI was deployed previously. Defaults to current resource group."
       }
     },
-    "azureOpenAIAPIKey": {
-      "type": "securestring",
+    "azureOpenAIName": {
+      "type": "string",
       "metadata": {
-        "description": "Required. The key of the Azure OpenAI."
+        "description": "Required. The name of the Azure OpenAI resource deployed previously."
       }
     },
     "azureOpenAIModelName": {
@@ -133,11 +136,11 @@
           "appSettings": [
             {
               "name": "BOT_SERVICE_NAME",
-              "value": "[parameters('botName')]"
+              "value": "[parameters('botDirectLineChannelName')]"
             },
             {
               "name": "BOT_DIRECTLINE_SECRET_KEY",
-              "value": "[parameters('botKey')]"
+              "value": "[listChannelWithKeys(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupBackend')), 'Microsoft.BotService/botServices/channels', split(parameters('botDirectLineChannelName'), '/')[0], split(parameters('botDirectLineChannelName'), '/')[1]), '2022-09-15').properties.properties.channelSecret]"
             },
             {
               "name": "DATASOURCE_SAS_TOKEN",
@@ -145,11 +148,11 @@
             },
             {
               "name": "AZURE_SEARCH_ENDPOINT",
-              "value": "[parameters('azureSearchEndpoint')]"
+              "value": "[format('https://{0}.search.windows.net', parameters('azureSearchName'))]"
             },
             {
               "name": "AZURE_SEARCH_KEY",
-              "value": "[parameters('azureSearchKey')]"
+              "value": "[listAdminKeys(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupSearch')), 'Microsoft.Search/searchServices', parameters('azureSearchName')), '2021-04-01-preview').primaryKey]"
             },
             {
               "name": "AZURE_SEARCH_API_VERSION",
@@ -157,11 +160,11 @@
             },
             {
               "name": "AZURE_OPENAI_ENDPOINT",
-              "value": "[parameters('azureOpenAIEndpoint')]"
+              "value": "[format('https://{0}.openai.azure.com/', parameters('azureOpenAIName'))]"
             },
             {
               "name": "AZURE_OPENAI_API_KEY",
-              "value": "[parameters('azureOpenAIAPIKey')]"
+              "value": "[listKeys(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupOpenAI')), 'Microsoft.CognitiveServices/accounts', parameters('azureOpenAIName')), '2023-05-01').key1]"
             },
             {
               "name": "AZURE_OPENAI_MODEL_NAME",

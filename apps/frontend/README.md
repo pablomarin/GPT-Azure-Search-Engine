@@ -9,7 +9,7 @@ Also includes a Search experience.
 
 1. Deploy the Frontend Azure Web Application by clicking the Button below
 
-[![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Ftectonia%2FGPT-Azure-Search-Engine%2Fmain%2Fapps%2Ffrontend%2Fazuredeploy-frontend.json)
+[![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Ftectonia%2FGPT-Azure-Search-Engine%2Fexisting-resource%2Fapps%2Ffrontend%2Fazuredeploy-frontend.json)
 
 2. Zip the code of the bot by executing the following command in the terminal (you have to be inside the folder: apps/frontend/ ):
 ```bash
