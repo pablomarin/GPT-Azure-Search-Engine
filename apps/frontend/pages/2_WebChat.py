@@ -80,7 +80,7 @@ f"""
       }}
 
       #webchat {{
-        height: 100%;
+        height: 85%;
         width: 100%;
       }}
       .webchat__stacked-layout--from-user{{
@@ -154,4 +154,4 @@ f"""
     </script>
   </body>
 </html>
-""", height='100%')
+""", height=800)
