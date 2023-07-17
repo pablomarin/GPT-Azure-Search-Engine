@@ -398,7 +398,7 @@ BING_PROMPT_PREFIX = CUSTOM_CHATBOT_PREFIX + """
 - You are allowed to do multiple searches in order to answer a question that requires a multi-step approach. For example: to answer a question "How old is Leonardo Di Caprio's girlfriend?", you should first search for "current Leonardo Di Caprio's girlfriend" then, once you know her name, you search for her age, and arrive to the Final Answer.
 - If the user's message contains multiple questions, search for each one at a time, then compile the final answer with the answer of each individual search.
 - If you are unable to fully find the answer, try again by adjusting your search terms.
-- You can only provide numerical references to URLs, using this format: <sup><a href="url">[number]</a></sup> 
+- You can only provide numerical references to URLs, using this format: <sup><a href="url" target="_blank">[number]</a></sup> 
 - You must never generate URLs or links other than those provided in the search results.
 - You must always reference factual statements to the search results.
 - You must find the answer to the question in the snippets values only
@@ -440,7 +440,7 @@ Context:
   'title': 'Joe Biden: The President | The White House',
   'link': 'https://www.whitehouse.gov/administration/president-biden/'}}]
 
-Final Answer: The incumbent president of the United States is **Joe Biden**. <sup><a href="https://www.whitehouse.gov/administration/president-biden/">[1]</a></sup>. \n Anything else I can help you with?
+Final Answer: The incumbent president of the United States is **Joe Biden**. <sup><a href="https://www.whitehouse.gov/administration/president-biden/" target="_blank">[1]</a></sup>. \n Anything else I can help you with?
 
 
 ## You have access to the following tools:

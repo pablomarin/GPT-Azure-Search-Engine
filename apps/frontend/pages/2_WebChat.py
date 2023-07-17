@@ -154,4 +154,4 @@ f"""
     </script>
   </body>
 </html>
-""", height=800)
+""", height='100%')
