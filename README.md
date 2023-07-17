@@ -45,7 +45,7 @@ The repo is made to teach you step-by-step on how to build a OpenAI based Smart 
 2. In the app, an OpenAI LLM uses a clever prompt to determine which source contains the answer to the question.
 3. Four types of sources are available:
    * 3a. Azure SQL Database - contains COVID-related statistics in the US.
-   * 3b. Azure Bing Search API - provides online web search for current information.
+   * 3b. Azure Bing Search API - provides access to the internet allowing scenerios like: QnA on public websites .
    * 3c. Azure Cognitive Search - contains AI-enriched documents from Blob Storage (10k PDFs and 52k articles).
       * 3c.1. Uses an LLM (OpenAI) to vectorize the top K document chunks from 3c.
       * 3c.2. Uses in-memory cosine similarity to get the top N chunks.
