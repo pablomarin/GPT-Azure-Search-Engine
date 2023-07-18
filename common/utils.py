@@ -511,7 +511,10 @@ class BingSearchResults(BaseTool):
 
     def _run(self, query: str) -> str:
         bing = BingSearchAPIWrapper(k=self.k)
-        return bing.results(query,num_results=self.k)
+        try:
+            return bing.results(query,num_results=self.k)
+        except:
+            return "No Results Found"
     
     async def _arun(self, query: str) -> str:
         """Use the tool asynchronously."""
