@@ -3,12 +3,12 @@ from typing import Any, Dict, List, Optional, Union
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain.schema import AgentAction, AgentFinish, LLMResult
 
-DEFAULT_ANSWER_PREFIX_TOKENS = ["Final", "Answer", ":"]
-        
-class MyCustomHandler(BaseCallbackHandler):
+
+
+# Callback handler to use in notebooks, uses stdout
+class StdOutCallbackHandler(BaseCallbackHandler):
     """Callback handler for streaming in agents.
     Only works with agents using LLMs that support streaming.
-    Only the final output of the agent will be streamed.
     """
     
     def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
@@ -28,5 +28,5 @@ class MyCustomHandler(BaseCallbackHandler):
 
     def on_agent_action(self, action: AgentAction, **kwargs: Any) -> Any:
         sys.stdout.write(f"{action.log}\n")
-        
-        
+               
+            
