@@ -17,7 +17,7 @@ Below are the steps to run the Bot API as an Azure Wep App, connected with the A
 
 2. Deploy the Bot Web App and the Bot Service by clicking the Button below and type the App Registration ID and Secret Value that you got in Step 1 along with all the other ENV variables you used in the Notebooks
 
-[![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Ftectonia%2FGPT-Azure-Search-Engine%2Fexisting-resource%2Fapps%2Fbackend%2Fazuredeploy-backend.json)
+[![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Ftectonia%2FGPT-Azure-Search-Engine%2Fmain%2Fapps%2Fbackend%2Fazuredeploy-backend.json)
 
 3. Zip the code of the bot by executing the following command in the terminal (**you have to be inside the app/backend/ folder**):
 ```bash
