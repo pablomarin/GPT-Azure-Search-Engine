@@ -20,9 +20,6 @@ param botDirectLineChannelName string
 @description('Required. The key to the direct line channel of your bot.')
 param botDirectLineChannelKey string
 
-@description('Optional. The name of the resource group where the backend resources (bot etc.) where deployed previously. Defaults to current resource group.')
-param resourceGroupBackend string = resourceGroup().name
-
 @description('Required. The SAS token for the Azure Storage Account hosting your data')
 @secure()
 param datasourceSASToken string 
