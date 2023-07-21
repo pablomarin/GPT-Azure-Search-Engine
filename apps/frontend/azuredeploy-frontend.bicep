@@ -15,7 +15,7 @@ param appServicePlanSKU string = 'S3'
 param appServicePlanName string = 'AppServicePlan-Frontend-${uniqueString(resourceGroup().id)}'
 
 @description('Required. The name of your Bot Service.')
-param botDirectLineChannelName string
+param botServiceName string
 
 @description('Required. The key to the direct line channel of your bot.')
 param botDirectLineChannelKey string
@@ -83,7 +83,7 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
       appSettings: [
         {
           name: 'BOT_SERVICE_NAME'
-          value: botDirectLineChannelName
+          value: botServiceName
         }
         {
           name: 'BOT_DIRECTLINE_SECRET_KEY'
