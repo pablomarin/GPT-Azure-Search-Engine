@@ -1,6 +1,6 @@
 import re
 from io import BytesIO
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Awaitable, Callable, Tuple, Type, Union
 import requests
 import os
 from collections import OrderedDict
@@ -134,7 +134,7 @@ def embed_docs(docs: List[Document], chunks_limit: int=100, verbose: bool = Fals
     return index
 
 
-def search_docs(index: VectorStore, query: str, k: int=4) -> List[Document]:
+def search_docs(index: VectorStore, query: str, k: int=2) -> List[Document]:
     """Searches a FAISS index for similar chunks to the query
     and returns a list of Documents."""
 
@@ -178,13 +178,15 @@ def num_tokens_from_string(string: str) -> int:
 def model_tokens_limit(model: str) -> int:
     """Returns the number of tokens limits in a text model."""
     if model == "gpt-35-turbo":
-        token_limit = 3000
+        token_limit = 2500
     elif model == "gpt-4":
-        token_limit = 7000
+        token_limit = 6500
+    elif model == "gpt-35-turbo-16k":
+        token_limit = 14500
     elif model == "gpt-4-32k":
-        token_limit = 31000
+        token_limit = 30500
     else:
-        token_limit = 3000
+        token_limit = 2500
     return token_limit
 
 # Returns num of toknes used on a list of Documents objects
@@ -205,7 +207,7 @@ def get_search_results(query: str, indexes: list, k: int = 5) -> List[dict]:
         url = os.environ["AZURE_SEARCH_ENDPOINT"] + '/indexes/'+ index + '/docs'
         url += '?api-version={}'.format(os.environ["AZURE_SEARCH_API_VERSION"])
         url += '&search={}'.format(query)
-        url += '&select=*'
+        url += '&select=id,title,chunks,language,name,location'
         url += '&$top={}'.format(k)  # You can change this to anything you need/want
         url += '&queryLanguage=en-us'
         url += '&queryType=semantic'
@@ -223,7 +225,7 @@ def get_search_results(query: str, indexes: list, k: int = 5) -> List[dict]:
     return agg_search_results
     
 
-def order_search_results( agg_search_results: List[dict], reranker_threshold: int) -> OrderedDict:
+def order_search_results( agg_search_results: List[dict], reranker_threshold: int = 0) -> OrderedDict:
     
     """Orders based on score the results from get_search_results function"""
     
@@ -232,15 +234,15 @@ def order_search_results( agg_search_results: List[dict], reranker_threshold: in
     
     for search_results in agg_search_results:
         for result in search_results['value']:
-            if result['@search.rerankerScore'] > reranker_threshold: # Show results that are at least 25% of the max possible score=4
+            if result['@search.rerankerScore'] > reranker_threshold: # Show results that are at least N% of the max possible score=4
                 content[result['id']]={
                                         "title": result['title'],
-                                        "chunks": result['pages'],
-                                        "language": result['language'],
+                                        "chunks": result['chunks'],
+                                        "language": result['language'], 
+                                        "name": result['name'], 
+                                        "location": result['location'] ,
                                         "caption": result['@search.captions'][0]['text'],
-                                        "score": result['@search.rerankerScore'],
-                                        "name": result['metadata_storage_name'],
-                                        "location": result['metadata_storage_path']                  
+                                        "score": result['@search.rerankerScore']                   
                                     }
     #After results have been filtered we will Sort and add them as an Ordered list
     for id in sorted(content, key= lambda x: content[x]["score"], reverse=True):
@@ -324,9 +326,10 @@ class DocSearchTool(BaseTool):
     indexes: List[str]
     k: int = 10
     response_language: str = "English"
-    reranker_th: int = 1
+    reranker_th: int = 0
     chunks_limit:int = 100
-    similarity_k: int = 4
+    similarity_k: int = 2
+    sas_token: str = ""
 
     
     def _run(self, query: str) -> str:
@@ -337,7 +340,8 @@ class DocSearchTool(BaseTool):
             docs = []
             for key,value in ordered_results.items():
                 for page in value["chunks"]:
-                    docs.append(Document(page_content=page, metadata={"source": value["location"]}))
+                    location = value["location"] if value["location"] is not None else ""
+                    docs.append(Document(page_content=page, metadata={"source": location+self.sas_token}))
 
             # Calculate number of tokens of our docs
             tokens_limit = model_tokens_limit(self.llm.deployment_name)
@@ -370,26 +374,10 @@ class DocSearchTool(BaseTool):
 
             if self.verbose:
                 print("Chain Type selected:", chain_type)
-
-            response = get_answer(llm=self.llm, query=query, docs=top_docs, chain_type=chain_type, language=self.response_language)
+                
+            response = get_answer(llm=self.llm, query=query, docs=top_docs, chain_type=chain_type, language=self.response_language, callback_manager=self.callbacks)
             
             answer = response['output_text']
-            
-            try:
-                split_word = "Source"
-                split_regex = re.compile(f"{split_word}s:?\\W*", re.IGNORECASE)
-                answer_text = split_regex.split(answer)[0]
-                sources_list = split_regex.split(answer)[1].replace(" ","").split(",")
-
-                sources_html = '<br><u>Sources</u>: '
-                for index, value in enumerate(sources_list):
-                    url = value + os.environ["DATASOURCE_SAS_TOKEN"]
-                    sources_html +='<sup><a href="'+ url + '">[' + str(index+1) + ']</a></sup>'
-                    
-                answer = answer_text + sources_html
-
-            except Exception as e:
-                print(e)
                 
             return answer
 
@@ -414,7 +402,7 @@ class CSVTabularTool(BaseTool):
     def _run(self, query: str) -> str:
         
         try:
-            agent = create_csv_agent(self.llm, self.path, verbose=self.verbose, callback_manager=self.callbacks,)
+            agent = create_csv_agent(self.llm, self.path, verbose=self.verbose, callback_manager=self.callbacks)
             for i in range(5):
                 try:
                     response = agent.run(CSV_PROMPT_PREFIX + query + CSV_PROMPT_SUFFIX) 
@@ -441,6 +429,7 @@ class SQLDbTool(BaseTool):
     description = "useful when the questions includes the term: @covidstats.\n"
 
     llm: AzureChatOpenAI
+    k: int = 30
     
     def _run(self, query: str) -> str:
         db_config = {
@@ -462,6 +451,7 @@ class SQLDbTool(BaseTool):
             llm=self.llm,
             toolkit=toolkit,
             callback_manager=self.callbacks,
+            top_k=self.k,
             verbose=self.verbose
         )
 
@@ -509,37 +499,6 @@ class ChatGPTTool(BaseTool):
         """Use the tool asynchronously."""
         raise NotImplementedError("ChatGPTTool does not support async")
         
-
-# class BingSearchTool(BaseTool):
-#     """Tool for a Bing Search Wrapper"""
-    
-#     name = "@bing"
-#     description = "useful when the questions includes the term: @bing.\n"
-
-#     llm: AzureChatOpenAI
-#     k: int = 5
-    
-#     def _run(self, query: str) -> str:
-#         try:
-#             bing = BingSearchAPIWrapper(k=self.k)
-#             context = str(bing.results(query,num_results=self.k))
-#             chatgpt_chain = LLMChain(
-#                 llm=self.llm, 
-#                 prompt=PromptTemplate(input_variables=["context","question"],template='Only using the following pieces of texts with its corresponding titles and links: \n "{context}".\n Answer this question: {question}.\n\n If the answer to the question is not in the above pieces of texts, say "The answer is not in the context provided". Do not make up an answer. If you can provide the answer based on the pieces of texts, please also provide the link along with the answer. Nothing else.'),
-#                 callback_manager=self.callbacks,
-#                 verbose=self.verbose
-#             )
-
-#             response = chatgpt_chain({"question": query, "context": context})['text']
-
-#             return response
-        
-#         except Exception as e:
-#             print(e)
-            
-#     async def _arun(self, query: str) -> str:
-#         """Use the tool asynchronously."""
-#         raise NotImplementedError("ChatGPTTool does not support async")
     
     
 class BingSearchResults(BaseTool):
@@ -552,7 +511,10 @@ class BingSearchResults(BaseTool):
 
     def _run(self, query: str) -> str:
         bing = BingSearchAPIWrapper(k=self.k)
-        return bing.results(query,num_results=self.k)
+        try:
+            return bing.results(query,num_results=self.k)
+        except:
+            return "No Results Found"
     
     async def _arun(self, query: str) -> str:
         """Use the tool asynchronously."""
@@ -568,9 +530,11 @@ class BingSearchTool(BaseTool):
     llm: AzureChatOpenAI
     k: int = 5
     
-    def _run(self, query: str) -> str:
+    def _run(self, tool_input: Union[str, Dict],) -> str:
         try:
             tools = [BingSearchResults(k=self.k)]
+            parsed_input = self._parse_input(tool_input)
+
             agent_executor = initialize_agent(tools=tools, 
                                               llm=self.llm, 
                                               agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, 
@@ -578,9 +542,9 @@ class BingSearchTool(BaseTool):
                                               callback_manager=self.callbacks,
                                               verbose=self.verbose)
             
-            for i in range(3):
+            for i in range(2):
                 try:
-                    response = agent_executor.run(query) 
+                    response = run_agent(parsed_input, agent_executor)
                     break
                 except Exception as e:
                     response = str(e)
