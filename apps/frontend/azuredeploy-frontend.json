@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.18.4.5664",
-      "templateHash": "769434746632281065"
+      "version": "0.19.5.34762",
+      "templateHash": "4179049765400023452"
     }
   },
   "parameters": {
@@ -18,7 +18,7 @@
         "description": "Optional. Web app name must be between 2 and 60 characters."
       }
     },
-    "sku": {
+    "appServicePlanSKU": {
       "type": "string",
       "defaultValue": "S3",
       "allowedValues": [
@@ -30,77 +30,79 @@
         "description": "Optional, defaults to S3. The SKU of App Service Plan. The allowed values are B3, S3 and P2v3."
       }
     },
-    "AppServicePlanName": {
+    "appServicePlanName": {
       "type": "string",
       "defaultValue": "[format('AppServicePlan-Frontend-{0}', uniqueString(resourceGroup().id))]",
       "metadata": {
         "description": "Optional. The name of the App Service Plan."
       }
     },
-    "BOT_SERVICE_NAME": {
+    "botServiceName": {
       "type": "string",
       "metadata": {
         "description": "Required. The name of your Bot Service."
       }
     },
-    "BOT_DIRECTLINE_SECRET_KEY": {
-      "type": "securestring",
+    "botDirectLineChannelKey": {
+      "type": "string",
       "metadata": {
-        "description": "Required. The secret key of the Direct Line Channel of the Bot Service."
+        "description": "Required. The key to the direct line channel of your bot."
       }
     },
-    "DATASOURCE_SAS_TOKEN": {
+    "datasourceSASToken": {
       "type": "securestring",
       "metadata": {
         "description": "Required. The SAS token for the Azure Storage Account hosting your data"
       }
     },
-    "AZURE_SEARCH_ENDPOINT": {
+    "resourceGroupSearch": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().name]",
+      "metadata": {
+        "description": "Optional. The name of the resource group where the resources (Azure Search etc.) where deployed previously. Defaults to current resource group."
+      }
+    },
+    "azureSearchName": {
       "type": "string",
       "metadata": {
-        "description": "Required. The endpoint of the Azure Search."
+        "description": "Required. The name of the Azure Search service deployed previously."
       }
     },
-    "AZURE_SEARCH_KEY": {
-      "type": "securestring",
-      "metadata": {
-        "description": "Required. The key of the Azure Search."
-      }
-    },
-    "AZURE_SEARCH_API_VERSION": {
+    "azureSearchAPIVersion": {
       "type": "string",
       "defaultValue": "2021-04-30-Preview",
       "metadata": {
         "description": "Optional. The API version of the Azure Search."
       }
     },
-    "AZURE_OPENAI_ENDPOINT": {
+    "resourceGroupOpenAI": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().name]",
+      "metadata": {
+        "description": "Required. The name of the resource group where Azure Open AI was deployed previously. Defaults to current resource group."
+      }
+    },
+    "azureOpenAIName": {
       "type": "string",
       "metadata": {
-        "description": "Required. The endpoint of the Azure OpenAI."
+        "description": "Required. The name of the Azure OpenAI resource deployed previously."
       }
     },
-    "AZURE_OPENAI_API_KEY": {
-      "type": "securestring",
-      "metadata": {
-        "description": "Required. The key of the Azure OpenAI."
-      }
-    },
-    "AZURE_OPENAI_MODEL_NAME": {
+    "azureOpenAIModelName": {
       "type": "string",
       "defaultValue": "gpt-35-turbo",
       "metadata": {
         "description": "Optional. The model name of the Azure OpenAI."
       }
     },
-    "AZURE_OPENAI_API_VERSION": {
+    "azureOpenAIAPIVersion": {
       "type": "string",
       "defaultValue": "2023-03-15-preview",
       "metadata": {
         "description": "Optional. The API version of the Azure OpenAI."
       }
     },
-    "resourcesLocation": {
+    "location": {
       "type": "string",
       "defaultValue": "[resourceGroup().location]",
       "metadata": {
@@ -112,10 +114,10 @@
     {
       "type": "Microsoft.Web/serverfarms",
       "apiVersion": "2022-09-01",
-      "name": "[parameters('AppServicePlanName')]",
-      "location": "[parameters('resourcesLocation')]",
+      "name": "[parameters('appServicePlanName')]",
+      "location": "[parameters('location')]",
       "sku": {
-        "name": "[parameters('sku')]"
+        "name": "[parameters('appServicePlanSKU')]"
       },
       "kind": "linux",
       "properties": {
@@ -126,50 +128,50 @@
       "type": "Microsoft.Web/sites",
       "apiVersion": "2022-09-01",
       "name": "[parameters('webAppName')]",
-      "location": "[parameters('resourcesLocation')]",
+      "location": "[parameters('location')]",
       "properties": {
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('AppServicePlanName'))]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]",
         "siteConfig": {
           "appSettings": [
             {
               "name": "BOT_SERVICE_NAME",
-              "value": "[parameters('BOT_SERVICE_NAME')]"
+              "value": "[parameters('botServiceName')]"
             },
             {
               "name": "BOT_DIRECTLINE_SECRET_KEY",
-              "value": "[parameters('BOT_DIRECTLINE_SECRET_KEY')]"
+              "value": "[parameters('botDirectLineChannelKey')]"
             },
             {
               "name": "DATASOURCE_SAS_TOKEN",
-              "value": "[parameters('DATASOURCE_SAS_TOKEN')]"
+              "value": "[parameters('datasourceSASToken')]"
             },
             {
               "name": "AZURE_SEARCH_ENDPOINT",
-              "value": "[parameters('AZURE_SEARCH_ENDPOINT')]"
+              "value": "[format('https://{0}.search.windows.net', parameters('azureSearchName'))]"
             },
             {
               "name": "AZURE_SEARCH_KEY",
-              "value": "[parameters('AZURE_SEARCH_KEY')]"
+              "value": "[listAdminKeys(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupSearch')), 'Microsoft.Search/searchServices', parameters('azureSearchName')), '2021-04-01-preview').primaryKey]"
             },
             {
               "name": "AZURE_SEARCH_API_VERSION",
-              "value": "[parameters('AZURE_SEARCH_API_VERSION')]"
+              "value": "[parameters('azureSearchAPIVersion')]"
             },
             {
               "name": "AZURE_OPENAI_ENDPOINT",
-              "value": "[parameters('AZURE_OPENAI_ENDPOINT')]"
+              "value": "[format('https://{0}.openai.azure.com/', parameters('azureOpenAIName'))]"
             },
             {
               "name": "AZURE_OPENAI_API_KEY",
-              "value": "[parameters('AZURE_OPENAI_API_KEY')]"
+              "value": "[listKeys(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupOpenAI')), 'Microsoft.CognitiveServices/accounts', parameters('azureOpenAIName')), '2023-05-01').key1]"
             },
             {
               "name": "AZURE_OPENAI_MODEL_NAME",
-              "value": "[parameters('AZURE_OPENAI_MODEL_NAME')]"
+              "value": "[parameters('azureOpenAIModelName')]"
             },
             {
               "name": "AZURE_OPENAI_API_VERSION",
-              "value": "[parameters('AZURE_OPENAI_API_VERSION')]"
+              "value": "[parameters('azureOpenAIAPIVersion')]"
             },
             {
               "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
@@ -179,7 +181,7 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Web/serverfarms', parameters('AppServicePlanName'))]"
+        "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]"
       ]
     },
     {
