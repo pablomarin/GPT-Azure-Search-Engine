@@ -1,0 +1,35 @@
+name: Compile bicep to ARM
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '**.bicep'
+
+jobs:
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install Bicep build
+      run: |
+        curl -Lo bicepinstall https://github.com/Azure/bicep/releases/latest/download/bicep-linux-x64
+        chmod +x ./bicepinstall
+        sudo mv ./bicepinstall /usr/local/bin/bicep
+        bicep --help
+
+    - name: Run Bicep build
+      run: |
+        bicep build azuredeploy.bicep
+        bicep build apps/backend/azuredeploy-backend.bicep
+        bicep build apps/frontend/azuredeploy-frontend.bicep
+        ls -l *.json
+
+    - uses: EndBug/add-and-commit@v7.0.0
+      with:
+        author_name: github-actions
+        author_email: '41898282+github-actions[bot]@users.noreply.github.com'
+        message: Update ARM template to match Bicep
