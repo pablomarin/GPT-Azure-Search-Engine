@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.19.5.34762",
-      "templateHash": "16396897643437323274"
+      "templateHash": "10510832366725489476"
     }
   },
   "parameters": {
@@ -47,17 +47,16 @@
         "description": "Optional. The API version for the Azure Search service."
       }
     },
-    "resourceGroupOpenAI": {
-      "type": "string",
-      "defaultValue": "[resourceGroup().name]",
-      "metadata": {
-        "description": "Required. The name of the resource group where Azure Open AI was deployed previously. Defaults to current resource group."
-      }
-    },
     "azureOpenAIName": {
       "type": "string",
       "metadata": {
         "description": "Required. The name of the Azure OpenAI resource deployed previously."
+      }
+    },
+    "azureOpenAIAPIKey": {
+      "type": "string",
+      "metadata": {
+        "description": "Required. The API key of the Azure OpenAI resource deployed previously."
       }
     },
     "azureOpenAIModelName": {
@@ -244,7 +243,7 @@
             },
             {
               "name": "AZURE_OPENAI_API_KEY",
-              "value": "[listKeys(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupOpenAI')), 'Microsoft.CognitiveServices/accounts', parameters('azureOpenAIName')), '2023-05-01').key1]"
+              "value": "[parameters('azureOpenAIAPIKey')]"
             },
             {
               "name": "AZURE_OPENAI_MODEL_NAME",
@@ -263,7 +262,7 @@
               "value": "[listKeys(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupSearch')), 'Microsoft.Bing/accounts', parameters('bingSearchName')), '2020-06-10').key1]"
             },
             {
-              "name": "SQL_SERVER_ENDPOINT",
+              "name": "SQL_SERVER_NAME",
               "value": "[format('{0}{1}', parameters('SQLServerName'), environment().suffixes.sqlServerHostname)]"
             },
             {
