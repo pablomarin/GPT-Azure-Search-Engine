@@ -66,6 +66,9 @@ param cosmosDBDatabaseName string = 'cosmosdb-db-${uniqueString(resourceGroup().
 @description('Optional. The name for the CosmosDB database container')
 param cosmosDBContainerName string = 'cosmosdb-container-${uniqueString(resourceGroup().id)}'
 
+@description('Optional. The name of the Form Recognizer service')
+param formRecognizerName string = 'form-recognizer-${uniqueString(resourceGroup().id)}'
+
 @description('Optional, defaults to resource group location. The location of the resources.')
 param location string = resourceGroup().location
 
@@ -186,4 +189,13 @@ resource bingSearchAccount 'Microsoft.Bing/accounts@2020-06-10' = {
   sku: {
     name: 'S1'
   }
+}
+
+resource formRecognizerAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
+  name: formRecognizerName
+  location: location
+  sku: {
+    name: 'S0'
+  }
+  kind: 'FormRecognizer'
 }
