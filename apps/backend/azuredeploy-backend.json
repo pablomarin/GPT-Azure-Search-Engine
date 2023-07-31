@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.19.5.34762",
-      "templateHash": "16396897643437323274"
+      "templateHash": "8779691098945470380"
     }
   },
   "parameters": {
@@ -264,7 +264,7 @@
             },
             {
               "name": "SQL_SERVER_ENDPOINT",
-              "value": "[format('https://{0}{1}', parameters('SQLServerName'), environment().suffixes.sqlServerHostname)]"
+              "value": "[format('{0}{1}', parameters('SQLServerName'), environment().suffixes.sqlServerHostname)]"
             },
             {
               "name": "SQL_SERVER_DATABASE",
