@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.19.5.34762",
-      "templateHash": "14611163647092030995"
+      "templateHash": "10321183553980531399"
     }
   },
   "parameters": {
@@ -128,6 +128,13 @@
       "defaultValue": "[format('cosmosdb-container-{0}', uniqueString(resourceGroup().id))]",
       "metadata": {
         "description": "Optional. The name for the CosmosDB database container"
+      }
+    },
+    "formRecognizerName": {
+      "type": "string",
+      "defaultValue": "[format('form-recognizer-{0}', uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "Optional. The name of the Form Recognizer service"
       }
     },
     "location": {
@@ -275,6 +282,16 @@
       "sku": {
         "name": "S1"
       }
+    },
+    {
+      "type": "Microsoft.CognitiveServices/accounts",
+      "apiVersion": "2023-05-01",
+      "name": "[parameters('formRecognizerName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "S0"
+      },
+      "kind": "FormRecognizer"
     }
   ]
 }
