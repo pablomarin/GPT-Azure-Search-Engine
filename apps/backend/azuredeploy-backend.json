@@ -264,7 +264,7 @@
             },
             {
               "name": "SQL_SERVER_ENDPOINT",
-              "value": "[format('https://{0}{1}', parameters('SQLServerName'), environment().suffixes.sqlServerHostname)]"
+              "value": "[format('{0}{1}', parameters('SQLServerName'), environment().suffixes.sqlServerHostname)]"
             },
             {
               "name": "SQL_SERVER_DATABASE",
