@@ -18,11 +18,11 @@ param azureSearchName string
 @description('Optional. The API version for the Azure Search service.')
 param azureSearchAPIVersion string = '2021-04-30-Preview'
 
-@description('Required. The name of the resource group where Azure Open AI was deployed previously. Defaults to current resource group.')
-param resourceGroupOpenAI string = resourceGroup().name
-
 @description('Required. The name of the Azure OpenAI resource deployed previously.')
-param azureOpenAIName string 
+param azureOpenAIName string
+
+@description('Required. The API key of the Azure OpenAI resource deployed previously.')
+param azureOpenAIAPIKey string 
 
 @description('Optional. The model name for the Azure OpenAI service.')
 param azureOpenAIModelName string = 'gpt-4'
@@ -85,12 +85,6 @@ var botEndpoint = 'https://${siteHost}/api/messages'
 resource azureSearch 'Microsoft.Search/searchServices@2021-04-01-preview' existing = {
   name: azureSearchName
   scope: resourceGroup(resourceGroupSearch)
-}
-
-// Existing Azure OpenAI resource.
-resource azureOpenAI 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
-  name: azureOpenAIName
-  scope: resourceGroup(resourceGroupOpenAI)
 }
 
 // Existing Bing Search resource.
@@ -184,7 +178,7 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'AZURE_OPENAI_API_KEY'
-          value: azureOpenAI.listKeys().key1
+          value: azureOpenAIAPIKey
         }
         {
           name: 'AZURE_OPENAI_MODEL_NAME'
@@ -203,7 +197,7 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
           value: bingSearch.listKeys().key1
         }
         {
-          name: 'SQL_SERVER_ENDPOINT'
+          name: 'SQL_SERVER_NAME'
           value: '${SQLServerName}${environment().suffixes.sqlServerHostname}'
         }
         {

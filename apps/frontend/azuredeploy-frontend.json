@@ -4,16 +4,16 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.19.5.34762",
-      "templateHash": "4179049765400023452"
+      "version": "0.20.4.51522",
+      "templateHash": "16977009928115589074"
     }
   },
   "parameters": {
     "webAppName": {
       "type": "string",
       "defaultValue": "[format('webApp-Frontend-{0}', uniqueString(resourceGroup().id))]",
-      "maxLength": 60,
       "minLength": 2,
+      "maxLength": 60,
       "metadata": {
         "description": "Optional. Web app name must be between 2 and 60 characters."
       }
@@ -75,17 +75,16 @@
         "description": "Optional. The API version of the Azure Search."
       }
     },
-    "resourceGroupOpenAI": {
-      "type": "string",
-      "defaultValue": "[resourceGroup().name]",
-      "metadata": {
-        "description": "Required. The name of the resource group where Azure Open AI was deployed previously. Defaults to current resource group."
-      }
-    },
     "azureOpenAIName": {
       "type": "string",
       "metadata": {
         "description": "Required. The name of the Azure OpenAI resource deployed previously."
+      }
+    },
+    "azureOpenAIAPIKey": {
+      "type": "string",
+      "metadata": {
+        "description": "Required. The API key of the Azure OpenAI resource deployed previously."
       }
     },
     "azureOpenAIModelName": {
@@ -163,7 +162,7 @@
             },
             {
               "name": "AZURE_OPENAI_API_KEY",
-              "value": "[listKeys(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupOpenAI')), 'Microsoft.CognitiveServices/accounts', parameters('azureOpenAIName')), '2023-05-01').key1]"
+              "value": "[parameters('azureOpenAIAPIKey')]"
             },
             {
               "name": "AZURE_OPENAI_MODEL_NAME",
