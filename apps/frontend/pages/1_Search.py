@@ -75,8 +75,8 @@ elif (not os.environ.get("AZURE_OPENAI_ENDPOINT")) or (os.environ.get("AZURE_OPE
     st.error("Please set your AZURE_OPENAI_ENDPOINT on your Web App Settings")
 elif (not os.environ.get("AZURE_OPENAI_API_KEY")) or (os.environ.get("AZURE_OPENAI_API_KEY") == ""):
     st.error("Please set your AZURE_OPENAI_API_KEY on your Web App Settings")
-elif (not os.environ.get("DATASOURCE_SAS_TOKEN")) or (os.environ.get("DATASOURCE_SAS_TOKEN") == ""):
-    st.error("Please set your DATASOURCE_SAS_TOKEN on your Web App Settings")
+elif (not os.environ.get("BLOB_SAS_TOKEN")) or (os.environ.get("BLOB_SAS_TOKEN") == ""):
+    st.error("Please set your BLOB_SAS_TOKEN on your Web App Settings")
 
 else: 
     os.environ["OPENAI_API_BASE"] = os.environ.get("AZURE_OPENAI_ENDPOINT")
@@ -116,7 +116,7 @@ else:
                     for key,value in ordered_results.items():
                         for page in value["chunks"]:
                             location = value["location"] if value["location"] is not None else ""
-                            docs.append(Document(page_content=page, metadata={"source": location+os.environ.get("DATASOURCE_SAS_TOKEN")}))
+                            docs.append(Document(page_content=page, metadata={"source": location+os.environ.get("BLOB_SAS_TOKEN")}))
                             add_text = "Reading the source documents to provide the best answer... ⏳"
 
                     if "add_text" in locals():
@@ -153,7 +153,7 @@ else:
                         if(len(docs)>0):
                             for key, value in ordered_results.items():
                                 location = value["location"] if value["location"] is not None else ""
-                                url = location + os.environ.get("DATASOURCE_SAS_TOKEN")
+                                url = location + os.environ.get("BLOB_SAS_TOKEN")
                                 title = str(value['title']) if (value['title']) else value['name']
                                 score = str(round(value['score']*100/4,2))
                                 st.markdown("[" + title +  "](" + url + ")" + "  (Score: " + score + "%)")
