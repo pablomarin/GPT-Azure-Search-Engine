@@ -4,16 +4,16 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.19.5.34762",
-      "templateHash": "18346369185869690595"
+      "version": "0.20.4.51522",
+      "templateHash": "16977009928115589074"
     }
   },
   "parameters": {
     "webAppName": {
       "type": "string",
       "defaultValue": "[format('webApp-Frontend-{0}', uniqueString(resourceGroup().id))]",
-      "maxLength": 60,
       "minLength": 2,
+      "maxLength": 60,
       "metadata": {
         "description": "Optional. Web app name must be between 2 and 60 characters."
       }

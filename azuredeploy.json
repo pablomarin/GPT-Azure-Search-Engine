@@ -4,16 +4,16 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.19.5.34762",
-      "templateHash": "10321183553980531399"
+      "version": "0.20.4.51522",
+      "templateHash": "2904773790358752585"
     }
   },
   "parameters": {
     "azureSearchName": {
       "type": "string",
       "defaultValue": "[format('cog-search-{0}', uniqueString(resourceGroup().id))]",
-      "maxLength": 60,
       "minLength": 2,
+      "maxLength": 60,
       "metadata": {
         "description": "Optional. Service name must only contain lowercase letters, digits or dashes, cannot use dash as the first two or last one characters, cannot contain consecutive dashes, and is limited between 2 and 60 characters in length."
       }
@@ -37,8 +37,8 @@
     "azureSearchReplicaCount": {
       "type": "int",
       "defaultValue": 1,
-      "maxValue": 12,
       "minValue": 1,
+      "maxValue": 12,
       "metadata": {
         "description": "Optional, defaults to 1. Replicas distribute search workloads across the service. You need at least two replicas to support high availability of query workloads (not applicable to the free tier). Must be between 1 and 12."
       }
