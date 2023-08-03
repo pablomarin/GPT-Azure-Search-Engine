@@ -33,11 +33,11 @@ param azureSearchName string
 @description('Optional. The API version of the Azure Search.')
 param azureSearchAPIVersion string = '2021-04-30-Preview'
 
-@description('Required. The name of the resource group where Azure Open AI was deployed previously. Defaults to current resource group.')
-param resourceGroupOpenAI string = resourceGroup().name
-
 @description('Required. The name of the Azure OpenAI resource deployed previously.')
 param azureOpenAIName string 
+
+@description('Required. The API key of the Azure OpenAI resource deployed previously.')
+param azureOpenAIAPIKey string 
 
 @description('Optional. The model name of the Azure OpenAI.')
 param azureOpenAIModelName string = 'gpt-35-turbo'
@@ -52,12 +52,6 @@ param location string = resourceGroup().location
 resource azureSearch 'Microsoft.Search/searchServices@2021-04-01-preview' existing = {
   name: azureSearchName
   scope: resourceGroup(resourceGroupSearch)
-}
-
-// Existing Azure OpenAI resource.
-resource azureOpenAI 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
-  name: azureOpenAIName
-  scope: resourceGroup(resourceGroupOpenAI)
 }
 
 // Create a new Linux App Service Plan.
@@ -111,7 +105,7 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'AZURE_OPENAI_API_KEY'
-          value: azureOpenAI.listKeys().key1
+          value: azureOpenAIAPIKey
         }
         {
           name: 'AZURE_OPENAI_MODEL_NAME'
