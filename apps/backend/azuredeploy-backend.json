@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.19.5.34762",
-      "templateHash": "10510832366725489476"
+      "version": "0.20.4.51522",
+      "templateHash": "17383313211840897324"
     }
   },
   "parameters": {
@@ -21,10 +21,10 @@
         "description": "Required. Active Directory App Secret Value."
       }
     },
-    "datasourceSASToken": {
+    "blobSASToken": {
       "type": "securestring",
       "metadata": {
-        "description": "Required. The SAS token for the Azure Storage Account hosting your data"
+        "description": "Required. The SAS token for the blob hosting your data."
       }
     },
     "resourceGroupSearch": {
@@ -42,7 +42,7 @@
     },
     "azureSearchAPIVersion": {
       "type": "string",
-      "defaultValue": "2021-04-30-Preview",
+      "defaultValue": "2023-07-01-Preview",
       "metadata": {
         "description": "Optional. The API version for the Azure Search service."
       }
@@ -68,7 +68,7 @@
     },
     "azureOpenAIAPIVersion": {
       "type": "string",
-      "defaultValue": "2023-03-15-preview",
+      "defaultValue": "2023-05-15",
       "metadata": {
         "description": "Optional. The API version for the Azure OpenAI service."
       }
@@ -97,6 +97,12 @@
       "defaultValue": "SampleDB",
       "metadata": {
         "description": "Required. The name of the SQL Server database."
+      }
+    },
+    "SQLServerUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "Required. The username for the SQL Server."
       }
     },
     "SQLServerPassword": {
@@ -222,8 +228,8 @@
               "value": "[parameters('appPassword')]"
             },
             {
-              "name": "DATASOURCE_SAS_TOKEN",
-              "value": "[parameters('datasourceSASToken')]"
+              "name": "BLOB_SAS_TOKEN",
+              "value": "[parameters('blobSASToken')]"
             },
             {
               "name": "AZURE_SEARCH_ENDPOINT",
@@ -263,7 +269,7 @@
             },
             {
               "name": "SQL_SERVER_NAME",
-              "value": "[format('{0}{1}', parameters('SQLServerName'), environment().suffixes.sqlServerHostname)]"
+              "value": "[parameters('SQLServerName')]"
             },
             {
               "name": "SQL_SERVER_DATABASE",
@@ -271,7 +277,7 @@
             },
             {
               "name": "SQL_SERVER_USERNAME",
-              "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupSearch')), 'Microsoft.Sql/servers', parameters('SQLServerName')), '2022-11-01-preview').administratorLogin]"
+              "value": "[parameters('SQLServerUsername')]"
             },
             {
               "name": "SQL_SERVER_PASSWORD",
