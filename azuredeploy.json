@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "17153201912767270287"
+      "templateHash": "17027619221182957879"
     }
   },
   "parameters": {
@@ -139,7 +139,7 @@
     },
     "blobStorageAccountName": {
       "type": "string",
-      "defaultValue": "[format('blob-storage-{0}', uniqueString(resourceGroup().id))]",
+      "defaultValue": "[format('blobstorage{0}', uniqueString(resourceGroup().id))]",
       "metadata": {
         "description": "Optional. The name of the Blob Storage account"
       }
