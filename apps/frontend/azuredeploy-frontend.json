@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "13828785518120032705"
+      "templateHash": "10291947530786187860"
     }
   },
   "parameters": {
@@ -89,7 +89,7 @@
     },
     "azureOpenAIModelName": {
       "type": "string",
-      "defaultValue": "gpt-35-turbo",
+      "defaultValue": "gpt-4",
       "metadata": {
         "description": "Optional. The model name of the Azure OpenAI."
       }
