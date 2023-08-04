@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "17383313211840897324"
+      "templateHash": "8168126526162383484"
     }
   },
   "parameters": {
@@ -89,7 +89,7 @@
     "SQLServerName": {
       "type": "string",
       "metadata": {
-        "description": "Required. The name of the SQL server deployed previously."
+        "description": "Required. The name of the SQL server deployed previously e.g. sqlserver.database.windows.net"
       }
     },
     "SQLServerDatabase": {
