@@ -434,9 +434,9 @@ class SQLDbTool(BaseTool):
     def _run(self, query: str) -> str:
         db_config = {
             'drivername': 'mssql+pyodbc',
-            'username': os.environ["SQL_SERVER_USERNAME"] +'@'+ os.environ["SQL_SERVER_ENDPOINT"],
+            'username': os.environ["SQL_SERVER_USERNAME"] +'@'+ os.environ["SQL_SERVER_NAME"],
             'password': os.environ["SQL_SERVER_PASSWORD"],
-            'host': os.environ["SQL_SERVER_ENDPOINT"],
+            'host': os.environ["SQL_SERVER_NAME"],
             'port': 1433,
             'database': os.environ["SQL_SERVER_DATABASE"],
             'query': {'driver': 'ODBC Driver 17 for SQL Server'}

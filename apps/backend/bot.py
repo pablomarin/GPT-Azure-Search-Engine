@@ -33,7 +33,7 @@ class BotServiceCallbackHandler(BaseCallbackHandler):
     
     def __init__(self, turn_context: TurnContext) -> None:
         self.tc = turn_context
-    
+
     def on_llm_error(self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any) -> Any:
         asyncio.run(self.tc.send_activity(f"LLM Error: {error}\n"))
 
@@ -61,7 +61,7 @@ class MyBot(ActivityHandler):
         cb_handler = BotServiceCallbackHandler(turn_context)
         cb_manager = CallbackManager(handlers=[cb_handler])
 
-        llm = AzureChatOpenAI(deployment_name=self.MODEL_DEPLOYMENT_NAME, temperature=0.5, max_tokens=500, callback_manager=cb_manager)
+        llm = AzureChatOpenAI(deployment_name=self.MODEL_DEPLOYMENT_NAME, temperature=0.5, max_tokens=1000, callback_manager=cb_manager)
 
         # Initialize our Tools/Experts
         indexes = ["cogsrch-index-files", "cogsrch-index-csv"]
