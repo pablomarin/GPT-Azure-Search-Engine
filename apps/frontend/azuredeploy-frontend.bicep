@@ -38,6 +38,7 @@ param azureSearchAPIVersion string = '2023-07-01-Preview'
 param azureOpenAIName string 
 
 @description('Required. The API key of the Azure OpenAI resource deployed previously.')
+@secure()
 param azureOpenAIAPIKey string 
 
 @description('Optional. The model name of the Azure OpenAI.')
