@@ -36,7 +36,7 @@ param bingSearchUrl string = 'https://api.bing.microsoft.com/v7.0/search'
 @description('Required. The name of the Bing Search service deployed previously.')
 param bingSearchName string
 
-@description('Required. The name of the SQL server deployed previously.')
+@description('Required. The name of the SQL server deployed previously e.g. sqlserver.database.windows.net')
 param SQLServerName string
 
 @description('Required. The name of the SQL Server database.')
