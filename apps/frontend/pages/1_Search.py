@@ -56,7 +56,7 @@ For example:
 
 coli1, coli2= st.columns([3,1])
 with coli1:
-    query = st.text_input("Ask a question to your enterprise data lake", value= "What is CLP?", on_change=clear_submit)
+    query = st.text_input("Ask a question to your enterprise data lake", value= "What are the main risk factors for Covid-19?", on_change=clear_submit)
 with coli2:
     language= st.selectbox('Answer language',('English', 'Spanish', 'French', 'German', 'Portuguese', 'Italian'), index=0)
 
