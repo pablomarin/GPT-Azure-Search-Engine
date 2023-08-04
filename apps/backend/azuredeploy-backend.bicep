@@ -42,6 +42,9 @@ param SQLServerName string
 @description('Required. The name of the SQL Server database.')
 param SQLServerDatabase string = 'SampleDB'
 
+@description('Required. The username for the SQL Server.')
+param SQLServerUsername string
+
 @description('Required. The password for the SQL Server.')
 @secure()
 param SQLServerPassword string
@@ -90,12 +93,6 @@ resource azureSearch 'Microsoft.Search/searchServices@2021-04-01-preview' existi
 // Existing Bing Search resource.
 resource bingSearch 'Microsoft.Bing/accounts@2020-06-10' existing = {
   name: bingSearchName
-  scope: resourceGroup(resourceGroupSearch)
-}
-
-// Existing SQL Server resource.
-resource sqlServer 'Microsoft.Sql/servers@2022-11-01-preview' existing = {
-  name: SQLServerName
   scope: resourceGroup(resourceGroupSearch)
 }
 
@@ -198,7 +195,7 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'SQL_SERVER_NAME'
-          value: '${SQLServerName}${environment().suffixes.sqlServerHostname}'
+          value: SQLServerName
         }
         {
           name: 'SQL_SERVER_DATABASE'
@@ -206,7 +203,7 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'SQL_SERVER_USERNAME'
-          value: sqlServer.properties.administratorLogin
+          value: SQLServerUsername
         }
         {
           name: 'SQL_SERVER_PASSWORD'
