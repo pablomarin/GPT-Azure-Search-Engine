@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "8168126526162383484"
+      "templateHash": "12231490621592366523"
     }
   },
   "parameters": {
@@ -54,7 +54,7 @@
       }
     },
     "azureOpenAIAPIKey": {
-      "type": "string",
+      "type": "securestring",
       "metadata": {
         "description": "Required. The API key of the Azure OpenAI resource deployed previously."
       }
