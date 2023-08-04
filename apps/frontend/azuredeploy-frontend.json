@@ -4,16 +4,16 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.19.5.34762",
-      "templateHash": "18346369185869690595"
+      "version": "0.20.4.51522",
+      "templateHash": "10149391570072000089"
     }
   },
   "parameters": {
     "webAppName": {
       "type": "string",
       "defaultValue": "[format('webApp-Frontend-{0}', uniqueString(resourceGroup().id))]",
-      "maxLength": 60,
       "minLength": 2,
+      "maxLength": 60,
       "metadata": {
         "description": "Optional. Web app name must be between 2 and 60 characters."
       }
@@ -49,7 +49,7 @@
         "description": "Required. The key to the direct line channel of your bot."
       }
     },
-    "datasourceSASToken": {
+    "blobSASToken": {
       "type": "securestring",
       "metadata": {
         "description": "Required. The SAS token for the Azure Storage Account hosting your data"
@@ -70,7 +70,7 @@
     },
     "azureSearchAPIVersion": {
       "type": "string",
-      "defaultValue": "2021-04-30-Preview",
+      "defaultValue": "2023-07-01-Preview",
       "metadata": {
         "description": "Optional. The API version of the Azure Search."
       }
@@ -96,7 +96,7 @@
     },
     "azureOpenAIAPIVersion": {
       "type": "string",
-      "defaultValue": "2023-03-15-preview",
+      "defaultValue": "2023-05-15",
       "metadata": {
         "description": "Optional. The API version of the Azure OpenAI."
       }
@@ -141,8 +141,8 @@
               "value": "[parameters('botDirectLineChannelKey')]"
             },
             {
-              "name": "DATASOURCE_SAS_TOKEN",
-              "value": "[parameters('datasourceSASToken')]"
+              "name": "BLOB_SAS_TOKEN",
+              "value": "[parameters('blobSASToken')]"
             },
             {
               "name": "AZURE_SEARCH_ENDPOINT",
