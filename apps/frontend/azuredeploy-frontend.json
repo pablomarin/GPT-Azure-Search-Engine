@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "10149391570072000089"
+      "templateHash": "15860506419035874969"
     }
   },
   "parameters": {
@@ -44,7 +44,7 @@
       }
     },
     "botDirectLineChannelKey": {
-      "type": "string",
+      "type": "securestring",
       "metadata": {
         "description": "Required. The key to the direct line channel of your bot."
       }
