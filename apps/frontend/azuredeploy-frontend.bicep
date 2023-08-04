@@ -31,7 +31,7 @@ param resourceGroupSearch string = resourceGroup().name
 param azureSearchName string 
 
 @description('Optional. The API version of the Azure Search.')
-param azureSearchAPIVersion string = '2021-04-30-Preview'
+param azureSearchAPIVersion string = '2023-07-01-Preview'
 
 @description('Required. The name of the Azure OpenAI resource deployed previously.')
 param azureOpenAIName string 
@@ -43,7 +43,7 @@ param azureOpenAIAPIKey string
 param azureOpenAIModelName string = 'gpt-35-turbo'
 
 @description('Optional. The API version of the Azure OpenAI.')
-param azureOpenAIAPIVersion string = '2023-03-15-preview'
+param azureOpenAIAPIVersion string = '2023-05-15'
 
 @description('Optional, defaults to resource group location. The location of the resources.')
 param location string = resourceGroup().location

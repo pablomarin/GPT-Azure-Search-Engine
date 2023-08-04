@@ -16,7 +16,7 @@ param resourceGroupSearch string = resourceGroup().name
 param azureSearchName string 
 
 @description('Optional. The API version for the Azure Search service.')
-param azureSearchAPIVersion string = '2021-04-30-Preview'
+param azureSearchAPIVersion string = '2023-07-01-Preview'
 
 @description('Required. The name of the Azure OpenAI resource deployed previously.')
 param azureOpenAIName string
@@ -28,7 +28,7 @@ param azureOpenAIAPIKey string
 param azureOpenAIModelName string = 'gpt-4'
 
 @description('Optional. The API version for the Azure OpenAI service.')
-param azureOpenAIAPIVersion string = '2023-03-15-preview'
+param azureOpenAIAPIVersion string = '2023-05-15'
 
 @description('Optional. The URL for the Bing Search service.')
 param bingSearchUrl string = 'https://api.bing.microsoft.com/v7.0/search'
