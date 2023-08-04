@@ -18,6 +18,7 @@ param appServicePlanName string = 'AppServicePlan-Frontend-${uniqueString(resour
 param botServiceName string
 
 @description('Required. The key to the direct line channel of your bot.')
+@secure()
 param botDirectLineChannelKey string
 
 @description('Required. The SAS token for the Azure Storage Account hosting your data')
