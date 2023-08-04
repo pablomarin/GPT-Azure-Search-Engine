@@ -70,7 +70,7 @@ param cosmosDBContainerName string = 'cosmosdb-container-${uniqueString(resource
 param formRecognizerName string = 'form-recognizer-${uniqueString(resourceGroup().id)}'
 
 @description('Optional. The name of the Blob Storage account')
-param blobStorageAccountName string = 'blob-storage-${uniqueString(resourceGroup().id)}'
+param blobStorageAccountName string = 'blobstorage${uniqueString(resourceGroup().id)}'
 
 @description('Optional, defaults to resource group location. The location of the resources.')
 param location string = resourceGroup().location
