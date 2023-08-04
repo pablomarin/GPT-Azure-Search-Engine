@@ -5,9 +5,9 @@ param appId string
 @secure()
 param appPassword string
 
-@description('Required. The SAS token for the Azure Storage Account hosting your data')
+@description('Required. The SAS token for the blob hosting your data.')
 @secure()
-param datasourceSASToken string 
+param blobSASToken string 
 
 @description('Optional. The name of the resource group where the resources (Azure Search etc.) where deployed previously. Defaults to current resource group.')
 param resourceGroupSearch string = resourceGroup().name
@@ -154,8 +154,8 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
           value: appPassword
         }
         {
-          name: 'DATASOURCE_SAS_TOKEN'
-          value: datasourceSASToken
+          name: 'BLOB_SAS_TOKEN'
+          value: blobSASToken
         }
         {
           name: 'AZURE_SEARCH_ENDPOINT'
