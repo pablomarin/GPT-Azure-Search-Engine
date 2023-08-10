@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.20.4.51522",
-      "templateHash": "2904773790358752585"
+      "templateHash": "17027619221182957879"
     }
   },
   "parameters": {
@@ -135,6 +135,13 @@
       "defaultValue": "[format('form-recognizer-{0}', uniqueString(resourceGroup().id))]",
       "metadata": {
         "description": "Optional. The name of the Form Recognizer service"
+      }
+    },
+    "blobStorageAccountName": {
+      "type": "string",
+      "defaultValue": "[format('blobstorage{0}', uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "Optional. The name of the Blob Storage account"
       }
     },
     "location": {
@@ -292,6 +299,36 @@
         "name": "S0"
       },
       "kind": "FormRecognizer"
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2023-01-01",
+      "name": "[parameters('blobStorageAccountName')]",
+      "location": "[parameters('location')]",
+      "kind": "StorageV2",
+      "sku": {
+        "name": "Standard_LRS"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices",
+      "apiVersion": "2023-01-01",
+      "name": "[format('{0}/{1}', parameters('blobStorageAccountName'), 'default')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('blobStorageAccountName'))]"
+      ]
+    },
+    {
+      "copy": {
+        "name": "blobStorageContainer",
+        "count": "[length(createArray('books', 'cord19', 'mixed'))]"
+      },
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "apiVersion": "2023-01-01",
+      "name": "[format('{0}/{1}/{2}', parameters('blobStorageAccountName'), 'default', createArray('books', 'cord19', 'mixed')[copyIndex()])]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('blobStorageAccountName'), 'default')]"
+      ]
     }
   ]
 }

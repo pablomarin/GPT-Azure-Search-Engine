@@ -5,9 +5,9 @@ param appId string
 @secure()
 param appPassword string
 
-@description('Required. The SAS token for the Azure Storage Account hosting your data')
+@description('Required. The SAS token for the blob hosting your data.')
 @secure()
-param datasourceSASToken string 
+param blobSASToken string 
 
 @description('Optional. The name of the resource group where the resources (Azure Search etc.) where deployed previously. Defaults to current resource group.')
 param resourceGroupSearch string = resourceGroup().name
@@ -16,19 +16,20 @@ param resourceGroupSearch string = resourceGroup().name
 param azureSearchName string 
 
 @description('Optional. The API version for the Azure Search service.')
-param azureSearchAPIVersion string = '2021-04-30-Preview'
+param azureSearchAPIVersion string = '2023-07-01-Preview'
 
 @description('Required. The name of the Azure OpenAI resource deployed previously.')
 param azureOpenAIName string
 
 @description('Required. The API key of the Azure OpenAI resource deployed previously.')
+@secure()
 param azureOpenAIAPIKey string 
 
 @description('Optional. The model name for the Azure OpenAI service.')
 param azureOpenAIModelName string = 'gpt-4'
 
 @description('Optional. The API version for the Azure OpenAI service.')
-param azureOpenAIAPIVersion string = '2023-03-15-preview'
+param azureOpenAIAPIVersion string = '2023-05-15'
 
 @description('Optional. The URL for the Bing Search service.')
 param bingSearchUrl string = 'https://api.bing.microsoft.com/v7.0/search'
@@ -36,11 +37,14 @@ param bingSearchUrl string = 'https://api.bing.microsoft.com/v7.0/search'
 @description('Required. The name of the Bing Search service deployed previously.')
 param bingSearchName string
 
-@description('Required. The name of the SQL server deployed previously.')
+@description('Required. The name of the SQL server deployed previously e.g. sqlserver.database.windows.net')
 param SQLServerName string
 
 @description('Required. The name of the SQL Server database.')
 param SQLServerDatabase string = 'SampleDB'
+
+@description('Required. The username for the SQL Server.')
+param SQLServerUsername string
 
 @description('Required. The password for the SQL Server.')
 @secure()
@@ -90,12 +94,6 @@ resource azureSearch 'Microsoft.Search/searchServices@2021-04-01-preview' existi
 // Existing Bing Search resource.
 resource bingSearch 'Microsoft.Bing/accounts@2020-06-10' existing = {
   name: bingSearchName
-  scope: resourceGroup(resourceGroupSearch)
-}
-
-// Existing SQL Server resource.
-resource sqlServer 'Microsoft.Sql/servers@2022-11-01-preview' existing = {
-  name: SQLServerName
   scope: resourceGroup(resourceGroupSearch)
 }
 
@@ -157,8 +155,8 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
           value: appPassword
         }
         {
-          name: 'DATASOURCE_SAS_TOKEN'
-          value: datasourceSASToken
+          name: 'BLOB_SAS_TOKEN'
+          value: blobSASToken
         }
         {
           name: 'AZURE_SEARCH_ENDPOINT'
@@ -198,7 +196,7 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'SQL_SERVER_NAME'
-          value: '${SQLServerName}${environment().suffixes.sqlServerHostname}'
+          value: SQLServerName
         }
         {
           name: 'SQL_SERVER_DATABASE'
@@ -206,7 +204,7 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'SQL_SERVER_USERNAME'
-          value: sqlServer.properties.administratorLogin
+          value: SQLServerUsername
         }
         {
           name: 'SQL_SERVER_PASSWORD'

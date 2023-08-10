@@ -69,6 +69,9 @@ param cosmosDBContainerName string = 'cosmosdb-container-${uniqueString(resource
 @description('Optional. The name of the Form Recognizer service')
 param formRecognizerName string = 'form-recognizer-${uniqueString(resourceGroup().id)}'
 
+@description('Optional. The name of the Blob Storage account')
+param blobStorageAccountName string = 'blobstorage${uniqueString(resourceGroup().id)}'
+
 @description('Optional, defaults to resource group location. The location of the resources.')
 param location string = resourceGroup().location
 
@@ -199,3 +202,22 @@ resource formRecognizerAccount 'Microsoft.CognitiveServices/accounts@2023-05-01'
   }
   kind: 'FormRecognizer'
 }
+
+resource blobStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
+  name: blobStorageAccountName
+  location: location
+  kind: 'StorageV2'
+  sku: {
+    name: 'Standard_LRS'
+  }
+}
+
+resource blobServices 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01' = {
+  parent: blobStorageAccount
+  name: 'default'
+}
+
+resource blobStorageContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = [for containerName in ['books', 'cord19', 'mixed'] : {
+  parent: blobServices
+  name: containerName
+}]
