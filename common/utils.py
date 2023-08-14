@@ -1,8 +1,9 @@
 import re
+import os
+import json
 from io import BytesIO
 from typing import Any, Dict, List, Optional, Awaitable, Callable, Tuple, Type, Union
 import requests
-import os
 from collections import OrderedDict
 
 import docx2txt
@@ -199,27 +200,29 @@ def num_tokens_from_docs(docs: List[Document]) -> int:
 
 def get_search_results(query: str, indexes: list, k: int = 5) -> List[dict]:
     
-    headers = {'Content-Type': 'application/json','api-key': os.environ["AZURE_SEARCH_KEY"]}
+    headers = {'Content-Type': 'application/json','api-key': os.environ['AZURE_SEARCH_KEY']}
+    params = {'api-version': os.environ['AZURE_SEARCH_API_VERSION']}
 
-    agg_search_results = []
-    
+    agg_search_results = []        
+        
     for index in indexes:
-        url = os.environ["AZURE_SEARCH_ENDPOINT"] + '/indexes/'+ index + '/docs'
-        url += '?api-version={}'.format(os.environ["AZURE_SEARCH_API_VERSION"])
-        url += '&search={}'.format(query)
-        url += '&select=id,title,chunks,language,name,location'
-        url += '&$top={}'.format(k)  # You can change this to anything you need/want
-        url += '&queryLanguage=en-us'
-        url += '&queryType=semantic'
-        url += '&semanticConfiguration=my-semantic-config'
-        url += '&$count=true'
-        url += '&speller=lexicon'
-        url += '&answers=extractive|count-3'
-        url += '&captions=extractive|highlight-false'
+        search_payload = {
+            "search": query,
+            "select": "id, title, chunks, name, location",
+            "queryType": "semantic",
+            "semanticConfiguration": "my-semantic-config",
+            "count": "true",
+            "speller": "lexicon",
+            "queryLanguage": "en-us",
+            "captions": "extractive",
+            "answers": "extractive",
+            "top": k
+        }
 
-        resp = requests.get(url, headers=headers)
+        r = requests.post(os.environ['AZURE_SEARCH_ENDPOINT'] + "/indexes/" + index + "/docs/search",
+                         data=json.dumps(search_payload), headers=headers, params=params)
 
-        search_results = resp.json()
+        search_results = r.json()
         agg_search_results.append(search_results)
 
     return agg_search_results
@@ -238,7 +241,6 @@ def order_search_results( agg_search_results: List[dict], reranker_threshold: in
                 content[result['id']]={
                                         "title": result['title'],
                                         "chunks": result['chunks'],
-                                        "language": result['language'], 
                                         "name": result['name'], 
                                         "location": result['location'] ,
                                         "caption": result['@search.captions'][0]['text'],
