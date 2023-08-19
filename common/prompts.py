@@ -55,9 +55,12 @@ FINAL ANSWER IN English: The president did not mention Michael Jackson.
 <-- End of examples
 
 # Instructions:
-- Given the following extracted parts of a long document and a question, create a final answer with references. 
-- You can only provide numerical references to documents, using this format: <sup><a href="url?query_parameters" target="_blank">[number]</a></sup>.
-- Reference document's url can include query parameters, for example: "https://example.com/search?query=apple&category=fruits&sort=asc&page=1". On these cases, **you must** include que query references on the document url, using this format: <sup><a href="url?query_parameters" target="_blank">[number]</a></sup>.
+- Given the following extracted parts from one or multiple documents, and a question, create a final answer with references. 
+- You can only provide numerical references to documents, using this html format: `<sup><a href="url?query_parameters" target="_blank">[number]</a></sup>`.
+- The reference must be from the `Source:` section of the extracted part. You are not to make a reference from the content, only from the `Source:` of the extract parts.
+- Reference (source) document's url can include query parameters, for example: "https://example.com/search?query=apple&category=fruits&sort=asc&page=1". On these cases, **you must** include que query references on the document url, using this html format: <sup><a href="url?query_parameters" target="_blank">[number]</a></sup>.
+- **You can only answer the question from information contained in the extracted parts below**, DO NOT use your prior knowledge.
+- Never provide an answer without references.
 - If you don't know the answer, just say that you don't know. Don't try to make up an answer.
 - Respond in {language}.
 
@@ -88,7 +91,9 @@ I have various plugins and tools at my disposal to answer your questions effecti
 
 3. \U0001F50D **@docsearch**: This tool allows me to search a specialized search engine index. It includes 10,000 ArXiv computer science documents from 2020-2021 and 90,000 Covid research articles from the same years.
 
-4. \U0001F4CA **@covidstats**: By utilizing this tool, I can access a SQL database containing information about Covid cases, deaths, and hospitalizations in 2020-2021.
+4. \U0001F4D6 **@booksearch**: This tool allows me to search on 5 specific books: Rich Dad Poor Dad, Made to Stick, Azure Cognitive Search Documentation, Fundamentals of Physics and Boundaries.
+
+5. \U0001F4CA **@sqlsearch**: By utilizing this tool, I can access a SQL database containing information about Covid cases, deaths, and hospitalizations in 2020-2021.
 
 From all of my sources, I will provide the necessary information and also mention the sources I used to derive the answer. This way, you can have transparency about the origins of the information and understand how I arrived at the response.
 
@@ -98,6 +103,7 @@ To make the most of my capabilities, please mention the specific tool you'd like
 @bing, who is the daughter of the President of India?
 @chatgpt, how can I read a remote file from a URL using pandas?
 @docsearch, what are some practical applications of reinforcement learning?
+@booksearch, give me a .net example on how to upload vectors to Azure Search index?
 @covidstats, how many people died on the West Coast in 2020?
 ```
 
@@ -376,6 +382,7 @@ First set the pandas display options to show all the columns, get the column nam
 
 CSV_PROMPT_SUFFIX = """
 - **ALWAYS** before giving the Final Answer, try another method. Then reflect on the answers of the two methods you did and ask yourself if it answers correctly the original question. If you are not sure, try another method.
+- 
 - If the methods tried do not give the same result, reflect and try again until you have two methods that have the same result. 
 - If you still cannot arrive to a consistent result, say that you are not sure of the answer.
 - If you are sure of the correct answer, create a beautiful and thorough response using Markdown.

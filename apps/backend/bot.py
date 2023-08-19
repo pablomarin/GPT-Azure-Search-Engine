@@ -64,13 +64,23 @@ class MyBot(ActivityHandler):
         llm = AzureChatOpenAI(deployment_name=self.MODEL_DEPLOYMENT_NAME, temperature=0.5, max_tokens=1000, callback_manager=cb_manager)
 
         # Initialize our Tools/Experts
-        indexes = ["cogsrch-index-files", "cogsrch-index-csv"]
-        doc_search = DocSearchTool(llm=llm, indexes=indexes, k=10, chunks_limit=100, similarity_k=5, callback_manager=cb_manager, return_direct=True)
+        text_indexes = ["cogsrch-index-files", "cogsrch-index-csv"]
+        doc_search = DocSearchTool(llm=llm, indexes=text_indexes,
+                           k=10, similarity_k=4, reranker_th=1,
+                           sas_token=os.environ['BLOB_SAS_TOKEN'],
+                           callback_manager=cb_manager, return_direct=True)
+        vector_only_indexes = ["cogsrch-index-books-vector"]
+        book_search = DocSearchTool(llm=llm, vector_only_indexes = vector_only_indexes,
+                           k=10, similarity_k=10, reranker_th=1,
+                           sas_token=os.environ['BLOB_SAS_TOKEN'],
+                           callback_manager=cb_manager, return_direct=True,
+                           name="@booksearch",
+                           description="useful when the questions includes the term: @booksearch.\n")
         www_search = BingSearchTool(llm=llm, k=5, callback_manager=cb_manager, return_direct=True)
         sql_search = SQLDbTool(llm=llm, k=10, callback_manager=cb_manager, return_direct=True)
         chatgpt_search = ChatGPTTool(llm=llm, callback_manager=cb_manager, return_direct=True)
 
-        tools = [www_search, sql_search, doc_search, chatgpt_search]
+        tools = [www_search, sql_search, doc_search, chatgpt_search, book_search]
 
         # Set main Agent
         llm_a = AzureChatOpenAI(deployment_name=self.MODEL_DEPLOYMENT_NAME, temperature=0.5, max_tokens=500)
