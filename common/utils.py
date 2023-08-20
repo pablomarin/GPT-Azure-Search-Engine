@@ -48,14 +48,12 @@ from langchain.callbacks.base import BaseCallbackManager
 try:
     from .prompts import (COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT,
                           CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX, MSSQL_PROMPT, MSSQL_AGENT_PREFIX, 
-                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT, BING_PROMPT_PREFIX)
+                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT, BING_PROMPT_PREFIX, DOCSEARCH_PROMPT_PREFIX)
 except Exception as e:
     print(e)
     from prompts import (COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT,
                           CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX, MSSQL_PROMPT, MSSQL_AGENT_PREFIX, 
-                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT, BING_PROMPT_PREFIX)
-
-
+                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT, BING_PROMPT_PREFIX, DOCSEARCH_PROMPT_PREFIX)
 
 
 def text_to_base64(text):
@@ -461,6 +459,59 @@ def run_agent(question:str, agent_chain: AgentExecutor) -> str:
 ######## TOOL CLASSES #####################################
 ###########################################################
     
+class DocSearchResults(BaseTool):
+    """Tool for Azure Search results"""
+    
+    name = "@docsearch"
+    description = "useful when the questions includes the term: @docsearch.\n"
+    
+    indexes: List[str] = []
+    vector_only_indexes: List[str] = []
+    k: int = 10
+    reranker_th: int = 1
+    similarity_k: int = 2
+    embedding_model: str = "text-embedding-ada-002"
+    
+    def _run(self, query: str) -> str:
+        
+        embedder = OpenAIEmbeddings(deployment=self.embedding_model, chunk_size=1)
+    
+        if self.indexes:
+            # Search in text-based indexes first and update corresponding vector indexes
+            agg_search_results = get_search_results(query, indexes=self.indexes, k=self.k, vector_search=False)
+            ordered_results = order_search_results(agg_search_results,
+                                                   k=self.k,
+                                                   reranker_threshold=self.reranker_th, vector_search=False)
+            
+            update_vector_indexes(ordered_search_results=ordered_results, embedder=embedder)
+            
+            vector_indexes = [index+"-vector" for index in self.indexes]
+            if self.vector_only_indexes:
+                vector_indexes = vector_indexes + self.vector_only_indexes
+                    
+        if self.vector_only_indexes and not self.indexes:
+            vector_indexes = self.vector_only_indexes
+
+        if self.verbose:
+            print("Vector Indexes:",vector_indexes)
+
+        # Search in all vector-based indexes available
+        agg_search_results = get_search_results(query, indexes=vector_indexes, vector_search=True, 
+                                                query_vector = embedder.embed_query(query), 
+                                                k=self.similarity_k)
+        
+        ordered_results = order_search_results(agg_search_results,
+                                               k=self.similarity_k,
+                                               reranker_threshold=self.reranker_th, 
+                                               vector_search=True)
+        
+        return ordered_results
+
+    async def _arun(self, query: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError("DocSearchResults does not support async")
+  
+
 class DocSearchTool(BaseTool):
     """Tool for Azure GPT Smart Search Engine"""
     
@@ -471,70 +522,36 @@ class DocSearchTool(BaseTool):
     indexes: List[str] = []
     vector_only_indexes: List[str] = []
     k: int = 10
-    response_language: str = "English"
     reranker_th: int = 1
     similarity_k: int = 2
-    sas_token: str = ""
+    response_language: str = "English"
+    sas_token: str = ""   
     embedding_model: str = "text-embedding-ada-002"
-
     
-    def _run(self, query: str) -> str:
-
+    def _run(self, tool_input: Union[str, Dict],) -> str:
         try:
-            embedder = OpenAIEmbeddings(deployment=self.embedding_model, chunk_size=1)
+            tools = [DocSearchResults(indexes=self.indexes,vector_only_indexes=self.vector_only_indexes,
+                                      k=self.k, reranker_th=self.reranker_th, similarity_k=self.similarity_k,
+                                      embedding_model=self.embedding_model)]
             
-            if self.indexes:
-                # Search in text-based indexes first and update corresponding vector indexes
-                agg_search_results = get_search_results(query, indexes=self.indexes, k=self.k, vector_search=False)
-                ordered_results = order_search_results(agg_search_results,
-                                                       k=self.k,
-                                                       reranker_threshold=self.reranker_th, vector_search=False)
-                update_vector_indexes(ordered_search_results=ordered_results, embedder=embedder)
-                vector_indexes = [index+"-vector" for index in self.indexes]
-                if self.vector_only_indexes:
-                    vector_indexes = vector_indexes + self.vector_only_indexes
-                    
-            if self.vector_only_indexes and not self.indexes:
-                vector_indexes = self.vector_only_indexes
+            parsed_input = self._parse_input(tool_input)
             
-            if self.verbose:
-                print("Vector Indexes:",vector_indexes)
-           
-            # Search in all vector-based indexes available
-            agg_search_results = get_search_results(query, indexes=vector_indexes, vector_search=True, 
-                                                    query_vector = embedder.embed_query(query), 
-                                                    k=self.similarity_k)
-            ordered_results = order_search_results(agg_search_results,
-                                                   k=self.similarity_k,
-                                                   reranker_threshold=self.reranker_th, 
-                                                   vector_search=True)
-
-            top_docs = []
-            for key,value in ordered_results.items():
-                location = value["location"]+self.sas_token if value["location"] is not None else ""
-                top_docs.append(Document(page_content=value["chunk"], metadata={"source": location}))
+            agent_executor = initialize_agent(tools=tools, 
+                                              llm=self.llm, 
+                                              agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, 
+                                              agent_kwargs={'prefix':DOCSEARCH_PROMPT_PREFIX},
+                                              callback_manager=self.callbacks,
+                                              verbose=self.verbose)
             
-            # Calculate number of tokens of our docs
-            if(len(top_docs)>0):
-                tokens_limit = model_tokens_limit(self.llm.deployment_name) # this is a custom function we created in common/utils.py
-                num_tokens = num_tokens_from_docs(top_docs) # this is a custom function we created in common/utils.py
-                if self.verbose:
-                    print("Custom token limit for", self.llm.deployment_name, ":", tokens_limit)
-                    print("Combined docs tokens count:",num_tokens)
+            for i in range(2):
+                try:
+                    response = run_agent(parsed_input, agent_executor)
+                    break
+                except Exception as e:
+                    response = str(e)
+                    continue
 
-            else:
-                return "No Results Found in my knowledge base"
-
-            chain_type = "map_reduce" if num_tokens > tokens_limit else "stuff"  
-            if self.verbose:
-                print("Chain Type selected:", chain_type)
-                
-            response = get_answer(llm=self.llm, query=query, docs=top_docs, chain_type=chain_type, language=self.response_language, callback_manager=self.callbacks)
-
-            answer = response['output_text']
-                
-            return answer
-
+            return response
         
         except Exception as e:
             print(e)
@@ -542,6 +559,7 @@ class DocSearchTool(BaseTool):
     async def _arun(self, query: str) -> str:
         """Use the tool asynchronously."""
         raise NotImplementedError("DocSearchTool does not support async")
+    
     
 
 class CSVTabularTool(BaseTool):
