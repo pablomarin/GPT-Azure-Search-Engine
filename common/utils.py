@@ -301,7 +301,7 @@ def get_search_results(query: str, indexes: list, k: int = 5,
     
 
 def order_search_results( agg_search_results: dict, k:int = 5, reranker_threshold: int = 1,
-                         vector_search: bool = False) -> OrderedDict:
+                         vector_search: bool = False, sas_token: str ="") -> OrderedDict:
     
     """Orders based on score the results from get_search_results function"""
     
@@ -314,7 +314,7 @@ def order_search_results( agg_search_results: dict, k:int = 5, reranker_threshol
                 content[result['id']]={
                                         "title": result['title'], 
                                         "name": result['name'], 
-                                        "location": result['location'] ,
+                                        "location": result['location'] + sas_token if result['location'] else "",
                                         "caption": result['@search.captions'][0]['text'],
                                         "index": index
                                     }
@@ -462,14 +462,15 @@ def run_agent(question:str, agent_chain: AgentExecutor) -> str:
 class DocSearchResults(BaseTool):
     """Tool for Azure Search results"""
     
-    name = "@docsearch"
-    description = "useful when the questions includes the term: @docsearch.\n"
+    name = "search knowledge base"
+    description = "search documents in search engine"
     
     indexes: List[str] = []
     vector_only_indexes: List[str] = []
     k: int = 10
     reranker_th: int = 1
     similarity_k: int = 2
+    sas_token: str = "" 
     embedding_model: str = "text-embedding-ada-002"
     
     def _run(self, query: str) -> str:
@@ -481,7 +482,9 @@ class DocSearchResults(BaseTool):
             agg_search_results = get_search_results(query, indexes=self.indexes, k=self.k, vector_search=False)
             ordered_results = order_search_results(agg_search_results,
                                                    k=self.k,
-                                                   reranker_threshold=self.reranker_th, vector_search=False)
+                                                   reranker_threshold=self.reranker_th, 
+                                                   sas_token=self.sas_token,
+                                                   vector_search=False)
             
             update_vector_indexes(ordered_search_results=ordered_results, embedder=embedder)
             
@@ -503,6 +506,7 @@ class DocSearchResults(BaseTool):
         ordered_results = order_search_results(agg_search_results,
                                                k=self.similarity_k,
                                                reranker_threshold=self.reranker_th, 
+                                               sas_token=self.sas_token,
                                                vector_search=True)
         
         return ordered_results
@@ -532,7 +536,7 @@ class DocSearchTool(BaseTool):
         try:
             tools = [DocSearchResults(indexes=self.indexes,vector_only_indexes=self.vector_only_indexes,
                                       k=self.k, reranker_th=self.reranker_th, similarity_k=self.similarity_k,
-                                      embedding_model=self.embedding_model)]
+                                      sas_token=self.sas_token, embedding_model=self.embedding_model)]
             
             parsed_input = self._parse_input(tool_input)
             

@@ -470,6 +470,7 @@ DOCSEARCH_PROMPT_PREFIX = CUSTOM_CHATBOT_PREFIX + """
 - You must never generate URLs or links other than those provided in the search results.
 - You must always reference factual statements to the search results.
 - You must find the answer to the question in the context only.
+- If the context has no results found, you must respond saying that no results were found to answer the question.
 - The search results may be incomplete or irrelevant. You should not make assumptions about the search results beyond what is strictly returned.
 - If the search results do not contain enough information to fully address the user's message, you should only use facts from the search results and not add information on your own.
 - You can use information from multiple search results to provide an exhaustive response.
