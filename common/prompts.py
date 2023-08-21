@@ -227,8 +227,11 @@ Given the following:
 
 Instructions:
 - Create a final answer with references. 
-- You can only provide numerical references to documents, using this format: <sup><a href="url?query_parameters" target="_blank">[number]</a></sup>. 
-- Reference document's url can include query parameters, for example: "https://example.com/search?query=apple&category=fruits&sort=asc&page=1". On these cases, **you must** include que query references on the document url, using this format: <sup><a href="url?query_parameters" target="_blank">[number]</a></sup>.
+- You can only provide numerical references to documents, using this html format: `<sup><a href="url?query_parameters" target="_blank">[number]</a></sup>`.
+- The reference must be from the `Source:` section of the extracted parts. You are not to make a reference from the content, only from the `Source:` of the extract parts.
+- Reference (source) document's url can include query parameters, for example: "https://example.com/search?query=apple&category=fruits&sort=asc&page=1". On these cases, **you must** include que query references on the document url, using this html format: <sup><a href="url?query_parameters" target="_blank">[number]</a></sup>.
+- **You can only answer the question from information contained in the extracted parts below**, DO NOT use your prior knowledge.
+- Never provide an answer without references.
 - If you don't know the answer, just say that you don't know. Don't try to make up an answer.
 - Respond in {language}.
 
@@ -468,6 +471,7 @@ DOCSEARCH_PROMPT_PREFIX = CUSTOM_CHATBOT_PREFIX + """
 - If you are unable to fully find the answer, try again by adjusting your search terms.
 - You can only provide numerical references, using this format: <sup><a href="url" target="_blank">[number]</a></sup> 
 - You must never generate URLs or links other than those provided in the search results.
+- You must provide the references URLs exactly as shown in the 'location' of each chunk below. Do not shorten it.
 - You must always reference factual statements to the search results.
 - You must find the answer to the question in the context only.
 - If the context has no results found, you must respond saying that no results were found to answer the question.
@@ -507,47 +511,47 @@ Context:
 
 OrderedDict([('z4cagypm_0',
               {{'title': 'Deep reinforcement learning for large-scale epidemic control_chunk_0',
-               'name': 'metadata.csv',
-               'location': 'https://arxiv.org/pdf/2003.13676v1.pdf',
+               'name': 'some file name',
+               'location': 'some url location',
                'caption': 'This experiment shows that deep reinforcement learning can be used to learn mitigation policies in complex epidemiological models with a large state space. Moreover, through this experiment, we demonstrate that there can be an advantage to consider collaboration between districts when designing prevention strategies..\x00',
-               'index': 'cogsrch-index-csv-vector',
+               'index': 'some index name',
                'chunk': "Epidemics of infectious diseases are an important threat to public health and global economies. Yet, the development of prevention strategies remains a challenging process, as epidemics are non-linear and complex processes. For this reason, we investigate a deep reinforcement learning approach to automatically learn prevention strategies in the context of pandemic influenza. Firstly, we construct a new epidemiological meta-population model, with 379 patches (one for each administrative district in Great Britain), that adequately captures the infection process of pandemic influenza. Our model balances complexity and computational efficiency such that the use of reinforcement learning techniques becomes attainable. Secondly, we set up a ground truth such that we can evaluate the performance of the 'Proximal Policy Optimization' algorithm to learn in a single district of this epidemiological model. Finally, we consider a large-scale problem, by conducting an experiment where we aim to learn a joint policy to control the districts in a community of 11 tightly coupled districts, for which no ground truth can be established. This experiment shows that deep reinforcement learning can be used to learn mitigation policies in complex epidemiological models with a large state space. Moreover, through this experiment, we demonstrate that there can be an advantage to consider collaboration between districts when designing prevention strategies.",
                'score': 0.03333333507180214}}),
              ('8gaeosyr_0',
               {{'title': 'A Hybrid Recommendation for Music Based on Reinforcement Learning_chunk_0',
-               'name': 'metadata.csv',
-               'location': 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7206183/',
+               'name': 'another file name',
+               'location': 'another url location',
                'caption': 'In this paper, we propose a personalized hybrid recommendation algorithm for music based on reinforcement learning (PHRR) to recommend song sequences that match listeners’ preferences better. We firstly use weighted matrix factorization (WMF) and convolutional neural network (CNN) to learn and extract the song feature vectors.',
-               'index': 'cogsrch-index-csv-vector',
+               'index': 'some index name',
                'chunk': 'The key to personalized recommendation system is the prediction of users’ preferences. However, almost all existing music recommendation approaches only learn listeners’ preferences based on their historical records or explicit feedback, without considering the simulation of interaction process which can capture the minor changes of listeners’ preferences sensitively. In this paper, we propose a personalized hybrid recommendation algorithm for music based on reinforcement learning (PHRR) to recommend song sequences that match listeners’ preferences better. We firstly use weighted matrix factorization (WMF) and convolutional neural network (CNN) to learn and extract the song feature vectors. In order to capture the changes of listeners’ preferences sensitively, we innovatively enhance simulating interaction process of listeners and update the model continuously based on their preferences both for songs and song transitions. The extensive experiments on real-world datasets validate the effectiveness of the proposed PHRR on song sequence recommendation compared with the state-of-the-art recommendation approaches.',
                'score': 0.032522473484277725}}),
              ('7sjdzz9x_0',
               {{'title': 'Balancing Exploration and Exploitation in Self-imitation Learning_chunk_0',
-               'name': 'metadata.csv',
-               'location': 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7206262/',
+               'name': 'another file name',
+               'location': 'another url location',
                'caption': 'Sparse reward tasks are always challenging in reinforcement learning. Learning such tasks requires both efficient exploitation and exploration to reduce the sample complexity. One line of research called self-imitation learning is recently proposed, which encourages the agent to do more exploitation by imitating past good trajectories.',
-               'index': 'cogsrch-index-csv-vector',
+               'index': 'another index name',
                'chunk': 'Sparse reward tasks are always challenging in reinforcement learning. Learning such tasks requires both efficient exploitation and exploration to reduce the sample complexity. One line of research called self-imitation learning is recently proposed, which encourages the agent to do more exploitation by imitating past good trajectories. Exploration bonuses, however, is another line of research which enhances exploration by producing intrinsic reward when the agent visits novel states. In this paper, we introduce a novel framework Explore-then-Exploit (EE), which interleaves self-imitation learning with an exploration bonus to strengthen the effect of these two algorithms. In the exploring stage, with the aid of intrinsic reward, the agent tends to explore unseen states and occasionally collect high rewarding experiences, while in the self-imitating stage, the agent learns to consistently reproduce such experiences and thus provides a better starting point for subsequent stages. Our result shows that EE achieves superior or comparable performance on variants of MuJoCo environments with episodic reward settings.',
                'score': 0.03226646035909653}}),
              ('r253ygx0_0',
               {{'title': 'Cross-data Automatic Feature Engineering via Meta-learning and Reinforcement Learning_chunk_0',
-               'name': 'metadata.csv',
-               'location': 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7206177/',
+               'name': 'another file name',
+               'location': 'another url location',
                'caption': 'CAFEM contains two components: a FE learner (FeL) that learns fine-grained FE strategies on one single dataset by Double Deep Q-learning (DDQN) and a Cross-data Component (CdC) that speeds up FE learning on an unseen dataset by the generalized FE policies learned by Meta-Learning on a collection of datasets.',
-               'index': 'cogsrch-index-csv-vector',
+               'index': 'another index name',
                'chunk': 'Feature Engineering (FE) is one of the most beneficial, yet most difficult and time-consuming tasks of machine learning projects, and requires strong expert knowledge. It is thus significant to design generalized ways to perform FE. The primary difficulties arise from the multiform information to consider, the potentially infinite number of possible features and the high computational cost of feature generation and evaluation. We present a framework called Cross-data Automatic Feature Engineering Machine (CAFEM), which formalizes the FE problem as an optimization problem over a Feature Transformation Graph (FTG). CAFEM contains two components: a FE learner (FeL) that learns fine-grained FE strategies on one single dataset by Double Deep Q-learning (DDQN) and a Cross-data Component (CdC) that speeds up FE learning on an unseen dataset by the generalized FE policies learned by Meta-Learning on a collection of datasets. We compare the performance of FeL with several existing state-of-the-art automatic FE techniques on a large collection of datasets. It shows that FeL outperforms existing approaches and is robust on the selection of learning algorithms. Further experiments also show that CdC can not only speed up FE learning but also increase learning performance.',
                'score': 0.031054403632879257}}),
              ('f3oswivw_0',
               {{'title': 'Data Centers Job Scheduling with Deep Reinforcement Learning_chunk_0',
-               'name': 'metadata.csv',
-               'location': 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7206316/',
+               'name': 'another file name',
+               'location': 'another url location',
                'caption': 'A2cScheduler consists of two agents, one of which, dubbed the actor, is responsible for learning the scheduling policy automatically and the other one, the critic, reduces the estimation error. Unlike previous policy gradient approaches, A2cScheduler is designed to reduce the gradient estimation variance and to update parameters efficiently.',
-               'index': 'cogsrch-index-csv-vector',
+               'index': 'another index name',
                'chunk': 'Efficient job scheduling on data centers under heterogeneous complexity is crucial but challenging since it involves the allocation of multi-dimensional resources over time and space. To adapt the complex computing environment in data centers, we proposed an innovative Advantage Actor-Critic (A2C) deep reinforcement learning based approach called A2cScheduler for job scheduling. A2cScheduler consists of two agents, one of which, dubbed the actor, is responsible for learning the scheduling policy automatically and the other one, the critic, reduces the estimation error. Unlike previous policy gradient approaches, A2cScheduler is designed to reduce the gradient estimation variance and to update parameters efficiently. We show that the A2cScheduler can achieve competitive scheduling performance using both simulated workloads and real data collected from an academic data center.',
                'score': 0.03102453239262104}})])
 
 Final Answer:
-Reinforcement learning can be used in various use cases, including:\n1. Learning prevention strategies for epidemics of infectious diseases, such as pandemic influenza, in order to automatically learn mitigation policies in complex epidemiological models with a large state space<sup><a href="https://arxiv.org/pdf/2003.13676v1.pdf?sv=2022-11-02&ss=bf&srt=sco&sp=rltfx&se=2024-10-02T01:02:07Z&st=2023-08-03T17:02:07Z&spr=https&sig=gLxStXFSY6X29OPpPDpBEhoQDdtJNDrMVExNYJ%2BhmBQ%3D" target="_blank">[1]</a></sup>.\n2. Personalized hybrid recommendation algorithm for music based on reinforcement learning, which recommends song sequences that match listeners\' preferences better, by simulating the interaction process and continuously updating the model based on preferences<sup><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7206183/?sv=2022-11-02&ss=bf&srt=sco&sp=rltfx&se=2024-10-02T01:02:07Z&st=2023-08-03T17:02:07Z&spr=https&sig=gLxStXFSY6X29OPpPDpBEhoQDdtJNDrMVExNYJ%2BhmBQ%3D" target="_blank">[2]</a></sup>.\n3. Learning sparse reward tasks in reinforcement learning by combining self-imitation learning with exploration bonuses, which enhances both exploitation and exploration to reduce sample complexity<sup><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7206262/?sv=2022-11-02&ss=bf&srt=sco&sp=rltfx&se=2024-10-02T01:02:07Z&st=2023-08-03T17:02:07Z&spr=https&sig=gLxStXFSY6X29OPpPDpBEhoQDdtJNDrMVExNYJ%2BhmBQ%3D" target="_blank">[3]</a></sup>.\n4. Automatic feature engineering in machine learning projects, where a framework called CAFEM (Cross-data Automatic Feature Engineering Machine) is used to optimize the feature transformation graph and learn fine-grained feature engineering strategies<sup><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7206177/?sv=2022-11-02&ss=bf&srt=sco&sp=rltfx&se=2024-10-02T01:02:07Z&st=2023-08-03T17:02:07Z&spr=https&sig=gLxStXFSY6X29OPpPDpBEhoQDdtJNDrMVExNYJ%2BhmBQ%3D" target="_blank">[4]</a></sup>.\n5. Job scheduling in data centers using Advantage Actor-Critic (A2C) deep reinforcement learning, where the A2cScheduler agent learns the scheduling policy automatically and achieves competitive scheduling performance<sup><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7206316/?sv=2022-11-02&ss=bf&srt=sco&sp=rltfx&se=2024-10-02T01:02:07Z&st=2023-08-03T17:02:07Z&spr=https&sig=gLxStXFSY6X29OPpPDpBEhoQDdtJNDrMVExNYJ%2BhmBQ%3D" target="_blank">[5]</a></sup>.\n\nThese use cases demonstrate the versatility of reinforcement learning in solving complex problems and optimizing decision-making processes.
+Reinforcement learning can be used in various use cases, including:\n1. Learning prevention strategies for epidemics of infectious diseases, such as pandemic influenza, in order to automatically learn mitigation policies in complex epidemiological models with a large state space<sup><a href="some url location" target="_blank">[1]</a></sup>.\n2. Personalized hybrid recommendation algorithm for music based on reinforcement learning, which recommends song sequences that match listeners\' preferences better, by simulating the interaction process and continuously updating the model based on preferences<sup><a href="another url location" target="_blank">[2]</a></sup>.\n3. Learning sparse reward tasks in reinforcement learning by combining self-imitation learning with exploration bonuses, which enhances both exploitation and exploration to reduce sample complexity<sup><a href="another url location" target="_blank">[3]</a></sup>.\n4. Automatic feature engineering in machine learning projects, where a framework called CAFEM (Cross-data Automatic Feature Engineering Machine) is used to optimize the feature transformation graph and learn fine-grained feature engineering strategies<sup><a href="another url location" target="_blank">[4]</a></sup>.\n5. Job scheduling in data centers using Advantage Actor-Critic (A2C) deep reinforcement learning, where the A2cScheduler agent learns the scheduling policy automatically and achieves competitive scheduling performance<sup><a href="another url location" target="_blank">[5]</a></sup>.\n\nThese use cases demonstrate the versatility of reinforcement learning in solving complex problems and optimizing decision-making processes.
 
 ## You have access to the following tools:
 

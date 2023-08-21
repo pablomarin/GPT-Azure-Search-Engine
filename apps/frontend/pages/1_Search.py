@@ -11,10 +11,10 @@ from langchain.chat_models import AzureChatOpenAI
 from langchain.embeddings import OpenAIEmbeddings
 from utils import (
         get_search_results,
-        order_search_results,
         update_vector_indexes,
         model_tokens_limit,
         num_tokens_from_docs,
+        num_tokens_from_string,
         get_answer,
     )
 st.set_page_config(page_title="GPT Smart Search", page_icon="📖", layout="wide")
@@ -101,17 +101,18 @@ else:
                 
                 # Search in text-based indexes first and update vector indexes
                 top_k=10
-                agg_search_results = get_search_results(query, text_indexes, k=top_k, vector_search=False)
-                ordered_results = order_search_results(agg_search_results, k=top_k, reranker_threshold=1, vector_search=False)
+                ordered_results = get_search_results(query, text_indexes, k=top_k, 
+                                                        reranker_threshold=1,
+                                                        vector_search=False)
+                
                 update_vector_indexes(ordered_search_results=ordered_results, embedder=embedder)
 
                 # Search in all vector-based indexes available
-                agg_search_results = get_search_results(query, vector_indexes, k=top_k , vector_search=True, 
-                                                        query_vector = embedder.embed_query(query))
                 top_similarity_k = 5
-                ordered_results = order_search_results(agg_search_results, k=top_similarity_k,
-                                                       vector_search = True)
-
+                ordered_results = get_search_results(query, vector_indexes, k=top_k , vector_search=True, 
+                                                        similarity_k=top_similarity_k,
+                                                        query_vector = embedder.embed_query(query))
+                
 
                 st.session_state["submit"] = True
                 # Output Columns

@@ -245,15 +245,15 @@ def num_tokens_from_string(string: str) -> int:
 def model_tokens_limit(model: str) -> int:
     """Returns the number of tokens limits in a text model."""
     if model == "gpt-35-turbo":
-        token_limit = 2000
+        token_limit = 4096
     elif model == "gpt-4":
-        token_limit = 6000
+        token_limit = 8192
     elif model == "gpt-35-turbo-16k":
-        token_limit = 14000
+        token_limit = 16384
     elif model == "gpt-4-32k":
-        token_limit = 30000
+        token_limit = 32768
     else:
-        token_limit = 2000
+        token_limit = 4096
     return token_limit
 
 # Returns num of toknes used on a list of Documents objects
@@ -264,8 +264,13 @@ def num_tokens_from_docs(docs: List[Document]) -> int:
     return num_tokens
 
 
-def get_search_results(query: str, indexes: list, k: int = 5, 
-                       vector_search: bool = False, query_vector: list = []) -> List[dict]:
+def get_search_results(query: str, indexes: list, 
+                       k: int = 5,
+                       reranker_threshold: int = 1,
+                       sas_token: str = "",
+                       vector_search: bool = False,
+                       similarity_k: int = 3, 
+                       query_vector: list = []) -> List[dict]:
     
     headers = {'Content-Type': 'application/json','api-key': os.environ["AZURE_SEARCH_KEY"]}
     params = {'api-version': os.environ['AZURE_SEARCH_API_VERSION']}
@@ -296,14 +301,6 @@ def get_search_results(query: str, indexes: list, k: int = 5,
 
         search_results = resp.json()
         agg_search_results[index] = search_results
-
-    return agg_search_results
-    
-
-def order_search_results( agg_search_results: dict, k:int = 5, reranker_threshold: int = 1,
-                         vector_search: bool = False, sas_token: str ="") -> OrderedDict:
-    
-    """Orders based on score the results from get_search_results function"""
     
     content = dict()
     ordered_content = OrderedDict()
@@ -329,11 +326,16 @@ def order_search_results( agg_search_results: dict, k:int = 5, reranker_threshol
                     content[result['id']]["vectorized"]= result['vectorized']
                 
     # After results have been filtered, sort and add the top k to the ordered_content
+    if vector_search:
+        topk = similarity_k
+    else:
+        topk = k*len(indexes)
+        
     count = 0  # To keep track of the number of results added
     for id in sorted(content, key=lambda x: content[x]["score"], reverse=True):
         ordered_content[id] = content[id]
         count += 1
-        if count >= k:  # Stop after adding 5 results
+        if count >= topk:  # Stop after adding 5 results
             break
 
     return ordered_content
@@ -469,7 +471,7 @@ class DocSearchResults(BaseTool):
     vector_only_indexes: List[str] = []
     k: int = 10
     reranker_th: int = 1
-    similarity_k: int = 2
+    similarity_k: int = 3
     sas_token: str = "" 
     embedding_model: str = "text-embedding-ada-002"
     
@@ -479,12 +481,9 @@ class DocSearchResults(BaseTool):
     
         if self.indexes:
             # Search in text-based indexes first and update corresponding vector indexes
-            agg_search_results = get_search_results(query, indexes=self.indexes, k=self.k, vector_search=False)
-            ordered_results = order_search_results(agg_search_results,
-                                                   k=self.k,
-                                                   reranker_threshold=self.reranker_th, 
-                                                   sas_token=self.sas_token,
-                                                   vector_search=False)
+            ordered_results = get_search_results(query, indexes=self.indexes, k=self.k, 
+                                                    reranker_threshold=self.reranker_th,
+                                                    vector_search=False)
             
             update_vector_indexes(ordered_search_results=ordered_results, embedder=embedder)
             
@@ -499,15 +498,13 @@ class DocSearchResults(BaseTool):
             print("Vector Indexes:",vector_indexes)
 
         # Search in all vector-based indexes available
-        agg_search_results = get_search_results(query, indexes=vector_indexes, vector_search=True, 
-                                                query_vector = embedder.embed_query(query), 
-                                                k=self.similarity_k)
-        
-        ordered_results = order_search_results(agg_search_results,
-                                               k=self.similarity_k,
-                                               reranker_threshold=self.reranker_th, 
-                                               sas_token=self.sas_token,
-                                               vector_search=True)
+        ordered_results = get_search_results(query, indexes=vector_indexes, k=self.k,
+                                             reranker_threshold=self.reranker_th,
+                                             vector_search=True,
+                                             similarity_k=self.similarity_k,
+                                             query_vector = embedder.embed_query(query),
+                                             sas_token=self.sas_token,
+                                            )
         
         return ordered_results
 
@@ -527,8 +524,7 @@ class DocSearchTool(BaseTool):
     vector_only_indexes: List[str] = []
     k: int = 10
     reranker_th: int = 1
-    similarity_k: int = 2
-    response_language: str = "English"
+    similarity_k: int = 3
     sas_token: str = ""   
     embedding_model: str = "text-embedding-ada-002"
     
