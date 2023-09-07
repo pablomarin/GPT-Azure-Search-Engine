@@ -298,7 +298,12 @@
       "sku": {
         "name": "S0"
       },
-      "kind": "FormRecognizer"
+      "kind": "FormRecognizer",
+      "properties": {
+        "apiProperties": {
+          "statisticsEnabled": false
+        }
+      }
     },
     {
       "type": "Microsoft.Storage/storageAccounts",
