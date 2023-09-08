@@ -33,6 +33,7 @@ The repo is made to teach you step-by-step on how to build a OpenAI-based Smart 
 * The customer team and the Microsoft team must have Contributor permissions to this resource group so they can set everything up 2 weeks prior to the workshop
 * A storage account must be set in place in the RG.
 * Customer Data/Documents must be uploaded to the blob storage account, at least two weeks prior to the workshop date
+* Multi-Tenant App Registration (Service Principal).
 * For IDE collaboration and standarization during workshop, AML compute instances with Jupyper Lab will be used, for this, Azure Machine Learning Workspace must be deployed in the RG
    * Note: Please ensure you have enough core compute quota in your Azure Machine Learning workspace 
 
