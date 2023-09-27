@@ -104,7 +104,7 @@ To make the most of my capabilities, please mention the specific tool you'd like
 @chatgpt, how can I read a remote file from a URL using pandas?
 @docsearch, what are some practical applications of reinforcement learning?
 @booksearch, give me a .net example on how to upload vectors to Azure Search index?
-@covidstats, how many people died on the West Coast in 2020?
+@sqlsearch, how many people died on the West Coast in 2020?
 ```
 
 Feel free to ask any question and specify the tool you'd like me to utilize. I'm here to assist you!
