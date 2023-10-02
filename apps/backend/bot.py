@@ -22,7 +22,7 @@ from prompts import WELCOME_MESSAGE, CUSTOM_CHATBOT_PREFIX, CUSTOM_CHATBOT_SUFFI
 from botbuilder.core import ActivityHandler, TurnContext
 from botbuilder.schema import ChannelAccount, Activity, ActivityTypes
 
-
+# Env variables needed by langchain
 os.environ["OPENAI_API_BASE"] = os.environ.get("AZURE_OPENAI_ENDPOINT")
 os.environ["OPENAI_API_KEY"] = os.environ.get("AZURE_OPENAI_API_KEY")
 os.environ["OPENAI_API_VERSION"] = os.environ.get("AZURE_OPENAI_API_VERSION")
@@ -48,11 +48,14 @@ class BotServiceCallbackHandler(BaseCallbackHandler):
             asyncio.run(self.tc.send_activity(f"\u2611 Searching: {action} ..."))
             asyncio.run(self.tc.send_activity(Activity(type=ActivityTypes.typing)))
 
+            
+# Bot Class
 class MyBot(ActivityHandler):
     
-    def __init__(self, conversation_state: ConversationState, user_state: UserState):
+    def __init__(self):
         self.model_name = os.environ.get("AZURE_OPENAI_MODEL_NAME") 
     
+    # Function to show welcome message to new users
     async def on_members_added_activity(self, members_added: ChannelAccount, turn_context: TurnContext):
         for member_added in members_added:
             if member_added.id != turn_context.activity.recipient.id:
@@ -62,7 +65,7 @@ class MyBot(ActivityHandler):
     # See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
     async def on_message_activity(self, turn_context: TurnContext):
              
-        # Extract info from TurnContext
+        # Extract info from TurnContext - You can change this to whatever , this is just one option 
         session_id = turn_context.activity.conversation.id
         user_id = turn_context.activity.from_property.id + "-" + turn_context.activity.channel_id
         input_text_metadata = dict()
@@ -99,7 +102,7 @@ class MyBot(ActivityHandler):
 
         tools = [www_search, sql_search, doc_search, chatgpt_search, book_search]
 
-        # Set brain Agent
+        # Set brain Agent with persisten memory in CosmosDB
         cosmos = CosmosDBChatMessageHistory(
                         cosmos_endpoint=os.environ['AZURE_COSMOSDB_ENDPOINT'],
                         cosmos_database=os.environ['AZURE_COSMOSDB_NAME'],
@@ -114,10 +117,11 @@ class MyBot(ActivityHandler):
         agent_chain = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, memory=memory)
 
         await turn_context.send_activity(Activity(type=ActivityTypes.typing))
+        
         # Please note below that running a non-async function like run_agent in a separate thread won't make it truly asynchronous. It allows the function to be called without blocking the event loop, but it may still have synchronous behavior internally.
         loop = asyncio.get_event_loop()
         answer = await loop.run_in_executor(ThreadPoolExecutor(), run_agent, input_text, agent_chain)
-
+        
         await turn_context.send_activity(answer)
 
 
