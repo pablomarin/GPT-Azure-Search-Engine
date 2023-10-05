@@ -443,19 +443,22 @@ def get_answer(llm: AzureChatOpenAI,
 def run_agent(question:str, agent_chain: AgentExecutor) -> str:
     """Function to run the brain agent and deal with potential parsing errors"""
     
-    try:
-        return agent_chain.run(input=question)
-    
-    except OutputParserException as e:
-        # If the agent has a parsing error, we use OpenAI model again to reformat the error and give a good answer
-        chatgpt_chain = LLMChain(
-                llm=agent_chain.agent.llm_chain.llm, 
-                    prompt=PromptTemplate(input_variables=["error"],template='Remove any json formating from the below text, also remove any portion that says someting similar this "Could not parse LLM output: ". Reformat your response in beautiful Markdown. Just give me the reformated text, nothing else.\n Text: {error}'), 
-                verbose=False
-            )
+    for i in range(5):
+        try:
+            response = agent_chain.run(input=question)
+            break
+        except OutputParserException as e:
+            # If the agent has a parsing error, we use OpenAI model again to reformat the error and give a good answer
+            chatgpt_chain = LLMChain(
+                    llm=agent_chain.agent.llm_chain.llm, 
+                        prompt=PromptTemplate(input_variables=["error"],template='Remove any json formating from the below text, also remove any portion that says someting similar this "Could not parse LLM output: ". Reformat your response in beautiful Markdown. Just give me the reformated text, nothing else.\n Text: {error}'), 
+                    verbose=False
+                )
 
-        response = chatgpt_chain.run(str(e))
-        return response
+            response = chatgpt_chain.run(str(e))
+            continue
+    
+    return response
     
 
 ######## TOOL CLASSES #####################################
