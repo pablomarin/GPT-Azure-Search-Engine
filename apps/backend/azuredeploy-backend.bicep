@@ -26,7 +26,7 @@ param azureOpenAIName string
 param azureOpenAIAPIKey string 
 
 @description('Optional. The model name for the Azure OpenAI service.')
-param azureOpenAIModelName string = 'gpt-4'
+param azureOpenAIModelName string = 'gpt-4-32k'
 
 @description('Optional. The API version for the Azure OpenAI service.')
 param azureOpenAIAPIVersion string = '2023-05-15'

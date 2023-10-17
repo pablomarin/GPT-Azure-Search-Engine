@@ -87,7 +87,7 @@ resource azureSearch 'Microsoft.Search/searchServices@2021-04-01-Preview' = {
     replicaCount: azureSearchReplicaCount
     partitionCount: azureSearchPartitionCount
     hostingMode: azureSearchHostingMode
-    semanticSearch: 'free'
+    semanticSearch: 'standard'
   }
 }
 

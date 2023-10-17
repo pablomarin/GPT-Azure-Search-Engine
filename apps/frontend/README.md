@@ -17,7 +17,7 @@ zip frontend.zip ./*
 zip frontend.zip ./pages/*
 zip -j frontend.zip ../../common/*
 ```
-3. Using the Azure CLI deploy the bot code to the Azure App Service created on Step 2
+3. Using the Azure CLI deploy the frontend code to the Azure App Service created on Step 2
 ```bash
 az login -i
 az webapp deployment source config-zip --resource-group "<resource-group-name>" --name "<name-of-frontend-app-service>" --src "frontend.zip"
