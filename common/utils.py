@@ -374,26 +374,26 @@ def update_vector_indexes(ordered_search_results: dict, embedder: OpenAIEmbeddin
                         print(r.text)
                     else:
                         i = i + 1 #increment chunk number
-
-                        # Update document in text-based index and mark it as "vectorized"
-                        upload_payload = {
-                            "value": [
-                                {
-                                    "id": key,
-                                    "vectorized": True,
-                                    "@search.action": "merge"
-                                },
-                            ]
-                        }
-
-                        r = requests.post(os.environ['AZURE_SEARCH_ENDPOINT'] + "/indexes/" + value["index"]+ "/docs/index",
-                                         data=json.dumps(upload_payload), headers=headers, params=params)
-
-
+                        
                 except Exception as e:
                     print("Exception:",e)
-                    print(content)
+                    print(chunk)
                     continue
+
+        # Update document in text-based index and mark it as "vectorized"
+        upload_payload = {
+            "value": [
+                {
+                    "id": key,
+                    "vectorized": True,
+                    "@search.action": "merge"
+                },
+            ]
+        }
+
+        r = requests.post(os.environ['AZURE_SEARCH_ENDPOINT'] + "/indexes/" + value["index"]+ "/docs/index",
+                         data=json.dumps(upload_payload), headers=headers, params=params)
+
 
 
 def get_answer(llm: AzureChatOpenAI,
