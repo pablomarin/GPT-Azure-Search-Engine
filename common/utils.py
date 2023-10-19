@@ -293,7 +293,7 @@ def get_search_results(query: str, indexes: list,
             search_payload["vectors"]= [{"value": query_vector, "fields": "chunkVector","k": k}]
             search_payload["select"]= "id, title, chunk, name, location"
         else:
-            search_payload["select"]= "id, title, chunks, language, name, location, vectorized"
+            search_payload["select"]= "id, title, chunks, name, location, vectorized"
         
 
         resp = requests.post(os.environ['AZURE_SEARCH_ENDPOINT'] + "/indexes/" + index + "/docs/search",
@@ -321,7 +321,6 @@ def get_search_results(query: str, indexes: list,
               
                 else:
                     content[result['id']]["chunks"]= result['chunks']
-                    content[result['id']]["language"]= result['language']
                     content[result['id']]["score"]= result['@search.rerankerScore'] # Uses the reranker score
                     content[result['id']]["vectorized"]= result['vectorized']
                 
