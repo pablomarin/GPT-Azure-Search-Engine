@@ -543,7 +543,8 @@ class DocSearchTool(BaseTool):
                                               agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, 
                                               agent_kwargs={'prefix':DOCSEARCH_PROMPT_PREFIX},
                                               callback_manager=self.callbacks,
-                                              verbose=self.verbose)
+                                              verbose=self.verbose,
+                                              handle_parsing_errors=True)
             
             for i in range(2):
                 try:
@@ -576,7 +577,7 @@ class CSVTabularTool(BaseTool):
     def _run(self, query: str) -> str:
         
         try:
-            agent = create_csv_agent(self.llm, self.path, verbose=self.verbose, callback_manager=self.callbacks)
+            agent = create_csv_agent(self.llm, self.path, verbose=self.verbose, callback_manager=self.callbacks, handle_parsing_errors=True)
             for i in range(5):
                 try:
                     response = agent.run(CSV_PROMPT_PREFIX + query + CSV_PROMPT_SUFFIX) 
@@ -626,7 +627,8 @@ class SQLDbTool(BaseTool):
             toolkit=toolkit,
             callback_manager=self.callbacks,
             top_k=self.k,
-            verbose=self.verbose
+            verbose=self.verbose,
+            handle_parsing_errors=True
         )
 
         for i in range(2):
@@ -714,7 +716,8 @@ class BingSearchTool(BaseTool):
                                               agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, 
                                               agent_kwargs={'prefix':BING_PROMPT_PREFIX},
                                               callback_manager=self.callbacks,
-                                              verbose=self.verbose)
+                                              verbose=self.verbose,
+                                              handle_parsing_errors=True)
             
             for i in range(2):
                 try:
