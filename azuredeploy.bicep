@@ -226,3 +226,24 @@ resource blobStorageContainer 'Microsoft.Storage/storageAccounts/blobServices/co
   parent: blobServices
   name: containerName
 }]
+
+
+output azureSearchName string = azureSearchName
+output azureSearchEndpoint string = 'https://${azureSearchName}.search.windows.net'
+output SQLServerName string = SQLServerName
+output SQLDatabaseName string = SQLDBName
+output cosmosDBAccountName string = cosmosDBAccountName
+output cosmosDBDatabaseName string = cosmosDBDatabaseName
+output cosmosDBContainerName string = cosmosDBContainerName
+output bingSearchAPIName string = bingSearchAPIName
+output formRecognizerName string = formRecognizerName
+output blobStorageAccountName string = blobStorageAccountName
+output formrecognizerEndpoint string = 'https://${formRecognizerName}.cognitiveservices.azure.com'
+output formRecognizerKey string = formRecognizerAccount.listKeys().key1
+output azureSearchKey string = azureSearch.listAdminKeys().primaryKey
+output cosmosDBAccountEndpoint string = cosmosDBAccount.properties.documentEndpoint
+output cosmosDBConnectionString string = 'AccountEndpoint=${cosmosDBAccount.properties.documentEndpoint};AccountKey=${cosmosDBAccount.listKeys().primaryMasterKey}' 
+output bingServiceSearchKey string = bingSearchAccount.listKeys().key1
+output cognitiveServiceName string = cognitiveServiceName
+output cognitiveServiceKey string = cognitiveService.listKeys().key1
+output blobConnectionString string = 'DefaultEndpointsProtocol=https;AccountName=${blobStorageAccountName};AccountKey=${blobStorageAccount.listKeys().keys[0].value};EndpointSuffix=core.windows.net'
