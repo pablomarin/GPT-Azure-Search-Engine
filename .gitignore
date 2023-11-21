@@ -10,3 +10,6 @@ common/__pycache__/
 *.amltemp
 data/
 credentials.env
+.azure/
+.vscode/
+infra/target/

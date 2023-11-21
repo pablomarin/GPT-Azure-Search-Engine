@@ -1,0 +1,66 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+# This is an example starter azure.yaml file containing several example services in comments below.
+# Make changes as needed to describe your application setup.
+# To learn more about the azure.yaml file, visit https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/azd-schema
+
+# Name of the application.
+name: Azure-Cognitive-Search-Azure-OpenAI-Accelerator
+
+hooks:
+  preprovision:
+    windows:
+      shell: pwsh
+      run: ./infra/scripts/CreatePrerequisites.ps1
+      interactive: true
+      continueOnError: false
+    posix:
+      shell: pwsh
+      run: ./infra/scripts/CreatePrerequisites.ps1
+      interactive: true
+      continueOnError: false
+  postprovision:
+    windows:
+      shell: pwsh
+      run: ./infra/scripts/UpdateSecretsInApps.ps1
+      interactive: true
+      continueOnError: false
+    posix:
+      shell: pwsh
+      run: ./infra/scripts/UpdateSecretsInApps.ps1
+      interactive: true
+      continueOnError: false
+
+services:
+  backend:
+    project: ./infra/target/backend
+    language: py
+    host: appservice
+    hooks:
+      prepackage:
+        windows:
+          shell: pwsh
+          run: Remove-Item * -Recurse;Copy-Item -Path "../../../apps/backend/*" -Destination "./" -force;Copy-Item -Path "../../../common/*" -Destination "./" -Recurse -force;pip install -r requirements.txt 
+          interactive: true
+          continueOnError: false
+        posix:
+          shell: pwsh
+          run: 'Remove-Item * -Recurse;Copy-Item -Path "../../../apps/backend/*" -Destination "./" -force;Copy-Item -Path "../../../common/*" -Destination "./" -Recurse -force;pip install -r requirements.txt' 
+          interactive: true
+          continueOnError: false      
+  frontend:
+    project: ./infra/target/frontend
+    language: py
+    host: appservice
+    hooks:
+      prepackage:
+        windows:
+          shell: pwsh
+          run: Remove-Item * -Recurse; Copy-Item -Path "../../../apps/frontend/*" -Destination "./" -Recurse -Force; Copy-Item -Path "../../../common/*" -Destination "./" -Recurse -force;pip install -r requirements.txt 
+          interactive: true
+          continueOnError: false
+        posix:
+          shell: pwsh
+          run: 'Remove-Item * -Recurse; Copy-Item -Path "../../../apps/frontend/*" -Destination "./" -Recurse -Force; Copy-Item -Path "../../../common/*" -Destination "./" -Recurse -force;pip install -r requirements.txt'
+          interactive: true
+          continueOnError: false      

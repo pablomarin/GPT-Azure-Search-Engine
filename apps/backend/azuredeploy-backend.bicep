@@ -120,6 +120,7 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
 resource webApp 'Microsoft.Web/sites@2022-09-01' = {
   name: webAppName
   location: location
+  tags: { 'azd-service-name': 'backend' }
   kind: 'app,linux'
   properties: {
     enabled: true
@@ -314,3 +315,7 @@ resource bot 'Microsoft.BotService/botServices@2022-09-15' = {
     webApp
   ]
 }
+
+output botServiceName string = bot.name
+output webAppName string = webApp.name
+output webAppUrl string = webApp.properties.defaultHostName
