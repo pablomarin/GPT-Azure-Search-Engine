@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "3834668829092637576"
+      "templateHash": "6332436063003351938"
     }
   },
   "parameters": {
@@ -127,6 +127,9 @@
       "type": "Microsoft.Web/sites",
       "apiVersion": "2022-09-01",
       "name": "[parameters('webAppName')]",
+      "tags": {
+        "azd-service-name": "frontend"
+      },
       "location": "[parameters('location')]",
       "properties": {
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]",
@@ -196,5 +199,15 @@
         "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
       ]
     }
-  ]
+  ],
+  "outputs": {
+    "webAppURL": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Web/sites', parameters('webAppName')), '2022-09-01').defaultHostName]"
+    },
+    "webAppName": {
+      "type": "string",
+      "value": "[parameters('webAppName')]"
+    }
+  }
 }

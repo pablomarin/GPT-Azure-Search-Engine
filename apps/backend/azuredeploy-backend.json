@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "7996731115395384403"
+      "templateHash": "15820469957931514877"
     }
   },
   "parameters": {
@@ -193,6 +193,9 @@
       "apiVersion": "2022-09-01",
       "name": "[variables('webAppName')]",
       "location": "[parameters('location')]",
+      "tags": {
+        "azd-service-name": "backend"
+      },
       "kind": "app,linux",
       "properties": {
         "enabled": true,
@@ -394,5 +397,19 @@
         "[resourceId('Microsoft.Web/sites', variables('webAppName'))]"
       ]
     }
-  ]
+  ],
+  "outputs": {
+    "botServiceName": {
+      "type": "string",
+      "value": "[parameters('botId')]"
+    },
+    "webAppName": {
+      "type": "string",
+      "value": "[variables('webAppName')]"
+    },
+    "webAppUrl": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Web/sites', variables('webAppName')), '2022-09-01').defaultHostName]"
+    }
+  }
 }

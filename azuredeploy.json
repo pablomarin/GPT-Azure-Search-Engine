@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.23.1.45101",
-      "templateHash": "2438818889237034428"
+      "templateHash": "9804660331329529955"
     }
   },
   "parameters": {
@@ -335,5 +335,83 @@
         "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('blobStorageAccountName'), 'default')]"
       ]
     }
-  ]
+  ],
+  "outputs": {
+    "azureSearchName": {
+      "type": "string",
+      "value": "[parameters('azureSearchName')]"
+    },
+    "azureSearchEndpoint": {
+      "type": "string",
+      "value": "[format('https://{0}.search.windows.net', parameters('azureSearchName'))]"
+    },
+    "SQLServerName": {
+      "type": "string",
+      "value": "[parameters('SQLServerName')]"
+    },
+    "SQLDatabaseName": {
+      "type": "string",
+      "value": "[parameters('SQLDBName')]"
+    },
+    "cosmosDBAccountName": {
+      "type": "string",
+      "value": "[parameters('cosmosDBAccountName')]"
+    },
+    "cosmosDBDatabaseName": {
+      "type": "string",
+      "value": "[parameters('cosmosDBDatabaseName')]"
+    },
+    "cosmosDBContainerName": {
+      "type": "string",
+      "value": "[parameters('cosmosDBContainerName')]"
+    },
+    "bingSearchAPIName": {
+      "type": "string",
+      "value": "[parameters('bingSearchAPIName')]"
+    },
+    "formRecognizerName": {
+      "type": "string",
+      "value": "[parameters('formRecognizerName')]"
+    },
+    "blobStorageAccountName": {
+      "type": "string",
+      "value": "[parameters('blobStorageAccountName')]"
+    },
+    "formrecognizerEndpoint": {
+      "type": "string",
+      "value": "[format('https://{0}.cognitiveservices.azure.com', parameters('formRecognizerName'))]"
+    },
+    "formRecognizerKey": {
+      "type": "string",
+      "value": "[listKeys(resourceId('Microsoft.CognitiveServices/accounts', parameters('formRecognizerName')), '2023-05-01').key1]"
+    },
+    "azureSearchKey": {
+      "type": "string",
+      "value": "[listAdminKeys(resourceId('Microsoft.Search/searchServices', parameters('azureSearchName')), '2021-04-01-preview').primaryKey]"
+    },
+    "cosmosDBAccountEndpoint": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBAccountName')), '2023-04-15').documentEndpoint]"
+    },
+    "cosmosDBConnectionString": {
+      "type": "string",
+      "value": "[format('AccountEndpoint={0};AccountKey={1}', reference(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBAccountName')), '2023-04-15').documentEndpoint, listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBAccountName')), '2023-04-15').primaryMasterKey)]"
+    },
+    "bingServiceSearchKey": {
+      "type": "string",
+      "value": "[listKeys(resourceId('Microsoft.Bing/accounts', parameters('bingSearchAPIName')), '2020-06-10').key1]"
+    },
+    "cognitiveServiceName": {
+      "type": "string",
+      "value": "[parameters('cognitiveServiceName')]"
+    },
+    "cognitiveServiceKey": {
+      "type": "string",
+      "value": "[listKeys(resourceId('Microsoft.CognitiveServices/accounts', parameters('cognitiveServiceName')), '2023-05-01').key1]"
+    },
+    "blobConnectionString": {
+      "type": "string",
+      "value": "[format('DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};EndpointSuffix=core.windows.net', parameters('blobStorageAccountName'), listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('blobStorageAccountName')), '2023-01-01').keys[0].value)]"
+    }
+  }
 }
