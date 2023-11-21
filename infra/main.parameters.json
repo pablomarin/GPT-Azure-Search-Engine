@@ -1,0 +1,42 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": {
+      "value": "${AZURE_ENV_NAME}"
+    },
+    "location": {
+      "value": "${AZURE_LOCATION}"
+    },
+    "resourceGroupName": {
+      "value": "${AZURE_RESOURCE_GROUP}"
+    },
+    "openAiResourceGroupLocation": {
+      "value": "${AZURE_OPENAI_LOCATION}"
+    },
+    "openAiServiceName": {
+      "value": "${AZURE_OPENAI_SERVICE}"
+    },
+    "openAiResourceGroupName": {
+      "value": "${AZURE_OPENAI_RESOURCE_GROUP}"
+    },
+    "openAiHost": {
+      "value": "${OPENAI_HOST=azure}"
+    },
+    "appId": {
+      "value": "${AZURE_APP_ID}"
+    },
+    "appSecret": {
+      "value": "${AZURE_APP_SECRET}"
+    },
+    "blobSASToken": {
+      "value": "${AZURE_BLOB_SAS_TOKEN}"
+    },
+    "chatGptDeploymentName": {
+      "value": "${AZURE_OPENAI_CHATGPT_DEPLOYMENT}"
+    },
+    "embeddingDeploymentName": {
+      "value": "${AZURE_OPENAI_EMB_DEPLOYMENT}"
+    }
+  }
+}
