@@ -42,7 +42,7 @@ param azureOpenAIName string
 param azureOpenAIAPIKey string 
 
 @description('Optional. The model name of the Azure OpenAI.')
-param azureOpenAIModelName string = 'gpt-4'
+param azureOpenAIModelName string = 'gpt-4-32k'
 
 @description('Optional. The API version of the Azure OpenAI.')
 param azureOpenAIAPIVersion string = '2023-05-15'
@@ -72,6 +72,7 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
 // Create a Web App using a Linux App Service Plan.
 resource webApp 'Microsoft.Web/sites@2022-09-01' = {
   name: webAppName
+  tags: { 'azd-service-name': 'frontend' }
   location: location
   properties: {
     serverFarmId: appServicePlan.id
@@ -135,3 +136,6 @@ resource webAppConfig 'Microsoft.Web/sites/config@2022-09-01' = {
     appCommandLine: 'python -m streamlit run Home.py --server.port 8000 --server.address 0.0.0.0'
   }
 }
+
+output webAppURL string = webApp.properties.defaultHostName
+output webAppName string = webApp.name

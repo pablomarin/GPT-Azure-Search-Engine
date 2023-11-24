@@ -1,6 +1,6 @@
-langchain==0.0.265
+langchain==0.0.316
 faiss-cpu
-openai
+openai==0.28.1
 tiktoken
 docx2txt
 pillow

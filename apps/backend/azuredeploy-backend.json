@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.20.4.51522",
-      "templateHash": "12231490621592366523"
+      "version": "0.23.1.45101",
+      "templateHash": "15820469957931514877"
     }
   },
   "parameters": {
@@ -61,7 +61,7 @@
     },
     "azureOpenAIModelName": {
       "type": "string",
-      "defaultValue": "gpt-4",
+      "defaultValue": "gpt-4-32k",
       "metadata": {
         "description": "Optional. The model name for the Azure OpenAI service."
       }
@@ -193,6 +193,9 @@
       "apiVersion": "2022-09-01",
       "name": "[variables('webAppName')]",
       "location": "[parameters('location')]",
+      "tags": {
+        "azd-service-name": "backend"
+      },
       "kind": "app,linux",
       "properties": {
         "enabled": true,
@@ -394,5 +397,19 @@
         "[resourceId('Microsoft.Web/sites', variables('webAppName'))]"
       ]
     }
-  ]
+  ],
+  "outputs": {
+    "botServiceName": {
+      "type": "string",
+      "value": "[parameters('botId')]"
+    },
+    "webAppName": {
+      "type": "string",
+      "value": "[variables('webAppName')]"
+    },
+    "webAppUrl": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Web/sites', variables('webAppName')), '2022-09-01').defaultHostName]"
+    }
+  }
 }

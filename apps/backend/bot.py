@@ -114,7 +114,7 @@ class MyBot(ActivityHandler):
         cosmos.prepare_cosmos()
         memory = ConversationBufferWindowMemory(memory_key="chat_history", return_messages=True, k=30, chat_memory=cosmos)
         agent = ConversationalChatAgent.from_llm_and_tools(llm=llm, tools=tools,system_message=CUSTOM_CHATBOT_PREFIX,human_message=CUSTOM_CHATBOT_SUFFIX)
-        agent_chain = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, memory=memory)
+        agent_chain = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, memory=memory, handle_parsing_errors=True)
 
         await turn_context.send_activity(Activity(type=ActivityTypes.typing))
         

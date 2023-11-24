@@ -293,7 +293,7 @@ def get_search_results(query: str, indexes: list,
             search_payload["vectors"]= [{"value": query_vector, "fields": "chunkVector","k": k}]
             search_payload["select"]= "id, title, chunk, name, location"
         else:
-            search_payload["select"]= "id, title, chunks, language, name, location, vectorized"
+            search_payload["select"]= "id, title, chunks, name, location, vectorized"
         
 
         resp = requests.post(os.environ['AZURE_SEARCH_ENDPOINT'] + "/indexes/" + index + "/docs/search",
@@ -321,7 +321,6 @@ def get_search_results(query: str, indexes: list,
               
                 else:
                     content[result['id']]["chunks"]= result['chunks']
-                    content[result['id']]["language"]= result['language']
                     content[result['id']]["score"]= result['@search.rerankerScore'] # Uses the reranker score
                     content[result['id']]["vectorized"]= result['vectorized']
                 
@@ -374,26 +373,26 @@ def update_vector_indexes(ordered_search_results: dict, embedder: OpenAIEmbeddin
                         print(r.text)
                     else:
                         i = i + 1 #increment chunk number
-
-                        # Update document in text-based index and mark it as "vectorized"
-                        upload_payload = {
-                            "value": [
-                                {
-                                    "id": key,
-                                    "vectorized": True,
-                                    "@search.action": "merge"
-                                },
-                            ]
-                        }
-
-                        r = requests.post(os.environ['AZURE_SEARCH_ENDPOINT'] + "/indexes/" + value["index"]+ "/docs/index",
-                                         data=json.dumps(upload_payload), headers=headers, params=params)
-
-
+                        
                 except Exception as e:
                     print("Exception:",e)
-                    print(content)
+                    print(chunk)
                     continue
+
+        # Update document in text-based index and mark it as "vectorized"
+        upload_payload = {
+            "value": [
+                {
+                    "id": key,
+                    "vectorized": True,
+                    "@search.action": "merge"
+                },
+            ]
+        }
+
+        r = requests.post(os.environ['AZURE_SEARCH_ENDPOINT'] + "/indexes/" + value["index"]+ "/docs/index",
+                         data=json.dumps(upload_payload), headers=headers, params=params)
+
 
 
 def get_answer(llm: AzureChatOpenAI,
@@ -544,7 +543,8 @@ class DocSearchTool(BaseTool):
                                               agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, 
                                               agent_kwargs={'prefix':DOCSEARCH_PROMPT_PREFIX},
                                               callback_manager=self.callbacks,
-                                              verbose=self.verbose)
+                                              verbose=self.verbose,
+                                              handle_parsing_errors=True)
             
             for i in range(2):
                 try:
@@ -577,7 +577,7 @@ class CSVTabularTool(BaseTool):
     def _run(self, query: str) -> str:
         
         try:
-            agent = create_csv_agent(self.llm, self.path, verbose=self.verbose, callback_manager=self.callbacks)
+            agent = create_csv_agent(self.llm, self.path, verbose=self.verbose, callback_manager=self.callbacks, handle_parsing_errors=True)
             for i in range(5):
                 try:
                     response = agent.run(CSV_PROMPT_PREFIX + query + CSV_PROMPT_SUFFIX) 
@@ -609,7 +609,7 @@ class SQLDbTool(BaseTool):
     def _run(self, query: str) -> str:
         db_config = {
             'drivername': 'mssql+pyodbc',
-            'username': os.environ["SQL_SERVER_USERNAME"] +'@'+ os.environ["SQL_SERVER_NAME"],
+            'username': os.environ["SQL_SERVER_USERNAME"],
             'password': os.environ["SQL_SERVER_PASSWORD"],
             'host': os.environ["SQL_SERVER_NAME"],
             'port': 1433,
@@ -627,7 +627,8 @@ class SQLDbTool(BaseTool):
             toolkit=toolkit,
             callback_manager=self.callbacks,
             top_k=self.k,
-            verbose=self.verbose
+            verbose=self.verbose,
+            handle_parsing_errors=True
         )
 
         for i in range(2):
@@ -715,7 +716,8 @@ class BingSearchTool(BaseTool):
                                               agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, 
                                               agent_kwargs={'prefix':BING_PROMPT_PREFIX},
                                               callback_manager=self.callbacks,
-                                              verbose=self.verbose)
+                                              verbose=self.verbose,
+                                              handle_parsing_errors=True)
             
             for i in range(2):
                 try:
