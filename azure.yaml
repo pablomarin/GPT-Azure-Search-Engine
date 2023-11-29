@@ -8,7 +8,7 @@
 name: Azure-Cognitive-Search-Azure-OpenAI-Accelerator
 
 hooks:
-  preprovision:
+  preup:
     windows:
       shell: pwsh
       run: ./infra/scripts/CreatePrerequisites.ps1
@@ -17,6 +17,17 @@ hooks:
     posix:
       shell: pwsh
       run: ./infra/scripts/CreatePrerequisites.ps1
+      interactive: true
+      continueOnError: false
+  preprovision:
+    windows:
+      shell: pwsh
+      run: ./infra/scripts/CreateAppRegistration.ps1
+      interactive: true
+      continueOnError: false
+    posix:
+      shell: pwsh
+      run: ./infra/scripts/CreateAppRegistration.ps1
       interactive: true
       continueOnError: false
   postprovision:
