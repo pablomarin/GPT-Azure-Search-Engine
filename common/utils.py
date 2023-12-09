@@ -12,11 +12,15 @@ import docx2txt
 import tiktoken
 import html
 import time
+from time import sleep
+from typing import List, Tuple
 from pypdf import PdfReader, PdfWriter
+from dataclasses import dataclass
+from sqlalchemy.engine.url import URL
 from azure.ai.formrecognizer import DocumentAnalysisClient
 from azure.core.credentials import AzureKeyCredential
 
-from langchain.embeddings import OpenAIEmbeddings
+from langchain.embeddings import AzureOpenAIEmbeddings
 from langchain.docstore.document import Document
 from langchain.llms import AzureOpenAI
 from langchain.chat_models import AzureChatOpenAI
@@ -27,33 +31,31 @@ from langchain.vectorstores.faiss import FAISS
 from langchain.chains import LLMChain
 from langchain.memory import ConversationBufferMemory
 from langchain_experimental.agents.agent_toolkits import create_csv_agent
-from langchain.chains.question_answering import load_qa_chain
 from langchain.chains.qa_with_sources import load_qa_with_sources_chain
-from langchain.chains import ConversationalRetrievalChain
-from langchain.chains.conversational_retrieval.prompts import CONDENSE_QUESTION_PROMPT
 from langchain.tools import BaseTool
 from langchain.prompts import PromptTemplate
-from openai.error import AuthenticationError
-from langchain.docstore.document import Document
-from pypdf import PdfReader
-from sqlalchemy.engine.url import URL
 from langchain.sql_database import SQLDatabase
 from langchain.agents import AgentExecutor, initialize_agent, AgentType
-from langchain.tools import BaseTool
 from langchain.utilities import BingSearchAPIWrapper
 from langchain.agents import create_sql_agent
 from langchain.agents.agent_toolkits import SQLDatabaseToolkit
 from langchain.callbacks.base import BaseCallbackManager
+from langchain.requests import RequestsWrapper
+from langchain.chains import APIChain
+from langchain.agents.agent_toolkits.openapi.spec import reduce_openapi_spec
+from langchain.utils.json_schema import dereference_refs
+
+
 
 try:
     from .prompts import (COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT,
                           CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX, MSSQL_PROMPT, MSSQL_AGENT_PREFIX, 
-                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT, BING_PROMPT_PREFIX, DOCSEARCH_PROMPT_PREFIX)
+                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT, BING_PROMPT_PREFIX, DOCSEARCH_PROMPT_PREFIX, APISEARCH_PROMPT_PREFIX)
 except Exception as e:
     print(e)
     from prompts import (COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT,
                           CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX, MSSQL_PROMPT, MSSQL_AGENT_PREFIX, 
-                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT, BING_PROMPT_PREFIX, DOCSEARCH_PROMPT_PREFIX)
+                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT, BING_PROMPT_PREFIX, DOCSEARCH_PROMPT_PREFIX, APISEARCH_PROMPT_PREFIX)
 
 
 def text_to_base64(text):
@@ -204,7 +206,7 @@ def embed_docs_faiss(docs: List[Document], chunks_limit: int=100, verbose: bool 
  
     # Select the Embedder model'
     if verbose: print("Number of chunks:",len(docs))
-    embedder = OpenAIEmbeddings(deployment="text-embedding-ada-002", chunk_size=1) 
+    embedder = AzureOpenAIEmbeddings(model="text-embedding-ada-002", skip_empty=True) 
     
     if len(docs) > chunks_limit:
         docs = docs[:chunks_limit]
@@ -262,6 +264,75 @@ def num_tokens_from_docs(docs: List[Document]) -> int:
     for i in range(len(docs)):
         num_tokens += num_tokens_from_string(docs[i].page_content)
     return num_tokens
+
+
+@dataclass(frozen=True)
+class ReducedOpenAPISpec:
+    """A reduced OpenAPI spec.
+
+    This is a quick and dirty representation for OpenAPI specs.
+
+    Attributes:
+        servers: The servers in the spec.
+        description: The description of the spec.
+        endpoints: The endpoints in the spec.
+    """
+
+    servers: List[dict]
+    description: str
+    endpoints: List[Tuple[str, str, dict]]
+
+
+def reduce_openapi_spec(spec: dict, dereference: bool = True) -> ReducedOpenAPISpec:
+    """Simplify/distill/minify a spec somehow.
+
+    I want a smaller target for retrieval and (more importantly)
+    I want smaller results from retrieval.
+    I was hoping https://openapi.tools/ would have some useful bits
+    to this end, but doesn't seem so.
+    """
+    # 1. Consider only get, post, patch, put, delete endpoints.
+    endpoints = [
+        (f"{operation_name.upper()} {route}", docs.get("description"), docs)
+        for route, operation in spec["paths"].items()
+        for operation_name, docs in operation.items()
+        if operation_name in ["get", "post", "patch", "put", "delete"]
+    ]
+
+    # 2. Replace any refs so that complete docs are retrieved.
+    # Note: probably want to do this post-retrieval, it blows up the size of the spec.
+    if dereference:
+        endpoints = [
+            (name, description, dereference_refs(docs, full_schema=spec))
+            for name, description, docs in endpoints
+        ]
+
+    # 3. Strip docs down to required request args + happy path response.
+    def reduce_endpoint_docs(docs: dict) -> dict:
+        out = {}
+        if docs.get("description"):
+            out["description"] = docs.get("description")
+        if docs.get("parameters"):
+            out["parameters"] = [
+                parameter
+                for parameter in docs.get("parameters", [])
+                if parameter.get("required")
+            ]
+        if "200" in docs["responses"]:
+            out["responses"] = docs["responses"]["200"]
+        if docs.get("requestBody"):
+            out["requestBody"] = docs.get("requestBody")
+        return out
+
+    endpoints = [
+        (name, description, reduce_endpoint_docs(docs))
+        for name, description, docs in endpoints
+    ]
+    return ReducedOpenAPISpec(
+        servers=spec["servers"] if "servers" in spec.items() else [{"url": "https://" + spec["host"]}],
+        description=spec["info"].get("description", ""),
+        endpoints=endpoints,
+    )
 
 
 def get_search_results(query: str, indexes: list, 
@@ -340,7 +411,7 @@ def get_search_results(query: str, indexes: list,
     return ordered_content
 
 
-def update_vector_indexes(ordered_search_results: dict, embedder: OpenAIEmbeddings):
+def update_vector_indexes(ordered_search_results: dict, embedder: AzureOpenAIEmbeddings):
     
     """Get as input the results of a text-based multi-index search, vectorize the documents chunks that has not been done before and updates the vector-based indexes"""
     
@@ -460,10 +531,10 @@ def run_agent(question:str, agent_chain: AgentExecutor) -> str:
     return response
     
 
-######## TOOL CLASSES #####################################
+######## AGENTS AND TOOL CLASSES #####################################
 ###########################################################
     
-class DocSearchResults(BaseTool):
+class GetDocSearchResults_Tool(BaseTool):
     """Tool for Azure Search results"""
     
     name = "search knowledge base"
@@ -479,7 +550,7 @@ class DocSearchResults(BaseTool):
     
     def _run(self, query: str) -> str:
         
-        embedder = OpenAIEmbeddings(deployment=self.embedding_model, chunk_size=1)
+        embedder = AzureOpenAIEmbeddings(model="text-embedding-ada-002", skip_empty=True) 
     
         if self.indexes:
             # Search in text-based indexes first and update corresponding vector indexes
@@ -515,8 +586,8 @@ class DocSearchResults(BaseTool):
         raise NotImplementedError("DocSearchResults does not support async")
   
 
-class DocSearchTool(BaseTool):
-    """Tool for Azure GPT Smart Search Engine"""
+class DocSearchAgent(BaseTool):
+    """Agent to interact with for Azure AI Search """
     
     name = "@docsearch"
     description = "useful when the questions includes the term: @docsearch.\n"
@@ -532,7 +603,7 @@ class DocSearchTool(BaseTool):
     
     def _run(self, tool_input: Union[str, Dict],) -> str:
         try:
-            tools = [DocSearchResults(indexes=self.indexes,vector_only_indexes=self.vector_only_indexes,
+            tools = [GetDocSearchResults_Tool(indexes=self.indexes,vector_only_indexes=self.vector_only_indexes,
                                       k=self.k, reranker_th=self.reranker_th, similarity_k=self.similarity_k,
                                       sas_token=self.sas_token, embedding_model=self.embedding_model)]
             
@@ -565,8 +636,8 @@ class DocSearchTool(BaseTool):
     
     
 
-class CSVTabularTool(BaseTool):
-    """Tool CSV agent"""
+class CSVTabularAgent(BaseTool):
+    """Agent to interact with CSV files"""
     
     name = "@csvfile"
     description = "useful when the questions includes the term: @csvfile.\n"
@@ -597,8 +668,8 @@ class CSVTabularTool(BaseTool):
         raise NotImplementedError("CSVTabularTool does not support async")
         
         
-class SQLDbTool(BaseTool):
-    """Tool SQLDB Agent"""
+class SQLSearchAgent(BaseTool):
+    """Agent to interact with SQL databases"""
     
     name = "@sqlsearch"
     description = "useful when the questions includes the term: @sqlsearch.\n"
@@ -609,7 +680,7 @@ class SQLDbTool(BaseTool):
     def _run(self, query: str) -> str:
         db_config = {
             'drivername': 'mssql+pyodbc',
-            'username': os.environ["SQL_SERVER_USERNAME"],
+            'username': os.environ["SQL_SERVER_USERNAME"] +'@'+ os.environ["SQL_SERVER_NAME"],
             'password': os.environ["SQL_SERVER_PASSWORD"],
             'host': os.environ["SQL_SERVER_NAME"],
             'port': 1433,
@@ -677,7 +748,7 @@ class ChatGPTTool(BaseTool):
         
     
     
-class BingSearchResults(BaseTool):
+class GetBingSearchResults_Tool(BaseTool):
     """Tool for a Bing Search Wrapper"""
 
     name = "@bing"
@@ -697,8 +768,8 @@ class BingSearchResults(BaseTool):
         raise NotImplementedError("BingSearchResults does not support async")
             
 
-class BingSearchTool(BaseTool):
-    """Tool for a Bing Search Wrapper"""
+class BingSearchAgent(BaseTool):
+    """Agent to interact with Bing"""
     
     name = "@bing"
     description = "useful when the questions includes the term: @bing.\n"
@@ -708,7 +779,7 @@ class BingSearchTool(BaseTool):
     
     def _run(self, tool_input: Union[str, Dict],) -> str:
         try:
-            tools = [BingSearchResults(k=self.k)]
+            tools = [GetBingSearchResults_Tool(k=self.k)]
             parsed_input = self._parse_input(tool_input)
 
             agent_executor = initialize_agent(tools=tools, 
@@ -735,3 +806,90 @@ class BingSearchTool(BaseTool):
     async def _arun(self, query: str) -> str:
         """Use the tool asynchronously."""
         raise NotImplementedError("BingSearchTool does not support async")
+        
+        
+        
+class GetAPISearchResults_Tool(BaseTool):
+    """APIChain as a tool"""
+    
+    name = "@apisearch"
+    description = "useful when the questions includes the term: @apisearch.\n"
+
+    llm: AzureChatOpenAI
+    api_spec: str
+    headers: dict = {}
+    limit_to_domains: list = []
+    verbose: bool = False
+    
+    def _run(self, query: str) -> str:
+        
+        chain = APIChain.from_llm_and_api_docs(
+                            llm=self.llm,
+                            api_docs=self.api_spec,
+                            headers=self.headers,
+                            verbose=self.verbose,
+                            limit_to_domains=self.limit_to_domains
+                            )
+        try:
+            sleep(2) # This is optional to avoid possible TPM rate limits
+            response = chain.run(query)
+        except Exception as e:
+            response = e
+        
+        return response
+            
+    async def _arun(self, query: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError("This Tool does not support async")
+        
+
+class APISearchAgent(BaseTool):
+    """Agent to interact with any API given a OpenAPI 3.0 spec"""
+    
+    name = "@apisearch"
+    description = "useful when the questions includes the term: @apisearch.\n"
+    
+    llm: AzureChatOpenAI
+    llm_search: AzureChatOpenAI
+    api_spec: str
+    headers: dict = {}
+    limit_to_domains: list = []
+    verbose: bool = False
+    
+    def _run(self, tool_input: Union[str, Dict],) -> str:
+        try:
+            tools = [GetAPISearchResults_Tool(llm=self.llm,
+                                              llm_search=self.llm_search,
+                                              api_spec=str(self.api_spec),
+                                              headers=self.headers,
+                                              verbose=self.verbose,
+                                              limit_to_domains=self.limit_to_domains)]
+            
+            parsed_input = self._parse_input(tool_input)
+            
+            agent_executor = initialize_agent(tools=tools,
+                                              llm=self.llm, 
+                                              agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+                                              agent_kwargs={'prefix':APISEARCH_PROMPT_PREFIX},
+                                              callback_manager=self.callbacks,
+                                              verbose=self.verbose,
+                                              handle_parsing_errors=True)
+
+            
+            for i in range(2):
+                try:
+                    response = run_agent(parsed_input, agent_executor)
+                    break
+                except Exception as e:
+                    response = str(e)
+                    continue
+
+            return response
+        
+        except Exception as e:
+            print(e)
+    
+    async def _arun(self, query: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError("APISearchAgent does not support async")
+        

@@ -95,6 +95,8 @@ I have various plugins and tools at my disposal to answer your questions effecti
 
 5. \U0001F4CA **@sqlsearch**: By utilizing this tool, I can access a SQL database containing information about Covid cases, deaths, and hospitalizations in 2020-2021.
 
+6. \U0001F4E1 **@apisearch**: With this tool I can access the https://disease.sh/ API containing real-time covid statistics for US States, Countries and Continents.
+
 From all of my sources, I will provide the necessary information and also mention the sources I used to derive the answer. This way, you can have transparency about the origins of the information and understand how I arrived at the response.
 
 To make the most of my capabilities, please mention the specific tool you'd like me to use when asking your question. Here's an example:
@@ -102,9 +104,10 @@ To make the most of my capabilities, please mention the specific tool you'd like
 ```
 @bing, who is the daughter of the President of India?
 @chatgpt, how can I read a remote file from a URL using pandas?
-@docsearch, what are some practical applications of reinforcement learning?
-@booksearch, give me a .net example on how to upload vectors to Azure Search index?
+@docsearch, Does chloroquine really works against covid?
+@booksearch, tell me the legend of the stolen kidney in the book "Made To Stick"
 @sqlsearch, how many people died on the West Coast in 2020?
+@apisearch, in UK how many people died of covid percentage wise based on its population?
 ```
 
 Feel free to ask any question and specify the tool you'd like me to utilize. I'm here to assist you!
@@ -553,6 +556,31 @@ OrderedDict([('z4cagypm_0',
 
 Final Answer:
 Reinforcement learning can be used in various use cases, including:\n1. Learning prevention strategies for epidemics of infectious diseases, such as pandemic influenza, in order to automatically learn mitigation policies in complex epidemiological models with a large state space<sup><a href="some url location" target="_blank">[1]</a></sup>.\n2. Personalized hybrid recommendation algorithm for music based on reinforcement learning, which recommends song sequences that match listeners\' preferences better, by simulating the interaction process and continuously updating the model based on preferences<sup><a href="another url location" target="_blank">[2]</a></sup>.\n3. Learning sparse reward tasks in reinforcement learning by combining self-imitation learning with exploration bonuses, which enhances both exploitation and exploration to reduce sample complexity<sup><a href="another url location" target="_blank">[3]</a></sup>.\n4. Automatic feature engineering in machine learning projects, where a framework called CAFEM (Cross-data Automatic Feature Engineering Machine) is used to optimize the feature transformation graph and learn fine-grained feature engineering strategies<sup><a href="another url location" target="_blank">[4]</a></sup>.\n5. Job scheduling in data centers using Advantage Actor-Critic (A2C) deep reinforcement learning, where the A2cScheduler agent learns the scheduling policy automatically and achieves competitive scheduling performance<sup><a href="another url location" target="_blank">[5]</a></sup>.\n\nThese use cases demonstrate the versatility of reinforcement learning in solving complex problems and optimizing decision-making processes.
+
+## You have access to the following tools:
+
+"""
+
+
+APISEARCH_PROMPT_PREFIX = CUSTOM_CHATBOT_PREFIX + """
+
+## About your ability to gather and present information:
+- You must always perform searches using your tools when the user is seeking information (explicitly or implicitly), regardless of your internal knowledge or information.
+- You can and should perform up to 5 searches in a single conversation turn before reaching the Final Answer. You should never search the same query more than once.
+- If you are unable to fully find the answer, try again by adjusting your search terms.
+- You must always reference factual statements to the search results.
+- You must find the answer to the question in the search results/context returned by your tools only
+- The search results may be incomplete or irrelevant. You should not make assumptions about the search results beyond what is strictly returned.
+- If the search results do not contain enough information to fully address the user's message, you should only use facts from the search results and not add information on your own.
+- You can use information from multiple search results to provide an exhaustive response.
+- If the user's message is not a question or a chat message, you treat it as a search query.
+- If the message contain instructions on how to present the information, follow it as long as it doesn't contradict other instructions above.
+- If the question contains the `$` sign referring to currency, substitute it with `USD` when doing the web search and on your Final Answer as well. You should not use `$` in your Final Answer, only `USD` when refering to dollars.
+
+
+## On Context
+
+- Your context is: search results returned by your tools
 
 ## You have access to the following tools:
 

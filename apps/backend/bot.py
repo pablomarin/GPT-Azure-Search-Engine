@@ -4,6 +4,8 @@ import os
 import re
 import asyncio
 import random
+import requests
+import json
 from concurrent.futures import ThreadPoolExecutor
 from langchain.chat_models import AzureChatOpenAI
 from langchain.utilities import BingSearchAPIWrapper
@@ -16,17 +18,14 @@ from langchain.callbacks.manager import CallbackManager
 from langchain.schema import AgentAction, AgentFinish, LLMResult
 
 #custom libraries that we will use later in the app
-from utils import DocSearchTool, CSVTabularTool, SQLDbTool, ChatGPTTool, BingSearchTool, run_agent
+from utils import DocSearchAgent, CSVTabularAgent, SQLSearchAgent, ChatGPTTool, BingSearchAgent, APISearchAgent, run_agent, reduce_openapi_spec
 from prompts import WELCOME_MESSAGE, CUSTOM_CHATBOT_PREFIX, CUSTOM_CHATBOT_SUFFIX
 
 from botbuilder.core import ActivityHandler, TurnContext
 from botbuilder.schema import ChannelAccount, Activity, ActivityTypes
 
 # Env variables needed by langchain
-os.environ["OPENAI_API_BASE"] = os.environ.get("AZURE_OPENAI_ENDPOINT")
-os.environ["OPENAI_API_KEY"] = os.environ.get("AZURE_OPENAI_API_KEY")
 os.environ["OPENAI_API_VERSION"] = os.environ.get("AZURE_OPENAI_API_VERSION")
-os.environ["OPENAI_API_TYPE"] = "azure"
 
 
 # Callback hanlder used for the bot service to inform the client of the thought process before the final response
@@ -85,22 +84,31 @@ class MyBot(ActivityHandler):
 
         # Initialize our Tools/Experts
         text_indexes = ["cogsrch-index-files", "cogsrch-index-csv"]
-        doc_search = DocSearchTool(llm=llm, indexes=text_indexes,
+        doc_search = DocSearchAgent(llm=llm, indexes=text_indexes,
                            k=10, similarity_k=4, reranker_th=1,
                            sas_token=os.environ['BLOB_SAS_TOKEN'],
                            callback_manager=cb_manager, return_direct=True)
         vector_only_indexes = ["cogsrch-index-books-vector"]
-        book_search = DocSearchTool(llm=llm, vector_only_indexes = vector_only_indexes,
+        book_search = DocSearchAgent(llm=llm, vector_only_indexes = vector_only_indexes,
                            k=10, similarity_k=10, reranker_th=1,
                            sas_token=os.environ['BLOB_SAS_TOKEN'],
                            callback_manager=cb_manager, return_direct=True,
                            name="@booksearch",
                            description="useful when the questions includes the term: @booksearch.\n")
-        www_search = BingSearchTool(llm=llm, k=5, callback_manager=cb_manager, return_direct=True)
-        sql_search = SQLDbTool(llm=llm, k=10, callback_manager=cb_manager, return_direct=True)
+        www_search = BingSearchAgent(llm=llm, k=5, callback_manager=cb_manager, return_direct=True)
+        sql_search = SQLSearchAgent(llm=llm, k=10, callback_manager=cb_manager, return_direct=True)
         chatgpt_search = ChatGPTTool(llm=llm, callback_manager=cb_manager, return_direct=True)
+        
+        url = 'https://disease.sh/apidocs/swagger_v3.json'
+        spec = requests.get(url).json()
 
-        tools = [www_search, sql_search, doc_search, chatgpt_search, book_search]
+        api_search = APISearchAgent(llm=llm,
+                            llm_search=AzureChatOpenAI(deployment_name="gpt-35-turbo-16k", temperature=0, max_tokens=1000),
+                            api_spec=str(reduce_openapi_spec(spec)), 
+                            limit_to_domains=["https://disease.sh/"],
+                            callback_manager=cb_manager, return_direct=True)
+
+        tools = [www_search, sql_search, doc_search, chatgpt_search, book_search, api_search]
 
         # Set brain Agent with persisten memory in CosmosDB
         cosmos = CosmosDBChatMessageHistory(
