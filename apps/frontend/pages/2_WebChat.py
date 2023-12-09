@@ -19,13 +19,16 @@ with st.sidebar:
     st.markdown("""
 
 This Chatbot is hosted in an independent Backend Azure Web App and was created using the Bot Framework SDK.
+The Bot Interface is just a window to a Bot Service app hosted in Azure.
+
 It has access to the following tools/pluggins:
 
 - Bing Search (***use @bing in your question***)
 - ChatGPT for common knowledge (***use @chatgpt in your question***)
-- Azure SQL for covid statistics data (***use @covidstats in your question***)
+- Azure SQL for covid statistics data (***use @sqlsearch in your question***)
 - Azure Search for documents knowledge - Arxiv papers and Covid Articles (***use @docsearch in your question***)
 - Azure Search for books knowledge - 5 PDF books (***use @booksearch in your question***)
+- API Search for real-time covid statistics for US States, Countries and Continents (***use @apisearch in your question***)
 
 Note: If you don't use any of the tool names beginning with @, the bot will try to use it's own knowledge or tool available to answer the question.
 
@@ -35,15 +38,11 @@ Example questions:
 - @bing, What's the main economic news of today?
 - @chatgpt, How do I cook a chocolate cake?
 - @booksearch, what normally rich dad do that is different from poor dad?
-- @docsearch, What medicine reduces inflammation in the lungs?
 - @docsearch, Why Covid doesn't affect kids that much compared to adults?
-- What are markov chains?
-- @covidstats, How many people where hospitalized in Arkansas in June 2020?
+- @apisearch, What is the state with most covid deaths in USA?
+- @sqlsearch, How many people where hospitalized in Arkansas in June 2020?
 - @docsearch, List the authors that talk about Boosting Algorithms
-- @booksearch, Tell me a summary of the book Boundaries
-- @chatgpt, how do I fix this error: aiohttp.web_exceptions.HTTPNotFound: Not Found
 - @bing, what movies are showing tonight in Seattle?
-- @docsearch, What are the main risk factors for Covid-19?
 - Please tell me a joke
     """)
     

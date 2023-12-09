@@ -78,6 +78,7 @@ To open the Bot in MS Teams, click [HERE](https://teams.microsoft.com/l/chat/0/0
    - Tabular Data Q&A with CSV files and SQL flavor Databases
    - Uses [Azure AI Document Intelligence SDK (former Form Recognizer)](https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/overview?view=doc-intel-3.0.0) to parse complex/large PDF documents
    - Uses [Bing Search API](https://www.microsoft.com/en-us/bing/apis) to power internet searches and Q&A over public websites.
+   - Connects to API Data sources by converting natural language questions to API calls.
    - Uses CosmosDB as persistent memory to save user's conversations.
    - Uses [Streamlit](https://streamlit.io/) to build the Frontend web application in python.
    

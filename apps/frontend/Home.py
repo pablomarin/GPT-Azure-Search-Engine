@@ -14,7 +14,7 @@ st.markdown("""
     - ~90k [COVID-19 research articles from the CORD19 dataset](https://github.com/allenai/cord19)
     - [Covid Tracking Project Dataset](https://covidtracking.com/). Azure SQL with information of Covid cases and hospitalizations in the US from 2020-2021.
     - 5 Books: "Azure_Cognitive_Search_Documentation.pdf", "Boundaries_When_to_Say_Yes_How_to_Say_No_to_Take_Control_of_Your_Life.pdf", "Fundamentals_of_Physics_Textbook.pdf", "Made_To_Stick.pdf", "Pere_Riche_Pere_Pauvre.pdf" (French version of Rich Dad Poor Dad).
-    - The Bot Interface is just a window to a Bot Service app hosted in Azure. 
+    - [Open Disease Data API](https://disease.sh/). This API provides a big range of detailed information about multiple viruses. From COVID19 global data overviews to city/region specific mobility data, and data on the current outbreak of Influenza. We also provide official government data for some countries. 
     
     **👈 Select a demo from the sidebar** to see an example of a Search Interface, and a Bot Interface.
 
