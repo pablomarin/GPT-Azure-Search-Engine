@@ -44,16 +44,15 @@ The repo is made to teach you step-by-step on how to build a OpenAI-based Smart 
 ## Flow
 1. The user asks a question.
 2. In the app, an OpenAI GPT-4 LLM uses a clever prompt to determine which source to use based on the user input
-3. Four types of sources are available:
+3. Five types of sources are available:
    * 3a. Azure SQL Database - contains COVID-related statistics in the US.
-   * 3b. Azure Bing Search API - provides access to the internet allowing scenerios like: QnA on public websites .
-   * 3c. Azure Cognitive Search - contains AI-enriched documents from Blob Storage (10k PDFs and 90k articles).
-      * 3c.1. Uses OpenAI to vectorize the top K document chunks
-      * 3c.2. Fills up the vector-based indexes on-demand.
-      * 3c.3. Gets the Top N Chunks by doing a vector search on vector-based indexes.
-   * 3d. CSV Tabular File - contains COVID-related statistics in the US.
+   * 3b. API Endpoints - RESTful OpenAPI 3.0 API containing up-to-date statistics about Covid.
+   * 3c. Azure Bing Search API - provides access to the internet allowing scenerios like: QnA on public websites .
+   * 3d. Azure AI Text Search - contains AI-enriched documents from Blob Storage (10k PDFs and 90k articles).
+   * 3e. Azure AI Vector Search - contains 5 lenghty PDF books vectorized per page.
+   * 3f. CSV Tabular File - contains COVID-related statistics in the US.
 4. The app retrieves the result from the source and crafts the answer.
-5. The tuple (Question and Answer) is saved to CosmosDB to keep a record of the interaction and further analysis.
+5. The tuple (Question and Answer) is saved to CosmosDB as persistent memory and for further analysis.
 6. The answer is delivered to the user.
 
 ---
