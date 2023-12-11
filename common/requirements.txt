@@ -15,3 +15,5 @@ azure-cosmos
 streamlit
 python-dotenv
 azure-ai-formrecognizer
+azure-storage-blob
+rarfile
