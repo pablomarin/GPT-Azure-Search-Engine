@@ -5,10 +5,9 @@ import re
 import time
 import random
 from collections import OrderedDict
-from openai.error import OpenAIError
 from langchain.docstore.document import Document
 from langchain.chat_models import AzureChatOpenAI
-from langchain.embeddings import OpenAIEmbeddings
+from langchain.embeddings import AzureOpenAIEmbeddings
 from utils import (
         get_search_results,
         update_vector_indexes,
@@ -78,14 +77,11 @@ elif (not os.environ.get("BLOB_SAS_TOKEN")) or (os.environ.get("BLOB_SAS_TOKEN")
     st.error("Please set your BLOB_SAS_TOKEN on your Web App Settings")
 
 else: 
-    os.environ["OPENAI_API_BASE"] = os.environ.get("AZURE_OPENAI_ENDPOINT")
-    os.environ["OPENAI_API_KEY"] = os.environ.get("AZURE_OPENAI_API_KEY")
     os.environ["OPENAI_API_VERSION"] = os.environ["AZURE_OPENAI_API_VERSION"]
-    os.environ["OPENAI_API_TYPE"] = "azure"
     
     MODEL = os.environ.get("AZURE_OPENAI_MODEL_NAME")
     llm = AzureChatOpenAI(deployment_name=MODEL, temperature=0.5, max_tokens=1000)
-    embedder = OpenAIEmbeddings(deployment="text-embedding-ada-002", chunk_size=1) 
+    embedder = AzureOpenAIEmbeddings(model="text-embedding-ada-002", skip_empty=True)  
                            
     if button or st.session_state.get("submit"):
         if not query:
@@ -162,5 +158,5 @@ else:
                                 st.markdown(value["caption"])
                                 st.markdown("---")
 
-                except OpenAIError as e:
+                except Exception as e:
                     st.error(e)
