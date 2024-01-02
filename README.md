@@ -57,10 +57,10 @@ The repo is made to teach you step-by-step on how to build a OpenAI-based Smart 
 
 ---
 ## Demo
+> :warning: **Warning:** Due to the high popularity of this repository, the site is temporarily down. We are currently seeking additional funding for the Azure Subscription to accommodate the increased traffic.
 
 https://gptsmartsearch.azurewebsites.net/
 
-To open the Bot in MS Teams, click [HERE](https://teams.microsoft.com/l/chat/0/0?users=28:5d583679-8196-4673-9d77-c294c010bca5)
 
 ---
 
