@@ -1,6 +1,10 @@
-langchain==0.0.347
-langchain-experimental==0.0.44
-openai==1.3.7
+openai
+langchain
+langchain-openai
+langchain-community
+langchain-experimental
+langserve[all]
+langchain-cli
 botbuilder-integration-aiohttp>=4.14.4
 faiss-cpu
 tiktoken
@@ -8,7 +12,7 @@ docx2txt
 pillow
 pypdf
 tenacity
-sqlalchemy<2.0.0
+sqlalchemy
 pyodbc
 tabulate
 azure-cosmos
@@ -16,4 +20,5 @@ streamlit
 python-dotenv
 azure-ai-formrecognizer
 azure-storage-blob
-rarfile
+grandalf
+beautifulsoup4
