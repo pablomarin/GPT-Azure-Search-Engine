@@ -7,19 +7,30 @@ import random
 import requests
 import json
 from concurrent.futures import ThreadPoolExecutor
-from langchain.chat_models import AzureChatOpenAI
+from langchain_openai import AzureChatOpenAI
 from langchain.utilities import BingSearchAPIWrapper
-from langchain.memory import ConversationBufferWindowMemory
 from langchain.memory import CosmosDBChatMessageHistory
+from langchain.agents import AgentExecutor, create_openai_tools_agent
+from langchain_core.runnables import ConfigurableField, ConfigurableFieldSpec
+from langchain_core.chat_history import BaseChatMessageHistory
+from langchain_community.chat_message_histories import ChatMessageHistory, CosmosDBChatMessageHistory
 from langchain.agents import ConversationalChatAgent, AgentExecutor, Tool
 from typing import Any, Dict, List, Optional, Union
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain.callbacks.manager import CallbackManager
 from langchain.schema import AgentAction, AgentFinish, LLMResult
+from langchain_community.chat_message_histories import ChatMessageHistory
+from langchain_core.runnables.history import RunnableWithMessageHistory
 
 #custom libraries that we will use later in the app
-from utils import DocSearchAgent, CSVTabularAgent, SQLSearchAgent, ChatGPTTool, BingSearchAgent, APISearchAgent, run_agent, reduce_openapi_spec
-from prompts import WELCOME_MESSAGE, CUSTOM_CHATBOT_PREFIX, CUSTOM_CHATBOT_SUFFIX
+from utils import (
+    DocSearchAgent, 
+    CSVTabularAgent, 
+    SQLSearchAgent, 
+    ChatGPTTool, 
+    BingSearchAgent
+)
+from prompts import CUSTOM_CHATBOT_PROMPT, WELCOME_MESSAGE
 
 from botbuilder.core import ActivityHandler, TurnContext
 from botbuilder.schema import ChannelAccount, Activity, ActivityTypes
@@ -53,6 +64,20 @@ class MyBot(ActivityHandler):
     
     def __init__(self):
         self.model_name = os.environ.get("AZURE_OPENAI_MODEL_NAME") 
+        
+    def get_session_history(self, session_id: str, user_id: str) -> CosmosDBChatMessageHistory:
+        cosmos = CosmosDBChatMessageHistory(
+            cosmos_endpoint=os.environ['AZURE_COSMOSDB_ENDPOINT'],
+            cosmos_database=os.environ['AZURE_COSMOSDB_NAME'],
+            cosmos_container=os.environ['AZURE_COSMOSDB_CONTAINER_NAME'],
+            connection_string=os.environ['AZURE_COMOSDB_CONNECTION_STRING'],
+            session_id=session_id,
+            user_id=user_id
+            )
+
+        # prepare the cosmosdb instance
+        cosmos.prepare_cosmos()
+        return cosmos
     
     # Function to show welcome message to new users
     async def on_members_added_activity(self, members_added: ChannelAccount, turn_context: TurnContext):
@@ -67,6 +92,7 @@ class MyBot(ActivityHandler):
         # Extract info from TurnContext - You can change this to whatever , this is just one option 
         session_id = turn_context.activity.conversation.id
         user_id = turn_context.activity.from_property.id + "-" + turn_context.activity.channel_id
+        
         input_text_metadata = dict()
         input_text_metadata["local_timestamp"] = turn_context.activity.local_timestamp.strftime("%I:%M:%S %p, %A, %B %d of %Y")
         input_text_metadata["local_timezone"] = turn_context.activity.local_timezone
@@ -80,55 +106,55 @@ class MyBot(ActivityHandler):
         cb_manager = CallbackManager(handlers=[cb_handler])
 
         # Set LLM 
-        llm = AzureChatOpenAI(deployment_name=self.model_name, temperature=0.5, max_tokens=1000, callback_manager=cb_manager)
+        llm = AzureChatOpenAI(deployment_name=self.model_name, temperature=0.5, 
+                              max_tokens=1500, callback_manager=cb_manager, streaming=True)
 
         # Initialize our Tools/Experts
-        text_indexes = ["cogsrch-index-files", "cogsrch-index-csv"]
-        doc_search = DocSearchAgent(llm=llm, indexes=text_indexes,
-                           k=10, similarity_k=4, reranker_th=1,
-                           sas_token=os.environ['BLOB_SAS_TOKEN'],
-                           callback_manager=cb_manager, return_direct=True)
-        vector_only_indexes = ["cogsrch-index-books-vector"]
-        book_search = DocSearchAgent(llm=llm, vector_only_indexes = vector_only_indexes,
-                           k=10, similarity_k=10, reranker_th=1,
-                           sas_token=os.environ['BLOB_SAS_TOKEN'],
-                           callback_manager=cb_manager, return_direct=True,
-                           name="@booksearch",
-                           description="useful when the questions includes the term: @booksearch.\n")
-        www_search = BingSearchAgent(llm=llm, k=5, callback_manager=cb_manager, return_direct=True)
-        sql_search = SQLSearchAgent(llm=llm, k=10, callback_manager=cb_manager, return_direct=True)
-        chatgpt_search = ChatGPTTool(llm=llm, callback_manager=cb_manager, return_direct=True)
+        indexes = ["cogsrch-index-files", "cogsrch-index-csv", "cogsrch-index-books"]
         
-        url = 'https://disease.sh/apidocs/swagger_v3.json'
-        spec = requests.get(url).json()
-
-        api_search = APISearchAgent(llm=llm,
-                            llm_search=AzureChatOpenAI(deployment_name="gpt-35-turbo-16k", temperature=0, max_tokens=1000),
-                            api_spec=str(reduce_openapi_spec(spec)), 
-                            limit_to_domains=["https://disease.sh/"],
-                            callback_manager=cb_manager, return_direct=True)
-
-        tools = [www_search, sql_search, doc_search, chatgpt_search, book_search, api_search]
-
-        # Set brain Agent with persisten memory in CosmosDB
-        cosmos = CosmosDBChatMessageHistory(
-                        cosmos_endpoint=os.environ['AZURE_COSMOSDB_ENDPOINT'],
-                        cosmos_database=os.environ['AZURE_COSMOSDB_NAME'],
-                        cosmos_container=os.environ['AZURE_COSMOSDB_CONTAINER_NAME'],
-                        connection_string=os.environ['AZURE_COMOSDB_CONNECTION_STRING'],
-                        session_id=session_id,
-                        user_id=user_id
-                    )
-        cosmos.prepare_cosmos()
-        memory = ConversationBufferWindowMemory(memory_key="chat_history", return_messages=True, k=30, chat_memory=cosmos)
-        agent = ConversationalChatAgent.from_llm_and_tools(llm=llm, tools=tools,system_message=CUSTOM_CHATBOT_PREFIX,human_message=CUSTOM_CHATBOT_SUFFIX)
-        agent_chain = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, memory=memory, handle_parsing_errors=True)
+        doc_search = DocSearchAgent(llm=llm, indexes=text_indexes,
+                           k=6, reranker_th=1,
+                           sas_token=os.environ['BLOB_SAS_TOKEN'],
+                           callback_manager=cb_manager, verbose=False)
+        
+        www_search = BingSearchAgent(llm=llm, k=5, callback_manager=cb_manager)
+        sql_search = SQLSearchAgent(llm=llm, k=30, callback_manager=cb_manager)
+        chatgpt_search = ChatGPTTool(llm=llm, callback_manager=cb_manager)
+        
+        tools = [doc_search, www_search, sql_search, chatgpt_search]
+        
+        agent = create_openai_tools_agent(llm, tools, CUSTOM_CHATBOT_PROMPT)
+        agent_executor = AgentExecutor(agent=agent, tools=tools)
+        brain_agent_executor = RunnableWithMessageHistory(
+            agent_executor,
+            get_session_history,
+            input_messages_key="question",
+            history_messages_key="history",
+            history_factory_config=[
+                ConfigurableFieldSpec(
+                    id="user_id",
+                    annotation=str,
+                    name="User ID",
+                    description="Unique identifier for the user.",
+                    default="",
+                    is_shared=True,
+                ),
+                ConfigurableFieldSpec(
+                    id="session_id",
+                    annotation=str,
+                    name="Session ID",
+                    description="Unique identifier for the conversation.",
+                    default="",
+                    is_shared=True,
+                ),
+            ],
+        )
 
         await turn_context.send_activity(Activity(type=ActivityTypes.typing))
         
         # Please note below that running a non-async function like run_agent in a separate thread won't make it truly asynchronous. It allows the function to be called without blocking the event loop, but it may still have synchronous behavior internally.
         loop = asyncio.get_event_loop()
-        answer = await loop.run_in_executor(ThreadPoolExecutor(), run_agent, input_text, agent_chain)
+        answer = brain_agent_executor.invoke({"question": input_text}, config=config)["output"]
         
         await turn_context.send_activity(answer)
 

@@ -1,6 +1,6 @@
 ![image](https://user-images.githubusercontent.com/113465005/226238596-cc76039e-67c2-46b6-b0bb-35d037ae66e1.png)
 
-# 3 or 5 days POC VBD powered by: Azure Search + Azure OpenAI + Bot Framework + Langchain + Azure SQL + CosmosDB + Bing Search API
+# 3 or 5 days POC VBD powered by: Azure AI Search + Azure OpenAI + Bot Framework + Langchain + Azure SQL + CosmosDB + Bing Search API + Document Intelligence SDK
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/MSUSAzureAccelerators/Azure-Cognitive-Search-Azure-OpenAI-Accelerator?quickstart=1)
 [![Open in VS Code Dev Containers](https://img.shields.io/static/v1?style=for-the-badge&label=Remote%20-%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/MSUSAzureAccelerators/Azure-Cognitive-Search-Azure-OpenAI-Accelerator)
 
@@ -33,7 +33,8 @@ The repo is made to teach you step-by-step on how to build a OpenAI-based Smart 
 * The customer team and the Microsoft team must have Contributor permissions to this resource group so they can set everything up 2 weeks prior to the workshop
 * A storage account must be set in place in the RG.
 * Customer Data/Documents must be uploaded to the blob storage account, at least two weeks prior to the workshop date
-* Multi-Tenant App Registration (Service Principal).
+* A Multi-Tenant App Registration (Service Principal) must be created by the customer (save the Client Id and Secret Value).
+* Customer must provide the Microsoft Team , 10-20 questions (easy to hard) that they want the bot to respond correctly.
 * For IDE collaboration and standarization during workshop, AML compute instances with Jupyper Lab will be used, for this, Azure Machine Learning Workspace must be deployed in the RG
    * Note: Please ensure you have enough core compute quota in your Azure Machine Learning workspace 
 
@@ -48,9 +49,12 @@ The repo is made to teach you step-by-step on how to build a OpenAI-based Smart 
    * 3a. Azure SQL Database - contains COVID-related statistics in the US.
    * 3b. API Endpoints - RESTful OpenAPI 3.0 API containing up-to-date statistics about Covid.
    * 3c. Azure Bing Search API - provides access to the internet allowing scenerios like: QnA on public websites .
-   * 3d. Azure AI Text Search - contains AI-enriched documents from Blob Storage (10k PDFs and 90k articles).
-   * 3e. Azure AI Vector Search - contains 5 lenghty PDF books vectorized per page.
+   * 3d. Azure AI Search - contains AI-enriched documents from Blob Storage:
+       - 10,000 Arxiv Computer Science PDFs  
+       - 90,000 Covid publication abstracts
+       - 5 lenghty PDF books
    * 3f. CSV Tabular File - contains COVID-related statistics in the US.
+   * 3g. Kraken broker API for currencies
 4. The app retrieves the result from the source and crafts the answer.
 5. The tuple (Question and Answer) is saved to CosmosDB as persistent memory and for further analysis.
 6. The answer is delivered to the user.
@@ -68,9 +72,8 @@ https://gptsmartsearch.azurewebsites.net/
 
    - Uses [Bot Framework](https://dev.botframework.com/) and [Bot Service](https://azure.microsoft.com/en-us/products/bot-services/) to Host the Bot API Backend and to expose it to multiple channels including MS Teams.
    - 100% Python.
-   - Uses [Azure Cognitive Services](https://azure.microsoft.com/en-us/products/cognitive-services/) to index and enrich unstructured documents: Detect Language, OCR images, Key-phrases extraction, entity recognition (persons, emails, addresses, organizations, urls).
-   - Uses Vector Search Capabilities of Azure Cognitive Search to provide the best semantic answer.
-   - Creates vectors on-demand as users interact with the system. (versus vectorizing the whole datalake at the beginning)
+   - Uses [Azure Cognitive Services](https://azure.microsoft.com/en-us/products/cognitive-services/) to index and enrich unstructured documents: OCR over images, Chunking and automated vectorization.
+   - Uses Hybrid Search Capabilities of Azure AI Search to provide the best semantic answer (Text and Vector search combined).
    - Uses [LangChain](https://langchain.readthedocs.io/en/latest/) as a wrapper for interacting with Azure OpenAI , vector stores, constructing prompts and creating agents.
    - Multi-Lingual (ingests, indexes and understand any language)
    - Multi-Index -> multiple search indexes
@@ -89,14 +92,12 @@ https://gptsmartsearch.azurewebsites.net/
 Note: (Pre-requisite) You need to have an Azure OpenAI service already created
 
 1. Fork this repo to your Github account.
-2. In Azure OpenAI studio, deploy these models: **Make sure that the deployment name is the same as the model name.**
-   - "gpt-35-turbo"
-   - "gpt-35-turbo-16k"
-   - "gpt-4"
-   - "gpt-4-32k"
-   - "text-embedding-ada-002"
+2. In Azure OpenAI studio, deploy these models (older models than the ones stated below won't work):
+   - "gpt-35-turbo-1106 (or newer)" 
+   - "gpt-4-turbo-1106  (or newer)"
+   - "text-embedding-ada-002 (or newer)"
 3. Create a Resource Group where all the assets of this accelerator are going to be. Azure OpenAI can be in different RG or a different Subscription.
-4. ClICK BELOW to create all the Azure Infrastructure needed to run the Notebooks (Azure Cognitive Search, Cognitive Services, etc):
+4. ClICK BELOW to create all the Azure Infrastructure needed to run the Notebooks (Azure AI Search, Cognitive Services, etc):
 
 [![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fpablomarin%2FGPT-Azure-Search-Engine%2Fmain%2Fazuredeploy.json) 
 
@@ -104,7 +105,7 @@ Note: (Pre-requisite) You need to have an Azure OpenAI service already created
 
 5. Clone your Forked repo to your AML Compute Instance. If your repo is private, see below in Troubleshooting section how to clone a private repo.
 
-6. Make sure you run the notebooks on a **Python 3.10 conda enviroment**
+6. Make sure you run the notebooks on a **Python 3.10 conda enviroment** or newer
 7. Install the dependencies on your machine (make sure you do the below pip comand on the same conda environment that you are going to run the notebooks. For example, in AZML compute instance run:
 ```
 conda activate azureml_py310_sdkv2
@@ -124,7 +125,7 @@ You might get some pip dependancies errors, but that is ok, the libraries were i
   
 ## **FAQs**
 
-1. **Why use Azure Cognitive Search engine to provide the context for the LLM and not fine tune the LLM instead?**
+1. **Why use Azure AI Search engine to provide the context for the LLM and not fine tune the LLM instead?**
 
 A: Quoting the [OpenAI documentation](https://platform.openai.com/docs/guides/fine-tuning): "GPT-3 has been pre-trained on a vast amount of text from the open internet. When given a prompt with just a few examples, it can often intuit what task you are trying to perform and generate a plausible completion. This is often called "few-shot learning.
 Fine-tuning improves on few-shot learning by training on many more examples than can fit in the prompt, letting you achieve better results on a wide number of tasks. Once a model has been fine-tuned, you won't need to provide examples in the prompt anymore. This **saves costs and enables lower-latency requests**"
