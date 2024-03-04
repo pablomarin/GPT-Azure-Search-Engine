@@ -1,8 +1,9 @@
-openai
-langchain
-langchain-openai
-langchain-community
-langchain-experimental
+openai==1.13.3
+langchain==0.1.9
+langchain-core==0.1.27
+langchain-openai==0.0.8
+langchain-community==0.0.24
+langchain-experimental==0.0.53
 langserve[all]
 langchain-cli
 botbuilder-integration-aiohttp>=4.14.4
