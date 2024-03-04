@@ -7,19 +7,18 @@ import random
 import requests
 import json
 from concurrent.futures import ThreadPoolExecutor
+from typing import Any, Dict, List, Optional, Union
+
 from langchain_openai import AzureChatOpenAI
-from langchain.utilities import BingSearchAPIWrapper
-from langchain.memory import CosmosDBChatMessageHistory
+from langchain_community.utilities import BingSearchAPIWrapper
 from langchain.agents import AgentExecutor, create_openai_tools_agent
 from langchain_core.runnables import ConfigurableField, ConfigurableFieldSpec
 from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_community.chat_message_histories import ChatMessageHistory, CosmosDBChatMessageHistory
 from langchain.agents import ConversationalChatAgent, AgentExecutor, Tool
-from typing import Any, Dict, List, Optional, Union
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain.callbacks.manager import CallbackManager
 from langchain.schema import AgentAction, AgentFinish, LLMResult
-from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain_core.runnables.history import RunnableWithMessageHistory
 
 #custom libraries that we will use later in the app
@@ -46,17 +45,15 @@ class BotServiceCallbackHandler(BaseCallbackHandler):
     def __init__(self, turn_context: TurnContext) -> None:
         self.tc = turn_context
 
-    def on_llm_error(self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any) -> Any:
-        asyncio.run(self.tc.send_activity(f"LLM Error: {error}\n"))
+    async def on_llm_error(self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any) -> Any:
+        await self.tc.send_activity(f"LLM Error: {error}\n")
 
-    def on_tool_start(self, serialized: Dict[str, Any], input_str: str, **kwargs: Any) -> Any:
-        asyncio.run(self.tc.send_activity(f"Tool: {serialized['name']}"))
+    async def on_tool_start(self, serialized: Dict[str, Any], input_str: str, **kwargs: Any) -> Any:
+        await self.tc.send_activity(f"Tool: {serialized['name']}")
 
-    def on_agent_action(self, action: AgentAction, **kwargs: Any) -> Any:
-        if "Action Input" in action.log:
-            action = action.log.split("Action Input:")[1]
-            asyncio.run(self.tc.send_activity(f"\u2611 Searching: {action} ..."))
-            asyncio.run(self.tc.send_activity(Activity(type=ActivityTypes.typing)))
+    async def on_agent_action(self, action: AgentAction, **kwargs: Any) -> Any:
+        await self.tc.send_activity(f"\u2611{action.log} ...")
+        await self.tc.send_activity(Activity(type=ActivityTypes.typing))
 
             
 # Bot Class
@@ -110,9 +107,16 @@ class MyBot(ActivityHandler):
                               max_tokens=1500, callback_manager=cb_manager, streaming=True)
 
         # Initialize our Tools/Experts
-        indexes = ["cogsrch-index-files", "cogsrch-index-csv", "cogsrch-index-books"]
+        doc_indexes = ["cogsrch-index-files", "cogsrch-index-csv", "cogsrch-index-books"]
         
-        doc_search = DocSearchAgent(llm=llm, indexes=text_indexes,
+        doc_search = DocSearchAgent(llm=llm, indexes=doc_indexes,
+                           k=6, reranker_th=1,
+                           sas_token=os.environ['BLOB_SAS_TOKEN'],
+                           callback_manager=cb_manager, verbose=False)
+        
+        book_indexes = ["cogsrch-index-books"]
+        
+        book_search = DocSearchAgent(llm=llm, indexes=book_indexes,
                            k=6, reranker_th=1,
                            sas_token=os.environ['BLOB_SAS_TOKEN'],
                            callback_manager=cb_manager, verbose=False)
@@ -127,7 +131,7 @@ class MyBot(ActivityHandler):
         agent_executor = AgentExecutor(agent=agent, tools=tools)
         brain_agent_executor = RunnableWithMessageHistory(
             agent_executor,
-            get_session_history,
+            self.get_session_history,
             input_messages_key="question",
             history_messages_key="history",
             history_factory_config=[
@@ -149,11 +153,12 @@ class MyBot(ActivityHandler):
                 ),
             ],
         )
+        
+        config={"configurable": {"session_id": session_id, "user_id": user_id}}
 
         await turn_context.send_activity(Activity(type=ActivityTypes.typing))
         
         # Please note below that running a non-async function like run_agent in a separate thread won't make it truly asynchronous. It allows the function to be called without blocking the event loop, but it may still have synchronous behavior internally.
-        loop = asyncio.get_event_loop()
         answer = brain_agent_executor.invoke({"question": input_text}, config=config)["output"]
         
         await turn_context.send_activity(answer)

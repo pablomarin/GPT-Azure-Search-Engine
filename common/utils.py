@@ -35,7 +35,7 @@ from langchain.tools import BaseTool, StructuredTool, tool
 from langchain.prompts import PromptTemplate
 from langchain.sql_database import SQLDatabase
 from langchain.agents import AgentExecutor, initialize_agent, AgentType, Tool
-from langchain.utilities import BingSearchAPIWrapper
+from langchain_community.utilities import BingSearchAPIWrapper
 from langchain.agents import create_sql_agent, create_openai_tools_agent
 from langchain_community.agent_toolkits import create_sql_agent
 from langchain_community.agent_toolkits import SQLDatabaseToolkit
