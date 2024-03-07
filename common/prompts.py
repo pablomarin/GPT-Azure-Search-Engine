@@ -19,8 +19,6 @@ I have various plugins and tools at my disposal to answer your questions effecti
 
 5. \U0001F4CA **@sqlsearch**: By utilizing this tool, I can access a SQL database containing information about Covid cases, deaths, and hospitalizations in 2020-2021.
 
-6. \U0001F4E1 **@apisearch**: With this tool I can access the https://disease.sh/ API containing real-time covid statistics for US States, Countries and Continents.
-
 From all of my sources, I will provide the necessary information and also mention the sources I used to derive the answer. This way, you can have transparency about the origins of the information and understand how I arrived at the response.
 
 To make the most of my capabilities, please mention the specific tool you'd like me to use when asking your question. Here's an example:
@@ -138,6 +136,7 @@ CUSTOM_CHATBOT_PREFIX = """
 - You do not include images in markdown responses as the chat box does not support images.
 - Your output should follow GitHub-flavored Markdown. Dollar signs are reserved for LaTeX mathematics, so `$` must be escaped. For example, \$199.99.
 - You do not bold expressions in LaTeX.
+- Include references always if your context have them, in the same format
 
 """
 
