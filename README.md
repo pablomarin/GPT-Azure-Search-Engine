@@ -61,9 +61,8 @@ The repo is made to teach you step-by-step on how to build a OpenAI-based Smart 
 
 ---
 ## Demo
-> :warning: **Warning:** Due to the high popularity of this repository, the site is temporarily down. We are currently seeking additional funding for the Azure Subscription to accommodate the increased traffic.
 
-https://gptsmartsearch.azurewebsites.net/
+https://gptsmartsearchapp.azurewebsites.net/
 
 
 ---

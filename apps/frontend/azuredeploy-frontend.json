@@ -70,7 +70,7 @@
     },
     "azureSearchAPIVersion": {
       "type": "string",
-      "defaultValue": "2023-07-01-Preview",
+      "defaultValue": "2023-10-01-preview",
       "metadata": {
         "description": "Optional. The API version of the Azure Search."
       }
@@ -89,14 +89,14 @@
     },
     "azureOpenAIModelName": {
       "type": "string",
-      "defaultValue": "gpt-4-32k",
+      "defaultValue": "gpt-35-turbo-1106",
       "metadata": {
         "description": "Optional. The model name of the Azure OpenAI."
       }
     },
     "azureOpenAIAPIVersion": {
       "type": "string",
-      "defaultValue": "2023-05-15",
+      "defaultValue": "2023-12-01-preview",
       "metadata": {
         "description": "Optional. The API version of the Azure OpenAI."
       }

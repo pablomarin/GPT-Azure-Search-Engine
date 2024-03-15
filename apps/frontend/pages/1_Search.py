@@ -4,9 +4,11 @@ import os
 import re
 import time
 import random
+from operator import itemgetter
 from collections import OrderedDict
 from langchain_core.documents import Document
 from langchain_openai import AzureChatOpenAI
+from langchain_core.output_parsers import StrOutputParser
 
 from utils import get_search_results
 from prompts import DOCSEARCH_PROMPT
@@ -70,7 +72,7 @@ else:
     os.environ["OPENAI_API_VERSION"] = os.environ["AZURE_OPENAI_API_VERSION"]
     
     MODEL = os.environ.get("AZURE_OPENAI_MODEL_NAME")
-    llm = AzureChatOpenAI(deployment_name=MODEL, temperature=0.5, max_tokens=1000)
+    llm = AzureChatOpenAI(deployment_name=MODEL, temperature=0.5, max_tokens=1500)
                            
     if button or st.session_state.get("submit"):
         if not query:
@@ -103,16 +105,12 @@ else:
                         with st.spinner(add_text):
                             if(len(top_docs)>0):
                                 chain = (
-                                    {
-                                        "context": top_docs,
-                                        "question": itemgetter("question")
-                                    }
-                                    | DOCSEARCH_PROMPT  # Passes the 4 variables above to the prompt template
+                                    DOCSEARCH_PROMPT  # Passes the 4 variables above to the prompt template
                                     | llm   # Passes the finished prompt to the LLM
                                     | StrOutputParser()  # converts the output (Runnable object) to the desired output (string)
                                 )
     
-                                answer = chain.invoke({"question": query})
+                                answer = chain.invoke({"question": query, "context":top_docs})
                                 
                             else:
                                 answer = {"output_text":"No results found" }
@@ -123,7 +121,7 @@ else:
                     with placeholder.container():
 
                         st.markdown("#### Answer")
-                        st.markdown(answer["output_text"], unsafe_allow_html=True)
+                        st.markdown(answer, unsafe_allow_html=True)
                         st.markdown("---")
                         st.markdown("#### Search Results")
 
