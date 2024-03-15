@@ -1,13 +1,12 @@
-openai==1.13.3
-langchain==0.1.9
-langchain-core==0.1.27
-langchain-openai==0.0.8
-langchain-community==0.0.24
-langchain-experimental==0.0.53
+openai
+langchain
+langchain-openai
+langchain-community
+langchain-experimental
+langgraph
 langserve[all]
 langchain-cli
 botbuilder-integration-aiohttp>=4.14.4
-faiss-cpu
 tiktoken
 docx2txt
 pillow
@@ -21,5 +20,4 @@ streamlit
 python-dotenv
 azure-ai-formrecognizer
 azure-storage-blob
-grandalf
 beautifulsoup4

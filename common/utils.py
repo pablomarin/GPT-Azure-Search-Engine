@@ -322,6 +322,7 @@ class CustomAzureSearchRetriever(BaseRetriever):
     ) -> List[Document]:
         
         ordered_results = get_search_results(query, self.indexes, k=self.topK, reranker_threshold=self.reranker_threshold, sas_token=self.sas_token)
+        
         top_docs = []
         for key,value in ordered_results.items():
             location = value["location"] if value["location"] is not None else ""
@@ -332,8 +333,7 @@ class CustomAzureSearchRetriever(BaseRetriever):
     
 def get_answer(llm: AzureChatOpenAI,
                retriever: CustomAzureSearchRetriever, 
-               query: str, 
-               language: str, 
+               query: str,
                memory: ConversationBufferMemory = None
               ) -> Dict[str, Any]:
     
@@ -341,20 +341,17 @@ def get_answer(llm: AzureChatOpenAI,
 
     # Get the answer
         
-    prompt = COMBINE_PROMPT
-
     chain = (
         {
-            "context": itemgetter("question") | retriever, 
-            "question": itemgetter("question"),
-            "language": itemgetter("language")
+            "context": itemgetter("question") | retriever, # Passes the question to the retriever and the results are assign to context
+            "question": itemgetter("question")
         }
-        | prompt
-        | llm
-        | StrOutputParser()
+        | DOCSEARCH_PROMPT  # Passes the 4 variables above to the prompt template
+        | llm   # Passes the finished prompt to the LLM
+        | StrOutputParser()  # converts the output (Runnable object) to the desired output (string)
     )
     
-    answer = chain.invoke({"question": query, "language": language})
+    answer = chain.invoke({"question": query})
 
     return answer
 
@@ -406,6 +403,7 @@ class DocSearchAgent(BaseTool):
     
     name = "docsearch"
     description = "useful when the questions includes the term: docsearch.\n"
+    args_schema: Type[BaseModel] = SearchInput
 
     llm: AzureChatOpenAI
     indexes: List[str] = []
@@ -413,7 +411,7 @@ class DocSearchAgent(BaseTool):
     reranker_th: int = 1
     sas_token: str = ""   
     
-    def _run(self, tool_input: Union[str, Dict], run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
+    def _run(self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
         try:
             tools = [GetDocSearchResults_Tool(indexes=self.indexes, k=self.k, reranker_th=self.reranker_th, sas_token=self.sas_token)]
 
@@ -421,9 +419,7 @@ class DocSearchAgent(BaseTool):
 
             agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=False, callback_manager=self.callbacks, handle_parsing_errors=True)
 
-            parsed_input = self._parse_input(tool_input)
-
-            response = agent_executor.invoke({"question":parsed_input})['output']
+            response = agent_executor.invoke({"question":query})['output']
             
             return response
 
@@ -441,6 +437,7 @@ class CSVTabularAgent(BaseTool):
     
     name = "csvfile"
     description = "useful when the questions includes the term: csvfile.\n"
+    args_schema: Type[BaseModel] = SearchInput
 
     path: str
     llm: AzureChatOpenAI
@@ -472,6 +469,7 @@ class SQLSearchAgent(BaseTool):
     
     name = "sqlsearch"
     description = "useful when the questions includes the term: sqlsearch.\n"
+    args_schema: Type[BaseModel] = SearchInput
 
     llm: AzureChatOpenAI
     k: int = 30
@@ -523,7 +521,8 @@ class ChatGPTTool(BaseTool):
     """Tool for a ChatGPT clone"""
     
     name = "chatgpt"
-    description = "useful when the questions includes the term: chatgpt.\n"
+    description = "default tool for general questions, profile or greeting like questions.\n"
+    args_schema: Type[BaseModel] = SearchInput
 
     llm: AzureChatOpenAI
     
@@ -542,7 +541,7 @@ class ChatGPTTool(BaseTool):
         except Exception as e:
             print(e)
             
-    async def _arun(self, query: str) -> str:
+    async def _arun(self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
         """Use the tool asynchronously."""
         raise NotImplementedError("ChatGPTTool does not support async")
         
@@ -553,6 +552,7 @@ class GetBingSearchResults_Tool(BaseTool):
 
     name = "Searcher"
     description = "useful to search the internet.\n"
+    args_schema: Type[BaseModel] = SearchInput
 
     k: int = 5
     
@@ -578,6 +578,7 @@ class BingSearchAgent(BaseTool):
     
     name = "bing"
     description = "useful when the questions includes the term: bing.\n"
+    args_schema: Type[BaseModel] = SearchInput
     
     llm: AzureChatOpenAI
     k: int = 5
@@ -593,7 +594,7 @@ class BingSearchAgent(BaseTool):
         return self.parse_html(response.content)
 
 
-    def _run(self, tool_input: Union[str, Dict],) -> str:
+    def _run(self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
         try:
             
             web_fetch_tool = Tool.from_function(
@@ -611,7 +612,7 @@ class BingSearchAgent(BaseTool):
                                             verbose=self.verbose,
                                             handle_parsing_errors=True)
 
-            parsed_input = self._parse_input(tool_input)
+            parsed_input = self._parse_input(query)
             response = agent_executor.invoke({"question":parsed_input})['output']
 
             return response
@@ -619,7 +620,7 @@ class BingSearchAgent(BaseTool):
         except Exception as e:
             print(e)
     
-    async def _arun(self, query: str) -> str:
+    async def _arun(self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
         """Use the tool asynchronously."""
         raise NotImplementedError("BingSearchTool does not support async")
         
@@ -630,6 +631,7 @@ class GetAPISearchResults_Tool(BaseTool):
     
     name = "apisearch"
     description = "useful when the questions includes the term: apisearch.\n"
+    args_schema: Type[BaseModel] = SearchInput
 
     llm: AzureChatOpenAI
     api_spec: str
@@ -637,7 +639,7 @@ class GetAPISearchResults_Tool(BaseTool):
     limit_to_domains: list = []
     verbose: bool = False
     
-    def _run(self, query: str) -> str:
+    def _run(self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
         
         chain = APIChain.from_llm_and_api_docs(
                             llm=self.llm,
@@ -654,7 +656,7 @@ class GetAPISearchResults_Tool(BaseTool):
         
         return response
             
-    async def _arun(self, query: str) -> str:
+    async def _arun(self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
         """Use the tool asynchronously."""
         raise NotImplementedError("This Tool does not support async")
         
@@ -664,6 +666,7 @@ class APISearchAgent(BaseTool):
     
     name = "apisearch"
     description = "useful when the questions includes the term: apisearch.\n"
+    args_schema: Type[BaseModel] = SearchInput
     
     llm: AzureChatOpenAI
     llm_search: AzureChatOpenAI
@@ -672,7 +675,7 @@ class APISearchAgent(BaseTool):
     limit_to_domains: list = None
     verbose: bool = False
     
-    def _run(self, tool_input: Union[str, Dict],) -> str:
+    def _run(self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
         try:
             tools = [GetAPISearchResults_Tool(llm=self.llm,
                                               llm_search=self.llm_search,
@@ -681,7 +684,7 @@ class APISearchAgent(BaseTool):
                                               verbose=self.verbose,
                                               limit_to_domains=self.limit_to_domains)]
             
-            parsed_input = self._parse_input(tool_input)
+            parsed_input = self._parse_input(query)
             
             agent = create_openai_tools_agent(llm=self.llm, tools=tools, prompt=APISEARCH_PROMPT)
             agent_executor = AgentExecutor(agent=agent, tools=tools, 
@@ -703,7 +706,7 @@ class APISearchAgent(BaseTool):
         except Exception as e:
             print(e)
     
-    async def _arun(self, query: str) -> str:
+    async def _arun(self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
         """Use the tool asynchronously."""
         raise NotImplementedError("APISearchAgent does not support async")
         
