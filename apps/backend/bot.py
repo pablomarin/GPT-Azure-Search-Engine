@@ -91,9 +91,15 @@ class MyBot(ActivityHandler):
         user_id = turn_context.activity.from_property.id + "-" + turn_context.activity.channel_id
         
         input_text_metadata = dict()
-        input_text_metadata["local_timestamp"] = turn_context.activity.local_timestamp.strftime("%I:%M:%S %p, %A, %B %d of %Y")
-        input_text_metadata["local_timezone"] = turn_context.activity.local_timezone
-        input_text_metadata["locale"] = turn_context.activity.locale
+        
+        # Check if local_timestamp exists and is not None before formatting it
+        input_text_metadata["local_timestamp"] = turn_context.activity.local_timestamp.strftime("%I:%M:%S %p, %A, %B %d of %Y") if turn_context.activity.local_timestamp else "Not Available"
+    
+        # Check if local_timezone exists and is not None before assigning it
+        input_text_metadata["local_timezone"] = turn_context.activity.local_timezone if turn_context.activity.local_timezone else "Not Available"
+    
+        # Check if locale exists and is not None before assigning it
+        input_text_metadata["locale"] = turn_context.activity.locale if turn_context.activity.locale else "Not Available"
 
         # Setting the query to send to OpenAI
         input_text = turn_context.activity.text + "\n\n metadata:\n" + str(input_text_metadata)    
@@ -103,7 +109,7 @@ class MyBot(ActivityHandler):
         cb_manager = CallbackManager(handlers=[cb_handler])
 
         # Set LLM 
-        llm = AzureChatOpenAI(deployment_name=self.model_name, temperature=0.5, 
+        llm = AzureChatOpenAI(deployment_name=self.model_name, temperature=0, 
                               max_tokens=1500, callback_manager=cb_manager, streaming=True)
 
         # Initialize our Tools/Experts
