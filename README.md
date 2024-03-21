@@ -98,22 +98,21 @@ Note: (Pre-requisite) You need to have an Azure OpenAI service already created
 3. Create a Resource Group where all the assets of this accelerator are going to be. Azure OpenAI can be in different RG or a different Subscription.
 4. ClICK BELOW to create all the Azure Infrastructure needed to run the Notebooks (Azure AI Search, Cognitive Services, etc):
 
-[![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fpablomarin%2FGPT-Azure-Search-Engine%2Fmain%2Fazuredeploy.json) 
+      [![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fpablomarin%2FGPT-Azure-Search-Engine%2Fmain%2Fazuredeploy.json) 
 
-**Note**: If you have never created a `Azure AI Services Multi-Service account` before, please create one manually in the azure portal to read and accept the Responsible AI terms. Once this is deployed, delete this and then use the above deployment button.
+      **Note**: If you have never created a `Azure AI Services Multi-Service account` before, please create one manually in the azure portal to read and accept the Responsible AI terms. Once this is deployed, delete this and then use the above deployment button.
 
 5. Clone your Forked repo to your AML Compute Instance. If your repo is private, see below in Troubleshooting section how to clone a private repo.
-
 6. Make sure you run the notebooks on a **Python 3.10 conda enviroment** or newer
 7. Install the dependencies on your machine (make sure you do the below pip comand on the same conda environment that you are going to run the notebooks. For example, in AZML compute instance run:
-```
-conda activate azureml_py310_sdkv2
-pip install -r ./common/requirements.txt
-```
-
-You might get some pip dependancies errors, but that is ok, the libraries were installed correctly regardless of the error.
+    ```
+    conda activate azureml_py310_sdkv2
+    pip install -r ./common/requirements.txt
+    ```
+    You might get some pip dependancies errors, but that is ok, the libraries were installed correctly regardless of the error.
 
 8. Edit the file `credentials.env` with your own values from the services created in step 4.
+    - For BLOB_SAS_TOKEN and BLOB_CONNECTION_STRING. Go to Storage Account>Security + networking>Shared access signature>Generate SAS
 9. **Run the Notebooks in order**. They build up on top of each other.
 
 ---
