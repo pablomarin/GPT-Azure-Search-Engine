@@ -13,3 +13,4 @@ credentials.env
 .azure/
 .vscode/
 infra/target/
+**/__pycache__/

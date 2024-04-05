@@ -22,14 +22,14 @@ from langchain.schema import AgentAction, AgentFinish, LLMResult
 from langchain_core.runnables.history import RunnableWithMessageHistory
 
 #custom libraries that we will use later in the app
-from utils import (
+from common.utils import (
     DocSearchAgent, 
     CSVTabularAgent, 
     SQLSearchAgent, 
     ChatGPTTool, 
     BingSearchAgent
 )
-from prompts import CUSTOM_CHATBOT_PROMPT, WELCOME_MESSAGE
+from common.prompts import CUSTOM_CHATBOT_PROMPT, WELCOME_MESSAGE
 
 from botbuilder.core import ActivityHandler, TurnContext
 from botbuilder.schema import ChannelAccount, Activity, ActivityTypes

@@ -22,7 +22,7 @@ from azure.ai.formrecognizer import DocumentAnalysisClient
 from azure.core.credentials import AzureKeyCredential
 
 from langchain.callbacks.manager import AsyncCallbackManagerForToolRun, CallbackManagerForToolRun
-from langchain.pydantic_v1 import BaseModel, Field
+from langchain.pydantic_v1 import BaseModel, Field, Extra
 from langchain.tools import BaseTool, StructuredTool, tool
 from typing import Dict, List
 from concurrent.futures import ThreadPoolExecutor
@@ -58,12 +58,12 @@ from typing import List
 
 
 try:
-    from .prompts import (AGENT_DOCSEARCH_PROMPT, CSV_PROMPT_PREFIX, MSSQL_AGENT_PREFIX, MSSQL_AGENT_SUFFIX,
-                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT, BINGSEARCH_PROMPT, APISEARCH_PROMPT)
+    from .prompts import (AGENT_DOCSEARCH_PROMPT, CSV_PROMPT_PREFIX, MSSQL_AGENT_PREFIX,
+                          CHATGPT_PROMPT, BINGSEARCH_PROMPT, APISEARCH_PROMPT)
 except Exception as e:
     print(e)
-    from prompts import (AGENT_DOCSEARCH_PROMPT, CSV_PROMPT_PREFIX, MSSQL_AGENT_PREFIX, MSSQL_AGENT_SUFFIX,
-                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT, BINGSEARCH_PROMPT, APISEARCH_PROMPT)
+    from prompts import (AGENT_DOCSEARCH_PROMPT, CSV_PROMPT_PREFIX, MSSQL_AGENT_PREFIX,
+                         CHATGPT_PROMPT, BINGSEARCH_PROMPT, APISEARCH_PROMPT)
 
 
 def text_to_base64(text):
@@ -357,8 +357,9 @@ def get_answer(llm: AzureChatOpenAI,
 
     
 
-######## AGENTS AND TOOL CLASSES #####################################
-###########################################################
+#####################################################################################################
+############################### AGENTS AND TOOL CLASSES #############################################
+#####################################################################################################
     
 class SearchInput(BaseModel):
     query: str = Field(description="should be a search query")
@@ -411,26 +412,35 @@ class DocSearchAgent(BaseTool):
     reranker_th: int = 1
     sas_token: str = ""   
     
+    class Config:
+        extra = Extra.allow  # Allows setting attributes not declared in the model
+    
+    def __init__(self, **data):
+        super().__init__(**data)
+        tools = [GetDocSearchResults_Tool(indexes=self.indexes, k=self.k, reranker_th=self.reranker_th, sas_token=self.sas_token)]
+
+        agent = create_openai_tools_agent(self.llm, tools, AGENT_DOCSEARCH_PROMPT)
+
+        self.agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=self.verbose, callback_manager=self.callbacks, handle_parsing_errors=True)
+        
+    
     def _run(self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
         try:
-            tools = [GetDocSearchResults_Tool(indexes=self.indexes, k=self.k, reranker_th=self.reranker_th, sas_token=self.sas_token)]
-
-            agent = create_openai_tools_agent(self.llm, tools, AGENT_DOCSEARCH_PROMPT)
-
-            agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=False, callback_manager=self.callbacks, handle_parsing_errors=True)
-
-            response = agent_executor.invoke({"question":query})['output']
-            
-            return response
-
+            result = self.agent_executor.invoke({"question": query})
+            return result['output']
         except Exception as e:
             print(e)
-    
+            return str(e)  # Return an empty string or some error indicator
+
     async def _arun(self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
-        """Use the tool asynchronously."""
-        raise NotImplementedError("DocSearchTool does not support async")
+        try:
+            result = await self.agent_executor.ainvoke({"question": query})
+            return result['output']
+        except Exception as e:
+            print(e)
+            return str(e)  # Return an empty string or some error indicator
     
-    
+
 
 class CSVTabularAgent(BaseTool):
     """Agent to interact with CSV files"""
@@ -441,29 +451,41 @@ class CSVTabularAgent(BaseTool):
 
     path: str
     llm: AzureChatOpenAI
-    
+
+    class Config:
+        extra = Extra.allow  # Allows setting attributes not declared in the model
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        # Create the agent_executor within the __init__ method as requested
+        self.agent_executor = create_csv_agent(self.llm, self.path, 
+                                               agent_type="openai-tools",
+                                               prefix=CSV_PROMPT_PREFIX,
+                                               verbose=self.verbose, 
+                                               callback_manager=self.callbacks,
+                                               )
+
     def _run(self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
-        
-        # try:
-        agent_executor = create_csv_agent(self.llm, self.path, verbose=self.verbose, 
-                                 callback_manager=self.callbacks,
-                                 agent_type="openai-tools",
-                                 prefix=CSV_PROMPT_PREFIX)
+        try:
+            # Use the initialized agent_executor to invoke the query
+            result = self.agent_executor.invoke(query)
+            return result['output']
+        except Exception as e:
+            print(e)
+            return str(e)  # Return an error indicator
 
-        response = agent_executor.invoke(query)['output'] 
-
-
-        return response
-        # except Exception as e:
-        #     print(e)
-        #     response = e
-        #     return response
-    
     async def _arun(self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
-        """Use the tool asynchronously."""
-        raise NotImplementedError("CSVTabularTool does not support async")
-        
-        
+        # Note: Implementation assumes the agent_executor and its methods support async operations
+        try:
+            # Use the initialized agent_executor to asynchronously invoke the query
+            result = await self.agent_executor.ainvoke(query)
+            return result['output']
+        except Exception as e:
+            print(e)
+            return str(e)  # Return an error indicator
+
+
+
 class SQLSearchAgent(BaseTool):
     """Agent to interact with SQL databases"""
     
@@ -473,11 +495,32 @@ class SQLSearchAgent(BaseTool):
 
     llm: AzureChatOpenAI
     k: int = 30
-    
-    def _run(self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
-        db_config = {
+
+    class Config:
+        extra = Extra.allow  # Allows setting attributes not declared in the model
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        db_config = self.get_db_config()
+        db_url = URL.create(**db_config)
+        db = SQLDatabase.from_uri(db_url)
+        toolkit = SQLDatabaseToolkit(db=db, llm=self.llm)
+
+        self.agent_executor = create_sql_agent(
+            prefix=MSSQL_AGENT_PREFIX,
+            llm=self.llm,
+            toolkit=toolkit,
+            top_k=self.k,
+            agent_type="openai-tools",
+            callback_manager=self.callbacks,
+            verbose=self.verbose,
+        )
+
+    def get_db_config(self):
+        """Returns the database configuration."""
+        return {
             'drivername': 'mssql+pyodbc',
-            'username': os.environ["SQL_SERVER_USERNAME"] +'@'+ os.environ["SQL_SERVER_NAME"],
+            'username': os.environ["SQL_SERVER_USERNAME"] + '@' + os.environ["SQL_SERVER_NAME"],
             'password': os.environ["SQL_SERVER_PASSWORD"],
             'host': os.environ["SQL_SERVER_NAME"],
             'port': 1433,
@@ -485,38 +528,27 @@ class SQLSearchAgent(BaseTool):
             'query': {'driver': 'ODBC Driver 17 for SQL Server'}
         }
 
-        db_url = URL.create(**db_config)
-        db = SQLDatabase.from_uri(db_url)
-        toolkit = SQLDatabaseToolkit(db=db, llm=self.llm)
-        agent_executor = create_sql_agent(
-            prefix=MSSQL_AGENT_PREFIX,
-            suffix=MSSQL_AGENT_SUFFIX,
-            format_instructions = MSSQL_AGENT_FORMAT_INSTRUCTIONS,
-            llm=self.llm,
-            toolkit=toolkit,
-            callback_manager=self.callbacks,
-            top_k=self.k,
-            verbose=self.verbose,
-            agent_type="openai-tools"
-        )
+    def _run(self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
+        try:
+            # Use the initialized agent_executor to invoke the query
+            result = self.agent_executor.invoke(query)
+            return result['output']
+        except Exception as e:
+            print(e)
+            return str(e)  # Return an error indicator
 
-        for i in range(2):
-            try:
-                response = agent_executor.invoke(query)["output"] 
-                break
-            except Exception as e:
-                response = str(e)
-                continue
-
-        return response
-        
-    
     async def _arun(self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
-        """Use the tool asynchronously."""
-        raise NotImplementedError("SQLDbTool does not support async")
+        # Note: Implementation assumes the agent_executor and its methods support async operations
+        try:
+            # Use the initialized agent_executor to asynchronously invoke the query
+            result = await self.agent_executor.ainvoke(query)
+            return result['output']
+        except Exception as e:
+            print(e)
+            return str(e)  # Return an error indicator
+
         
-        
-        
+
 class ChatGPTTool(BaseTool):
     """Tool for a ChatGPT clone"""
     
@@ -525,26 +557,33 @@ class ChatGPTTool(BaseTool):
     args_schema: Type[BaseModel] = SearchInput
 
     llm: AzureChatOpenAI
-    
+
+    class Config:
+        extra = Extra.allow  # Allows setting attributes not declared in the model
+
+    def __init__(self, **data):
+        super().__init__(**data)
+
+        output_parser = StrOutputParser()
+        self.chatgpt_chain = CHATGPT_PROMPT | self.llm | output_parser
+
     def _run(self, query: str) -> str:
         try:
-            chatgpt_chain = LLMChain(
-                llm=self.llm, 
-                prompt=CHATGPT_PROMPT,
-                callback_manager=self.callbacks,
-                verbose=self.verbose
-            )
-
-            response = chatgpt_chain.invoke(query)["text"]
-
+            response = self.chatgpt_chain.invoke({"question": query})
             return response
         except Exception as e:
             print(e)
-            
+            return str(e)  # Return an error indicator
+
     async def _arun(self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
-        """Use the tool asynchronously."""
-        raise NotImplementedError("ChatGPTTool does not support async")
-        
+        """Implement the tool to be used asynchronously."""
+        try:
+            response = await self.chatgpt_chain.ainvoke({"question": query})
+            return response
+        except Exception as e:
+            print(e)
+            return str(e)  # Return an error indicator
+               
     
     
 class GetBingSearchResults_Tool(BaseTool):
@@ -573,59 +612,69 @@ class GetBingSearchResults_Tool(BaseTool):
             return "No Results Found"
             
 
+
 class BingSearchAgent(BaseTool):
     """Agent to interact with Bing"""
     
     name = "bing"
     description = "useful when the questions includes the term: bing.\n"
     args_schema: Type[BaseModel] = SearchInput
-    
+
     llm: AzureChatOpenAI
     k: int = 5
     
-    def parse_html(self, content) -> str:
-        soup = BeautifulSoup(content, 'html.parser')
-        text_content_with_links = soup.get_text()
-        return text_content_with_links
+    class Config:
+        extra = Extra.allow  # Allows setting attributes not declared in the model
 
-    def fetch_web_page(self, url: str) -> str:
-        HEADERS = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:90.0) Gecko/20100101 Firefox/90.0'}
-        response = requests.get(url, headers=HEADERS)
-        return self.parse_html(response.content)
+    def __init__(self, **data):
+        super().__init__(**data)
+        
+        web_fetch_tool = Tool.from_function(
+            func=self.fetch_web_page,
+            name="WebFetcher",
+            description="useful to fetch the content of a url"
+        )
 
+        tools = [GetBingSearchResults_Tool(k=self.k), web_fetch_tool]
+        agent = create_openai_tools_agent(self.llm, tools, BINGSEARCH_PROMPT)
 
-    def _run(self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
-        try:
-            
-            web_fetch_tool = Tool.from_function(
-                func=self.fetch_web_page,
-                name="WebFetcher",
-                description="useful to fetch the content of a url"
-            )
-
-            tools = [GetBingSearchResults_Tool(k=self.k), web_fetch_tool]
-            agent = create_openai_tools_agent(self.llm, tools, BINGSEARCH_PROMPT)
-
-            agent_executor = AgentExecutor(agent=agent, tools=tools,
+        self.agent_executor = AgentExecutor(agent=agent, tools=tools,
                                             return_intermediate_steps=True,
                                             callback_manager=self.callbacks,
                                             verbose=self.verbose,
                                             handle_parsing_errors=True)
 
-            parsed_input = self._parse_input(query)
-            response = agent_executor.invoke({"question":parsed_input})['output']
+    def parse_html(self, content) -> str:
+        """Parses HTML content to text."""
+        soup = BeautifulSoup(content, 'html.parser')
+        text_content_with_links = soup.get_text()
+        return text_content_with_links
 
-            return response
+    def fetch_web_page(self, url: str) -> str:
+        """Fetches a webpage and returns its text content."""
+        HEADERS = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:90.0) Gecko/20100101 Firefox/90.0'}
+        response = requests.get(url, headers=HEADERS)
+        return self.parse_html(response.content)
 
+    def _run(self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
+        try:
+            response = self.agent_executor.invoke({"question": query})
+            return response['output']
         except Exception as e:
             print(e)
-    
+            return str(e)  # Return an error indicator
+
     async def _arun(self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
-        """Use the tool asynchronously."""
-        raise NotImplementedError("BingSearchTool does not support async")
+        """Implements the tool to be used asynchronously."""
+        try:
+            response = await self.agent_executor.ainvoke({"question": query})
+            return response['output']
+        except Exception as e:
+            print(e)
+            return str(e)  # Return an error indicator
+
         
-        
-        
+
 class GetAPISearchResults_Tool(BaseTool):
     """APIChain as a tool"""
     
@@ -636,77 +685,96 @@ class GetAPISearchResults_Tool(BaseTool):
     llm: AzureChatOpenAI
     api_spec: str
     headers: dict = {}
-    limit_to_domains: list = []
+    limit_to_domains: list = None
     verbose: bool = False
     
+    class Config:
+        extra = Extra.allow  # Allows setting attributes not declared in the model
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        self.chain = APIChain.from_llm_and_api_docs(
+            llm=self.llm,
+            api_docs=self.api_spec,
+            headers=self.headers,
+            verbose=self.verbose,
+            limit_to_domains=self.limit_to_domains
+        )
+
     def _run(self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
-        
-        chain = APIChain.from_llm_and_api_docs(
-                            llm=self.llm,
-                            api_docs=self.api_spec,
-                            headers=self.headers,
-                            verbose=self.verbose,
-                            limit_to_domains=self.limit_to_domains
-                            )
         try:
-            sleep(2) # This is optional to avoid possible TPM rate limits
-            response = chain.invoke(query)
+            # Optionally sleep to avoid possible TPM rate limits
+            sleep(2)
+            response = self.chain.invoke(query)
         except Exception as e:
-            response = e
-        
+            response = str(e)  # Ensure the response is always a string
+
         return response
-            
+
     async def _arun(self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
         """Use the tool asynchronously."""
-        raise NotImplementedError("This Tool does not support async")
-        
+        loop = asyncio.get_event_loop()
+        try:
+            # Optionally sleep to avoid possible TPM rate limits, handled differently in async context
+            await asyncio.sleep(2)
+            # Execute the synchronous function in a separate thread
+            response = await loop.run_in_executor(ThreadPoolExecutor(), self.chain.invoke, query)
+        except Exception as e:
+            response = str(e)  # Ensure the response is always a string
 
+        return response
+
+        
+        
 class APISearchAgent(BaseTool):
     """Agent to interact with any API given a OpenAPI 3.0 spec"""
     
     name = "apisearch"
     description = "useful when the questions includes the term: apisearch.\n"
     args_schema: Type[BaseModel] = SearchInput
-    
+
     llm: AzureChatOpenAI
     llm_search: AzureChatOpenAI
     api_spec: str
     headers: dict = {}
     limit_to_domains: list = None
-    verbose: bool = False
     
+    class Config:
+        extra = Extra.allow  # Allows setting attributes not declared in the model
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        tools = [GetAPISearchResults_Tool(llm=self.llm,
+                                          llm_search=self.llm_search,
+                                          api_spec=str(self.api_spec),
+                                          headers=self.headers,
+                                          verbose=self.verbose,
+                                          limit_to_domains=self.limit_to_domains)]
+        
+        agent = create_openai_tools_agent(llm=self.llm, tools=tools, prompt=APISEARCH_PROMPT)
+        self.agent_executor = AgentExecutor(agent=agent, tools=tools, 
+                                            verbose=self.verbose, 
+                                            return_intermediate_steps=True,
+                                            callback_manager=self.callbacks)
+
     def _run(self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
         try:
-            tools = [GetAPISearchResults_Tool(llm=self.llm,
-                                              llm_search=self.llm_search,
-                                              api_spec=str(self.api_spec),
-                                              headers=self.headers,
-                                              verbose=self.verbose,
-                                              limit_to_domains=self.limit_to_domains)]
-            
-            parsed_input = self._parse_input(query)
-            
-            agent = create_openai_tools_agent(llm=self.llm, tools=tools, prompt=APISEARCH_PROMPT)
-            agent_executor = AgentExecutor(agent=agent, tools=tools, 
-                                           verbose=self.verbose, 
-                                           return_intermediate_steps=True,
-                                           callback_manager=self.callbacks)
-
-            
-            for i in range(2):
-                try:
-                    response = agent_executor.invoke({"question":parsed_input})["output"]
-                    break
-                except Exception as e:
-                    response = str(e)
-                    continue
-
-            return response
-        
+            # Use the initialized agent_executor to invoke the query
+            response = self.agent_executor.invoke({"question":query})
+            return response['output']
         except Exception as e:
             print(e)
-    
+            return str(e)  # Return an error indicator
+
     async def _arun(self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
-        """Use the tool asynchronously."""
-        raise NotImplementedError("APISearchAgent does not support async")
-        
+        # Note: Implementation assumes the agent_executor and its methods support async operations
+        try:
+            # Use the initialized agent_executor to asynchronously invoke the query
+            response = await self.agent_executor.ainvoke({"question":query})
+            return response['output']
+        except Exception as e:
+            print(e)
+            return str(e)  # Return an error indicator
+
+
+

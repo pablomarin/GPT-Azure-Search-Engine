@@ -69,7 +69,6 @@ https://gptsmartsearchapp.azurewebsites.net/
 
 ## 🔧**Features**
 
-   - Uses [Bot Framework](https://dev.botframework.com/) and [Bot Service](https://azure.microsoft.com/en-us/products/bot-services/) to Host the Bot API Backend and to expose it to multiple channels including MS Teams.
    - 100% Python.
    - Uses [Azure Cognitive Services](https://azure.microsoft.com/en-us/products/cognitive-services/) to index and enrich unstructured documents: OCR over images, Chunking and automated vectorization.
    - Uses Hybrid Search Capabilities of Azure AI Search to provide the best semantic answer (Text and Vector search combined).
@@ -82,6 +81,8 @@ https://gptsmartsearchapp.azurewebsites.net/
    - Connects to API Data sources by converting natural language questions to API calls.
    - Uses CosmosDB as persistent memory to save user's conversations.
    - Uses [Streamlit](https://streamlit.io/) to build the Frontend web application in python.
+   - Uses [Bot Framework](https://dev.botframework.com/) and [Bot Service](https://azure.microsoft.com/en-us/products/bot-services/) to Host the Bot API Backend and to expose it to multiple channels including MS Teams.
+   - Uses also LangServe/FastAPI to deploy an alternative backend API with streaming capabilites
    
 
 ---

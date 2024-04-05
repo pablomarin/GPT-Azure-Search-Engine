@@ -19,9 +19,9 @@ Below are the steps to run the Bot API as an Azure Wep App, connected with the A
 
 [![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fpablomarin%2FGPT-Azure-Search-Engine%2Fmain%2Fapps%2Fbackend%2Fazuredeploy-backend.json)
 
-3. Zip the code of the bot by executing the following command in the terminal (**you have to be inside the app/backend/ folder**):
+3. Zip the code of the bot by executing the following command in the terminal (**you have to be inside the apps/backend/botservice/ folder**):
 ```bash
-zip -j backend.zip ../../common/* ./*
+(cd ../../../ && zip -r apps/backend/botservice/backend.zip common) && zip -j backend.zip ./* && zip -j backend.zip ../../../common/requirements.txt
 ```
 4. Using the Azure CLI deploy the bot code to the Azure App Service created on Step 2
 ```bash

@@ -274,7 +274,7 @@ resource webAppConfig 'Microsoft.Web/sites/config@2022-09-01' = {
     use32BitWorkerProcess: true
     webSocketsEnabled: false
     alwaysOn: true
-    appCommandLine: 'gunicorn --bind 0.0.0.0 --worker-class aiohttp.worker.GunicornWebWorker --timeout 600 app:APP'
+    appCommandLine: 'runserver.sh'
     managedPipelineMode: 'Integrated'
     virtualApplications: [
       {
