@@ -30,7 +30,7 @@ from langchain.agents import AgentExecutor, Tool, create_openai_tools_agent
 # library_path = Path(__file__).resolve().parents[4]
 # sys.path.append(str(library_path))
 # load_dotenv(str(library_path) + "/credentials.env")
-# os.environ["AZURE_OPENAI_MODEL_NAME"] = os.environ["GPT35_DEPLOYMENT_NAME"]
+# os.environ["AZURE_OPENAI_MODEL_NAME"] = os.environ["GPT4_DEPLOYMENT_NAME"]
 
 ###################################
 
