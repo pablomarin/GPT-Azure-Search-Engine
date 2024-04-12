@@ -12,12 +12,12 @@ Also includes a Search experience.
 [![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fpablomarin%2FGPT-Azure-Search-Engine%2Fmain%2Fapps%2Ffrontend%2Fazuredeploy-frontend.json)
 
 2. Zip the code of the bot by executing the following command in the terminal (you have to be inside the folder: apps/frontend/ ):
+
 ```bash
-zip frontend.zip ./*
-zip frontend.zip ./pages/*
-zip -j frontend.zip ../../common/*
+zip frontend.zip ./* && zip frontend.zip ./pages/* && zip -j frontend.zip ../../common/*
 ```
 3. Using the Azure CLI deploy the frontend code to the Azure App Service created on Step 2
+
 ```bash
 az login -i
 az webapp deployment source config-zip --resource-group "<resource-group-name>" --name "<name-of-frontend-app-service>" --src "frontend.zip"
