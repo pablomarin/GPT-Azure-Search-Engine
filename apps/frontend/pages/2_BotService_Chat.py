@@ -3,7 +3,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 # From here down is all the StreamLit UI.
-st.set_page_config(page_title="GPT Smart Agent", page_icon="📖", layout="wide")
+st.set_page_config(page_title="BotService Backend Bot", page_icon="🤖", layout="wide")
 # Add custom CSS styles to adjust padding
 st.markdown("""
         <style>
@@ -45,7 +45,7 @@ Example questions:
 - @bing, what movies are showing tonight in Seattle?
 - Please tell me a joke
     """)
-    
+
 st.markdown("""
         <style>
                .block-container {
