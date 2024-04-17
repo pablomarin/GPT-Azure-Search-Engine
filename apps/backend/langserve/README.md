@@ -8,20 +8,46 @@ This bot has been created using [LangServe](https://python.langchain.com/docs/la
 
 Below are the steps to run the LangServe Bot API as an Azure Wep App:
 
-1. We don't need to deploy again the Azure infrastructure, we did that already for the Bot Service API (Notebook 12). We are going to use the same App Service and just change the code.
+1. We don't need to deploy again the Azure infrastructure, we did that already for the Bot Service API (Notebook 12). We are going to use the same App Service, but we just need to add another SLOT to the service and have both APIs running at the same time. Note: the slot can have any name, we are using "staging".<br> In the terminal run:
 
-3. Zip the code of the bot by executing the following command in the terminal (**you have to be inside the apps/backend/langserve/ folder**):
+```bash
+az login -i
+az webapp deployment slot create --name "<name-of-backend-app-service>" --resource-group "<resource-group-name>" --slot staging --configuration-source "<name-of-backend-app-service>"
+```
+
+2. Zip the code of the bot by executing the following command in the terminal (**you have to be inside the apps/backend/langserve/ folder**):
+
 ```bash
 (cd ../../../ && zip -r apps/backend/langserve/backend.zip common) && zip -j backend.zip ./* && zip -j backend.zip ../../../common/requirements.txt && zip -j backend.zip app/*
 ```
-4. Using the Azure CLI deploy the bot code to the Azure App Service created on Step 2
+
+3. Using the Azure CLI deploy the bot code to the Azure App Service new SLOT created on Step 1:
+
 ```bash
-az login -i
-az webapp deployment source config-zip --resource-group "<resource-group-name>" --name "<name-of-backend-app-service>" --src "backend.zip"
+az webapp deployment source config-zip --resource-group "<resource-group-name>" --name "<name-of-backend-app-service>" --src "backend.zip" --slot staging
 ```
 
-5. **Wait around 5 minutes** and test your bot by running the next Notebook.
+4. Wait around 5 minutes and test your bot by running Notebook 14. Your Swagger (OpenAPI) definition should show here:
 
+```html
+https://<name-of-backend-app-service>-staging.azurewebsites.net/
+```
+
+5. Once you confirm that the API is working on step 4, you need to add the endpoint to the frontend page code. Go to `apps/frontend/pages`   and edit   `3_FastAPI_Chat.py`:
+
+```python
+    # ENTER HERE YOUR LANGSERVE FASTAPI ENDPOINT
+    # for example: "https://webapp-backend-botid-zf4fwhz3gdn64-staging.azurewebsites.net"
+
+    url = "https://<name-of-backend-app-service>-staging.azurewebsites.net" + "/agent/stream_events"
+```
+
+6. Re-deploy FrontEnd code: Zip the code of the bot by executing the following command in the terminal (you have to be inside the folder: **apps/frontend/** ):
+
+```bash
+zip frontend.zip ./* && zip frontend.zip ./pages/* && zip -j frontend.zip ../../common/*
+az webapp deployment source config-zip --resource-group "<resource-group-name>" --name "<name-of-frontend-app-service>" --src "frontend.zip"
+```
 
 ## (optional) Running in Docker
 

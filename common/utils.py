@@ -363,6 +363,10 @@ def get_answer(llm: AzureChatOpenAI,
     
 class SearchInput(BaseModel):
     query: str = Field(description="should be a search query")
+    return_direct: bool = Field(
+        description="Whether or the result of this should be returned directly to the user without you seeing what it is",
+        default=False,
+    )
 
 class GetDocSearchResults_Tool(BaseTool):
     name = "docsearch"
@@ -375,7 +379,7 @@ class GetDocSearchResults_Tool(BaseTool):
     sas_token: str = "" 
 
     def _run(
-        self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None
+        self, query: str,  return_direct = False, run_manager: Optional[CallbackManagerForToolRun] = None
     ) -> str:
 
         retriever = CustomAzureSearchRetriever(indexes=self.indexes, topK=self.k, reranker_threshold=self.reranker_th, 
@@ -385,7 +389,7 @@ class GetDocSearchResults_Tool(BaseTool):
         return results
 
     async def _arun(
-        self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None
+        self, query: str, return_direct = False, run_manager: Optional[AsyncCallbackManagerForToolRun] = None
     ) -> str:
         """Use the tool asynchronously."""
         
@@ -424,7 +428,7 @@ class DocSearchAgent(BaseTool):
         self.agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=self.verbose, callback_manager=self.callbacks, handle_parsing_errors=True)
         
     
-    def _run(self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
+    def _run(self, query: str,  return_direct = False, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
         try:
             result = self.agent_executor.invoke({"question": query})
             return result['output']
@@ -432,7 +436,7 @@ class DocSearchAgent(BaseTool):
             print(e)
             return str(e)  # Return an empty string or some error indicator
 
-    async def _arun(self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
+    async def _arun(self, query: str,  return_direct = False, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
         try:
             result = await self.agent_executor.ainvoke({"question": query})
             return result['output']
@@ -465,7 +469,7 @@ class CSVTabularAgent(BaseTool):
                                                callback_manager=self.callbacks,
                                                )
 
-    def _run(self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
+    def _run(self, query: str, return_direct = False, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
         try:
             # Use the initialized agent_executor to invoke the query
             result = self.agent_executor.invoke(query)
@@ -474,7 +478,7 @@ class CSVTabularAgent(BaseTool):
             print(e)
             return str(e)  # Return an error indicator
 
-    async def _arun(self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
+    async def _arun(self, query: str, return_direct = False, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
         # Note: Implementation assumes the agent_executor and its methods support async operations
         try:
             # Use the initialized agent_executor to asynchronously invoke the query
@@ -528,7 +532,7 @@ class SQLSearchAgent(BaseTool):
             'query': {'driver': 'ODBC Driver 17 for SQL Server'}
         }
 
-    def _run(self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
+    def _run(self, query: str, return_direct = False, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
         try:
             # Use the initialized agent_executor to invoke the query
             result = self.agent_executor.invoke(query)
@@ -537,7 +541,7 @@ class SQLSearchAgent(BaseTool):
             print(e)
             return str(e)  # Return an error indicator
 
-    async def _arun(self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
+    async def _arun(self, query: str, return_direct = False, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
         # Note: Implementation assumes the agent_executor and its methods support async operations
         try:
             # Use the initialized agent_executor to asynchronously invoke the query
@@ -567,7 +571,7 @@ class ChatGPTTool(BaseTool):
         output_parser = StrOutputParser()
         self.chatgpt_chain = CHATGPT_PROMPT | self.llm | output_parser
 
-    def _run(self, query: str) -> str:
+    def _run(self, query: str, return_direct = False, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
         try:
             response = self.chatgpt_chain.invoke({"question": query})
             return response
@@ -575,7 +579,7 @@ class ChatGPTTool(BaseTool):
             print(e)
             return str(e)  # Return an error indicator
 
-    async def _arun(self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
+    async def _arun(self, query: str, return_direct = False, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
         """Implement the tool to be used asynchronously."""
         try:
             response = await self.chatgpt_chain.ainvoke({"question": query})
@@ -595,14 +599,14 @@ class GetBingSearchResults_Tool(BaseTool):
 
     k: int = 5
     
-    def _run(self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
+    def _run(self, query: str,  return_direct = False, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
         bing = BingSearchAPIWrapper(k=self.k)
         try:
             return bing.results(query,num_results=self.k)
         except:
             return "No Results Found"
     
-    async def _arun(self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
+    async def _arun(self, query: str, return_direct = False, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
         bing = BingSearchAPIWrapper(k=self.k)
         loop = asyncio.get_event_loop()
         try:
@@ -635,7 +639,9 @@ class BingSearchAgent(BaseTool):
             description="useful to fetch the content of a url"
         )
 
-        tools = [GetBingSearchResults_Tool(k=self.k), web_fetch_tool]
+        tools = [GetBingSearchResults_Tool(k=self.k)]
+        # tools = [GetBingSearchResults_Tool(k=self.k), web_fetch_tool] # Uncomment if using GPT-4
+        
         agent = create_openai_tools_agent(self.llm, tools, BINGSEARCH_PROMPT)
 
         self.agent_executor = AgentExecutor(agent=agent, tools=tools,
@@ -656,7 +662,7 @@ class BingSearchAgent(BaseTool):
         response = requests.get(url, headers=HEADERS)
         return self.parse_html(response.content)
 
-    def _run(self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
+    def _run(self, query: str,  return_direct = False, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
         try:
             response = self.agent_executor.invoke({"question": query})
             return response['output']
@@ -664,7 +670,7 @@ class BingSearchAgent(BaseTool):
             print(e)
             return str(e)  # Return an error indicator
 
-    async def _arun(self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
+    async def _arun(self, query: str, return_direct = False, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
         """Implements the tool to be used asynchronously."""
         try:
             response = await self.agent_executor.ainvoke({"question": query})
@@ -701,7 +707,7 @@ class GetAPISearchResults_Tool(BaseTool):
             limit_to_domains=self.limit_to_domains
         )
 
-    def _run(self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
+    def _run(self, query: str, return_direct = False, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
         try:
             # Optionally sleep to avoid possible TPM rate limits
             sleep(2)
@@ -711,7 +717,7 @@ class GetAPISearchResults_Tool(BaseTool):
 
         return response
 
-    async def _arun(self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
+    async def _arun(self, query: str, return_direct = False, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
         """Use the tool asynchronously."""
         loop = asyncio.get_event_loop()
         try:
@@ -757,7 +763,7 @@ class APISearchAgent(BaseTool):
                                             return_intermediate_steps=True,
                                             callback_manager=self.callbacks)
 
-    def _run(self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
+    def _run(self, query: str, return_direct = False, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
         try:
             # Use the initialized agent_executor to invoke the query
             response = self.agent_executor.invoke({"question":query})
@@ -766,7 +772,7 @@ class APISearchAgent(BaseTool):
             print(e)
             return str(e)  # Return an error indicator
 
-    async def _arun(self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
+    async def _arun(self, query: str, return_direct = False, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
         # Note: Implementation assumes the agent_executor and its methods support async operations
         try:
             # Use the initialized agent_executor to asynchronously invoke the query
