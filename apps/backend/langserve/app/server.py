@@ -169,7 +169,7 @@ sql_search = SQLSearchAgent(llm=llm, k=30,
 
 chatgpt_search = ChatGPTTool(llm=llm,
                      name="chatgpt",
-                    description="use for general questions, profile, greeting-like questions and when the questions includes the term: chatgpt",
+                    description="useful when the questions includes the term: chatgpt",
                     verbose=False)
 
 tools = [doc_search, book_search, www_search, sql_search, chatgpt_search]
