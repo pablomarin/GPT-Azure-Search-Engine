@@ -142,7 +142,7 @@ class MyBot(ActivityHandler):
         
         chatgpt_search = ChatGPTTool(llm=llm, callback_manager=cb_manager,
                              name="chatgpt",
-                            description="use for general questions, profile, greeting-like questions and when the questions includes the term: chatgpt",
+                            description="useful when the questions includes the term: chatgpt",
                             verbose=False)
         
         tools = [doc_search, book_search, www_search, sql_search, chatgpt_search]
