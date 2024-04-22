@@ -112,7 +112,7 @@ Note: (Pre-requisite) You need to have an Azure OpenAI service already created
     ```
     You might get some pip dependancies errors, but that is ok, the libraries were installed correctly regardless of the error.
 
-8. Edit the file `credentials.env` with your own values from the services created in step 4.
+8. Copy the file `credentials.env` to a new `.env` file and update the latter with your own values from the services created in step 4.
     - For BLOB_SAS_TOKEN and BLOB_CONNECTION_STRING. Go to Storage Account>Security + networking>Shared access signature>Generate SAS
 9. **Run the Notebooks in order**. They build up on top of each other.
 
