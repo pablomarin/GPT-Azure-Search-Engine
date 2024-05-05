@@ -394,7 +394,7 @@
       "value": "[reference(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBAccountName')), '2023-04-15').documentEndpoint]"
     },
     "cosmosDBConnectionString": {
-      "type": "string",
+      "type": "secureString",
       "value": "[format('AccountEndpoint={0};AccountKey={1}', reference(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBAccountName')), '2023-04-15').documentEndpoint, listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBAccountName')), '2023-04-15').primaryMasterKey)]"
     },
     "bingServiceSearchKey": {
@@ -410,7 +410,7 @@
       "value": "[listKeys(resourceId('Microsoft.CognitiveServices/accounts', parameters('cognitiveServiceName')), '2023-05-01').key1]"
     },
     "blobConnectionString": {
-      "type": "string",
+      "type": "secureString",
       "value": "[format('DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};EndpointSuffix=core.windows.net', parameters('blobStorageAccountName'), listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('blobStorageAccountName')), '2023-01-01').keys[0].value)]"
     }
   }
