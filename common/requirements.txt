@@ -3,6 +3,8 @@ langchain
 langchain-openai
 langchain-community
 langchain-experimental
+langchain_mistralai
+langchain_cohere
 langgraph
 langserve[all]
 langchain-cli
@@ -23,3 +25,5 @@ azure-storage-blob
 beautifulsoup4
 pydantic==1.10.13
 fastapi
+
+
