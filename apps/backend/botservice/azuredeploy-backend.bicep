@@ -265,7 +265,7 @@ resource webAppConfig 'Microsoft.Web/sites/config@2022-09-01' = {
     linuxFxVersion: 'PYTHON|3.10'
     requestTracingEnabled: false
     remoteDebuggingEnabled: false
-    remoteDebuggingVersion: 'VS2017'
+    remoteDebuggingVersion: 'VS2022'
     httpLoggingEnabled: true
     logsDirectorySizeLimit: 35
     detailedErrorLoggingEnabled: false
