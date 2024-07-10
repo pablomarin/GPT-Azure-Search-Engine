@@ -640,8 +640,8 @@ class BingSearchAgent(BaseTool):
             description="useful to fetch the content of a url"
         )
 
-        tools = [GetBingSearchResults_Tool(k=self.k)]
-        # tools = [GetBingSearchResults_Tool(k=self.k), web_fetch_tool] # Uncomment if using GPT-4
+        # tools = [GetBingSearchResults_Tool(k=self.k)]
+        tools = [GetBingSearchResults_Tool(k=self.k), web_fetch_tool] # Uncomment if using GPT-4
         
         agent = create_openai_tools_agent(self.llm, tools, BINGSEARCH_PROMPT)
 

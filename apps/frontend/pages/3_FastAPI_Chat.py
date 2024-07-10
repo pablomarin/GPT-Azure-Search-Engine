@@ -39,21 +39,20 @@ Note: If you don't use any of the tool names beginning with @, the bot will try 
 Example questions:
 
 - Hello, my name is Bob, what's yours?
-- @bing, What's the main economic news of today?
-- @chatgpt, How do I cook a chocolate cake?
-- @booksearch, what normally rich dad do that is different from poor dad?
-- @docsearch, Why Covid doesn't affect kids that much compared to adults?
-- @apisearch, What is the state with most covid deaths in USA?
-- @sqlsearch, How many people where hospitalized in Arkansas in June 2020?
-- @docsearch, List the authors that talk about Boosting Algorithms
-- @bing, what movies are showing tonight in Seattle?
+- bing, What's the main economic news of today?
+- chatgpt, How do I cook a chocolate cake?
+- booksearch, what normally rich dad do that is different from poor dad?
+- docsearch, Why Covid doesn't affect kids that much compared to adults?
+- sqlsearch, How many people where hospitalized in Arkansas in June 2020?
+- docsearch, List the authors that talk about Boosting Algorithms
+- bing, what movies are showing tonight in Seattle?
 - Please tell me a joke
     """)
 
 st.markdown("""
         <style>
                .block-container {
-                    padding-top: 1rem;
+                    padding-top: 2rem;
                     padding-bottom: 0rem;
                 }
         </style>
@@ -63,8 +62,7 @@ st.markdown("""
 # ENTER HERE YOUR LANGSERVE FASTAPI ENDPOINT
 # for example: "https://webapp-backend-botid-zf4fwhz3gdn64-staging.azurewebsites.net"
 
-#url = "https://<name-of-backend-app-service>-staging.azurewebsites.net" + "/agent/stream_events"
-url = "https://webapp-backend-botid-zf4fwhz3gdn64-slot1.azurewebsites.net" + "/agent/stream_events"
+url = "https://<name-of-backend-app-service>-staging.azurewebsites.net" + "/agent/stream_events"
 
 def get_or_create_ids():
     """Generate or retrieve session and user IDs."""
@@ -132,7 +130,7 @@ def consume_api(url, user_query, session_id, user_id):
 
 # session state
 if "chat_history" not in st.session_state:
-    st.session_state.chat_history = [AIMessage(content="Hello, I am a GPT-3.5 bot hosted in Azure using FastAPI Streaming. How can I help you?")]
+    st.session_state.chat_history = [AIMessage(content="Hello, I am a GPT-4o bot hosted in Azure using FastAPI Streaming. How can I help you?")]
 
     
 # conversation

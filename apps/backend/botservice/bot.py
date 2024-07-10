@@ -113,7 +113,7 @@ class MyBot(ActivityHandler):
                               max_tokens=1500, callback_manager=cb_manager, streaming=True)
 
         # Initialize our Tools/Experts
-        doc_indexes = ["cogsrch-index-files", "cogsrch-index-csv"]
+        doc_indexes = ["srch-index-files", "srch-index-csv"]
         
         doc_search = DocSearchAgent(llm=llm, indexes=doc_indexes,
                            k=6, reranker_th=1,
@@ -122,7 +122,7 @@ class MyBot(ActivityHandler):
                            description="useful when the questions includes the term: docsearch",
                            callback_manager=cb_manager, verbose=False)
         
-        book_indexes = ["cogsrch-index-books"]
+        book_indexes = ["srch-index-books"]
         
         book_search = DocSearchAgent(llm=llm, indexes=book_indexes,
                            k=6, reranker_th=1,

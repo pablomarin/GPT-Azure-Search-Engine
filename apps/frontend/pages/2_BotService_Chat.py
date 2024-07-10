@@ -35,14 +35,13 @@ Note: If you don't use any of the tool names beginning with @, the bot will try 
 Example questions:
 
 - Hello, my name is Bob, what's yours?
-- @bing, What's the main economic news of today?
-- @chatgpt, How do I cook a chocolate cake?
-- @booksearch, what normally rich dad do that is different from poor dad?
-- @docsearch, Why Covid doesn't affect kids that much compared to adults?
-- @apisearch, What is the state with most covid deaths in USA?
-- @sqlsearch, How many people where hospitalized in Arkansas in June 2020?
-- @docsearch, List the authors that talk about Boosting Algorithms
-- @bing, what movies are showing tonight in Seattle?
+- bing, What's the main economic news of today?
+- chatgpt, How do I cook a chocolate cake?
+- booksearch, what normally rich dad do that is different from poor dad?
+- docsearch, Why Covid doesn't affect kids that much compared to adults?
+- sqlsearch, How many people where hospitalized in Arkansas in June 2020?
+- docsearch, List the authors that talk about Boosting Algorithms
+- bing, what movies are showing tonight in Seattle?
 - Please tell me a joke
     """)
 

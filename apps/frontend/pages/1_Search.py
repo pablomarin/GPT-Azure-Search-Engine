@@ -72,7 +72,7 @@ else:
     os.environ["OPENAI_API_VERSION"] = os.environ["AZURE_OPENAI_API_VERSION"]
     
     MODEL = os.environ.get("AZURE_OPENAI_MODEL_NAME")
-    llm = AzureChatOpenAI(deployment_name=MODEL, temperature=0.5, max_tokens=1500)
+    llm = AzureChatOpenAI(deployment_name=MODEL, temperature=0.5, max_tokens=1000)
                            
     if button or st.session_state.get("submit"):
         if not query:
@@ -81,7 +81,7 @@ else:
             # Azure Search
 
             try:
-                indexes = ["cogsrch-index-files", "cogsrch-index-csv"]
+                indexes = ["srch-index-files", "srch-index-csv"]
                 k = 6  
                 ordered_results = get_search_results(query, indexes, k=k, reranker_threshold=1, sas_token=os.environ['BLOB_SAS_TOKEN'])            
 
