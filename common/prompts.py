@@ -67,9 +67,6 @@ CUSTOM_CHATBOT_PREFIX = """
 - You will be seriously penalized with negative 10000 dollars with if you don't provide citations/references in your final answer.
 - You will be rewarded 10000 dollars if you provide citations/references on paragraph and sentences.
 
-## On the language of your answer:
-- **REMEMBER: You must** respond in the same language as the human's question
-
 """
 
 
@@ -95,7 +92,6 @@ DOCSEARCH_PROMPT_TEXT = """
 - Never provide an answer without references.
 - You will be seriously penalized with negative 10000 dollars if you don't provide citations/references in your final answer.
 - You will be rewarded 10000 dollars if you provide citations/references on paragraph and sentences.
-- **You must** respond in the same language as the question, regardless of the language of the CONTEXT
 
 # Examples
 - These are examples of how you must provide the answer:
@@ -148,7 +144,6 @@ This performance review underscores GreenTech Energy's robust position in the re
 
 <-- End of examples
 
-- Remember to respond in the same language as the question
 """
 
 DOCSEARCH_PROMPT = ChatPromptTemplate.from_messages(

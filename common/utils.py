@@ -318,10 +318,10 @@ class CustomAzureSearchRetriever(BaseRetriever):
     
     
     def _get_relevant_documents(
-        self, query: str, *, run_manager: CallbackManagerForRetrieverRun
+        self, input: str, *, run_manager: CallbackManagerForRetrieverRun
     ) -> List[Document]:
         
-        ordered_results = get_search_results(query, self.indexes, k=self.topK, reranker_threshold=self.reranker_threshold, sas_token=self.sas_token)
+        ordered_results = get_search_results(input, self.indexes, k=self.topK, reranker_threshold=self.reranker_threshold, sas_token=self.sas_token)
         
         top_docs = []
         for key,value in ordered_results.items():
@@ -384,7 +384,7 @@ class GetDocSearchResults_Tool(BaseTool):
 
         retriever = CustomAzureSearchRetriever(indexes=self.indexes, topK=self.k, reranker_threshold=self.reranker_th, 
                                                sas_token=self.sas_token, callback_manager=self.callbacks)
-        results = retriever.get_relevant_documents(query=query)
+        results = retriever.invoke(input=query)
         
         return results
 
@@ -398,7 +398,7 @@ class GetDocSearchResults_Tool(BaseTool):
         # Please note below that running a non-async function like run_agent in a separate thread won't make it truly asynchronous. 
         # It allows the function to be called without blocking the event loop, but it may still have synchronous behavior internally.
         loop = asyncio.get_event_loop()
-        results = await loop.run_in_executor(ThreadPoolExecutor(), retriever.get_relevant_documents, query)
+        results = await loop.run_in_executor(ThreadPoolExecutor(), retriever.invoke, query)
         
         return results
 
@@ -466,6 +466,7 @@ class CSVTabularAgent(BaseTool):
                                                agent_type="openai-tools",
                                                prefix=CSV_PROMPT_PREFIX,
                                                verbose=self.verbose, 
+                                               allow_dangerous_code=True,
                                                callback_manager=self.callbacks,
                                                )
 

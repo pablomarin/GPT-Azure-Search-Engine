@@ -24,13 +24,13 @@ from langchain.agents import AgentExecutor, Tool, create_openai_tools_agent
 
 ### uncomment this section to run server in local host #########
 
-# from pathlib import Path
-# from dotenv import load_dotenv
-# # Calculate the path three directories above the current script
-# library_path = Path(__file__).resolve().parents[4]
-# sys.path.append(str(library_path))
-# load_dotenv(str(library_path) + "/credentials.env")
-# os.environ["AZURE_OPENAI_MODEL_NAME"] = os.environ["GPT4_DEPLOYMENT_NAME"]
+from pathlib import Path
+from dotenv import load_dotenv
+# Calculate the path three directories above the current script
+library_path = Path(__file__).resolve().parents[4]
+sys.path.append(str(library_path))
+load_dotenv(str(library_path) + "/credentials.env")
+os.environ["AZURE_OPENAI_MODEL_NAME"] = os.environ["GPT4_DEPLOYMENT_NAME"]
 
 ###################################
 

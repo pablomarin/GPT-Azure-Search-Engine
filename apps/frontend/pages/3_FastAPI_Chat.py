@@ -63,8 +63,8 @@ st.markdown("""
 # ENTER HERE YOUR LANGSERVE FASTAPI ENDPOINT
 # for example: "https://webapp-backend-botid-zf4fwhz3gdn64-staging.azurewebsites.net"
 
-url = "https://<name-of-backend-app-service>-staging.azurewebsites.net" + "/agent/stream_events"
-
+#url = "https://<name-of-backend-app-service>-staging.azurewebsites.net" + "/agent/stream_events"
+url = "https://webapp-backend-botid-zf4fwhz3gdn64-slot1.azurewebsites.net" + "/agent/stream_events"
 
 def get_or_create_ids():
     """Generate or retrieve session and user IDs."""
@@ -157,6 +157,7 @@ if user_query is not None and user_query != "":
         st.markdown(user_query)
 
     with st.chat_message("AI"):
-        response = st.write_stream(consume_api(url, user_query, session_id, user_id))
+        with st.spinner(text=""):
+            response = st.write_stream(consume_api(url, user_query, session_id, user_id))
 
     st.session_state.chat_history.append(AIMessage(content=response))
