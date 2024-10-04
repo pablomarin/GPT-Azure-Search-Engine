@@ -27,7 +27,7 @@ The repo is made to teach you step-by-step on how to build a OpenAI-based Smart 
 ---
 **Prerequisites Client 3-5 Days POC**
 * Azure subscription
-* Accepted Application to Azure Open AI, including GPT-4. If customer does not have GPT-4 approved, Microsoft CSAs can lend theirs during the workshop
+* Accepted Application to Azure Open AI, including GPT-4o. If customer does not have GPT-4o approved, Microsoft CSAs can lend theirs during the workshop
 * Microsoft members preferably to be added as Guests in clients Azure AD. If not possible, then customers can issue corporate IDs to Microsoft members
 * A Resource Group (RG)  needs to be set for this Workshop POC, in the customer Azure tenant
 * The customer team and the Microsoft team must have Contributor permissions to this resource group so they can set everything up 2 weeks prior to the workshop
@@ -44,17 +44,16 @@ The repo is made to teach you step-by-step on how to build a OpenAI-based Smart 
 
 ## Flow
 1. The user asks a question.
-2. In the app, an OpenAI GPT-4 LLM uses a clever prompt to determine which source to use based on the user input
+2. In the app, an OpenAI LLM uses a clever prompt to determine which source to use based on the user input
 3. Five types of sources are available:
    * 3a. Azure SQL Database - contains COVID-related statistics in the US.
    * 3b. API Endpoints - RESTful OpenAPI 3.0 API containing up-to-date statistics about Covid.
    * 3c. Azure Bing Search API - provides access to the internet allowing scenerios like: QnA on public websites .
    * 3d. Azure AI Search - contains AI-enriched documents from Blob Storage:
-       - 10,000 Arxiv Computer Science PDFs  
+       - Transcripts of the dialogue of all the episodes of the TV Show: FRIENDS  
        - 90,000 Covid publication abstracts
-       - 5 lenghty PDF books
+       - 4 lenghty PDF books
    * 3f. CSV Tabular File - contains COVID-related statistics in the US.
-   * 3g. Kraken broker API for currencies
 4. The app retrieves the result from the source and crafts the answer.
 5. The tuple (Question and Answer) is saved to CosmosDB as persistent memory and for further analysis.
 6. The answer is delivered to the user.
@@ -93,8 +92,8 @@ Note: (Pre-requisite) You need to have an Azure OpenAI service already created
 
 1. Fork this repo to your Github account.
 2. In Azure OpenAI studio, deploy these models (older models than the ones stated below won't work):
-   - "gpt-35-turbo-1106 (or newer)" 
-   - "gpt-4-turbo-1106  (or newer)"
+   - "gpt-4o" 
+   - "gpt-4o-mini"
    - "text-embedding-ada-002 (or newer)"
 3. Create a Resource Group where all the assets of this accelerator are going to be. Azure OpenAI can be in different RG or a different Subscription.
 4. ClICK BELOW to create all the Azure Infrastructure needed to run the Notebooks (Azure AI Search, Cognitive Services, etc):

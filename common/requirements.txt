@@ -23,7 +23,7 @@ python-dotenv
 azure-ai-formrecognizer
 azure-storage-blob
 beautifulsoup4
-pydantic==1.10.13
+pydantic
 fastapi
 
 
