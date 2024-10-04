@@ -77,7 +77,7 @@ param location string = resourceGroup().location
 
 var cognitiveServiceSKU = 'S0'
 
-resource azureSearch 'Microsoft.Search/searchServices@2021-04-01-Preview' = {
+resource azureSearch 'Microsoft.Search/searchServices@2024-07-01' = {
   name: azureSearchName
   location: location
   sku: {
@@ -222,7 +222,7 @@ resource blobServices 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01
   name: 'default'
 }
 
-resource blobStorageContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = [for containerName in ['books', 'cord19', 'mixed'] : {
+resource blobStorageContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = [for containerName in ['books', 'cord19', 'friends'] : {
   parent: blobServices
   name: containerName
 }]

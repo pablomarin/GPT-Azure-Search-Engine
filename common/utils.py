@@ -13,6 +13,9 @@ import docx2txt
 import tiktoken
 import html
 import time
+import shutil
+import zipfile
+from tqdm import tqdm
 from time import sleep
 from typing import List, Tuple
 from pypdf import PdfReader, PdfWriter
@@ -20,6 +23,8 @@ from dataclasses import dataclass
 from sqlalchemy.engine.url import URL
 from azure.ai.formrecognizer import DocumentAnalysisClient
 from azure.core.credentials import AzureKeyCredential
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
+
 
 from langchain.callbacks.manager import AsyncCallbackManagerForToolRun, CallbackManagerForToolRun
 from langchain.pydantic_v1 import BaseModel, Field, Extra
@@ -55,6 +60,9 @@ from langchain_core.documents import Document
 from operator import itemgetter
 from typing import List
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 
 try:
@@ -64,6 +72,34 @@ except Exception as e:
     print(e)
     from prompts import (AGENT_DOCSEARCH_PROMPT, CSV_PROMPT_PREFIX, MSSQL_AGENT_PREFIX,
                          CHATGPT_PROMPT, BINGSEARCH_PROMPT, APISEARCH_PROMPT)
+
+    
+# Function to upload a single file
+def upload_file_to_blob(file_path, blob_name, container_name):
+    blob_service_client = BlobServiceClient.from_connection_string(os.environ['BLOB_CONNECTION_STRING'])
+    container_client = blob_service_client.get_container_client(container_name)
+    blob_client = container_client.get_blob_client(blob_name)
+    with open(file_path, "rb") as data:
+        blob_client.upload_blob(data, overwrite=True)
+
+# Unzip the file to a temporary directory
+def extract_zip_file(zip_path, extract_to):
+    print(f"Extracting {zip_path} ... ")
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        zip_ref.extractall(extract_to)
+    print(f"Extracted {zip_path} to {extract_to}")
+
+# Recursive function to upload all files in a directory with overall progress bar
+def upload_directory_to_blob(local_directory, container_name, container_folder=""):
+    total_files = sum([len(files) for _, _, files in os.walk(local_directory)])  # Get total number of files
+    with tqdm(total=total_files, desc="Uploading Files", ncols=100) as overall_progress:
+        for root, dirs, files in os.walk(local_directory):
+            for file in files:
+                file_path = os.path.join(root, file)
+                relative_path = os.path.relpath(file_path, local_directory)
+                blob_name = os.path.join(container_folder, relative_path).replace("\\", "/")  # Adjust path for Azure
+                upload_file_to_blob(file_path, blob_name, container_name)
+                overall_progress.update(1)  # Update progress after each file is uploaded
 
 
 def text_to_base64(text):
@@ -112,8 +148,12 @@ def parse_pdf(file, form_recognizer=False, formrecognizer_endpoint=None, formrec
         form_recognizer_client = DocumentAnalysisClient(endpoint=os.environ["FORM_RECOGNIZER_ENDPOINT"], credential=credential)
         
         if not from_url:
-            with open(file, "rb") as filename:
-                poller = form_recognizer_client.begin_analyze_document(model, document = filename)
+            # If file is a string (file path), open it normally; if it's BytesIO, pass it directly
+            if isinstance(file, str):
+                with open(file, "rb") as filename:
+                    poller = form_recognizer_client.begin_analyze_document(model, document=filename)
+            elif isinstance(file, BytesIO):
+                poller = form_recognizer_client.begin_analyze_document(model, document=file)
         else:
             poller = form_recognizer_client.begin_analyze_document_from_url(model, document_url = file)
             
@@ -250,6 +290,7 @@ def reduce_openapi_spec(spec: dict, dereference: bool = True) -> ReducedOpenAPIS
 
 
 def get_search_results(query: str, indexes: list, 
+                       search_filter: str = "",
                        k: int = 5,
                        reranker_threshold: int = 1,
                        sas_token: str = "") -> List[dict]:
@@ -272,12 +313,20 @@ def get_search_results(query: str, indexes: list,
             "count":"true",
             "top": k    
         }
+        
+        if search_filter:
+            search_payload["filter"] = search_filter
 
         resp = requests.post(os.environ['AZURE_SEARCH_ENDPOINT'] + "/indexes/" + index + "/docs/search",
                          data=json.dumps(search_payload), headers=headers, params=params)
 
         search_results = resp.json()
         agg_search_results[index] = search_results
+        
+        
+    if not any("value" in results for results in agg_search_results.values()):
+        logger.warning("Empty Search Response")
+        return {}
     
     content = dict()
     ordered_content = OrderedDict()
@@ -315,13 +364,14 @@ class CustomAzureSearchRetriever(BaseRetriever):
     topK : int
     reranker_threshold : int
     sas_token : str = ""
+    search_filter : str = ""
     
     
     def _get_relevant_documents(
         self, input: str, *, run_manager: CallbackManagerForRetrieverRun
     ) -> List[Document]:
         
-        ordered_results = get_search_results(input, self.indexes, k=self.topK, reranker_threshold=self.reranker_threshold, sas_token=self.sas_token)
+        ordered_results = get_search_results(input, self.indexes, k=self.topK, reranker_threshold=self.reranker_threshold, sas_token=self.sas_token, search_filter=self.search_filter)
         
         top_docs = []
         for key,value in ordered_results.items():

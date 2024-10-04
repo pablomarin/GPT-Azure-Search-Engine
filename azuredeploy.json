@@ -158,7 +158,7 @@
   "resources": [
     {
       "type": "Microsoft.Search/searchServices",
-      "apiVersion": "2021-04-01-preview",
+      "apiVersion": "2024-07-01",
       "name": "[parameters('azureSearchName')]",
       "location": "[parameters('location')]",
       "sku": {
@@ -321,7 +321,13 @@
       "name": "[format('{0}/{1}', parameters('blobStorageAccountName'), 'default')]",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts', parameters('blobStorageAccountName'))]"
-      ]
+      ],
+      "properties": {
+        "deleteRetentionPolicy": {
+        "enabled": true,
+        "days": 7 
+        }
+      }
     },
     {
       "copy": {
@@ -330,7 +336,7 @@
       },
       "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
       "apiVersion": "2023-01-01",
-      "name": "[format('{0}/{1}/{2}', parameters('blobStorageAccountName'), 'default', createArray('books', 'cord19', 'mixed')[copyIndex()])]",
+      "name": "[format('{0}/{1}/{2}', parameters('blobStorageAccountName'), 'default', createArray('books', 'cord19', 'friends')[copyIndex()])]",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('blobStorageAccountName'), 'default')]"
       ]
