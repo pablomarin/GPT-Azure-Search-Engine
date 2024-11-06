@@ -1,77 +1,68 @@
 import re
 import os
 import json
-from io import BytesIO
-from typing import Any, Dict, List, Optional, Awaitable, Callable, Tuple, Type, Union
 import requests
 import asyncio
-
-from collections import OrderedDict
 import base64
-from bs4 import BeautifulSoup
-import docx2txt
-import tiktoken
-import html
-import time
 import shutil
 import zipfile
-from tqdm import tqdm
+import time
+import tiktoken
+
 from time import sleep
-from typing import List, Tuple
+from io import BytesIO
+from typing import Any, Dict, List, Optional, Awaitable, Callable, Tuple, Type, Union
+from operator import itemgetter
+from typing import List
+from pydantic import BaseModel, Field, Extra
 from pypdf import PdfReader, PdfWriter
 from dataclasses import dataclass
+from concurrent.futures import ThreadPoolExecutor
+from collections import OrderedDict
+from tqdm import tqdm
+from bs4 import BeautifulSoup
+
 from sqlalchemy.engine.url import URL
 from azure.ai.formrecognizer import DocumentAnalysisClient
 from azure.core.credentials import AzureKeyCredential
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 
 
-from langchain.callbacks.manager import AsyncCallbackManagerForToolRun, CallbackManagerForToolRun
-from langchain.pydantic_v1 import BaseModel, Field, Extra
-from langchain.tools import BaseTool, StructuredTool, tool
-from typing import Dict, List
-from concurrent.futures import ThreadPoolExecutor
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.schema import BaseOutputParser, OutputParserException
-from langchain.chains import LLMChain
-from langchain.memory import ConversationBufferMemory
-from langchain_experimental.agents.agent_toolkits import create_csv_agent
-from langchain.tools import BaseTool, StructuredTool, tool
-from langchain.prompts import PromptTemplate
-from langchain.sql_database import SQLDatabase
-from langchain.agents import AgentExecutor, initialize_agent, AgentType, Tool
-from langchain_community.utilities import BingSearchAPIWrapper
-from langchain.agents import create_sql_agent, create_openai_tools_agent
-from langchain_community.agent_toolkits import create_sql_agent
-from langchain_community.agent_toolkits import SQLDatabaseToolkit
-from langchain_community.utilities.sql_database import SQLDatabase
-from langchain.callbacks.base import BaseCallbackManager
-from langchain.requests import RequestsWrapper
-from langchain.chains import APIChain
-from langchain.agents.agent_toolkits.openapi.spec import reduce_openapi_spec
-from langchain.utils.json_schema import dereference_refs
-from langchain_openai import AzureChatOpenAI
-from langchain_openai import AzureOpenAIEmbeddings
+from langchain_core.tools import BaseTool, StructuredTool
+from langchain_core.callbacks import AsyncCallbackManagerForToolRun,CallbackManagerForToolRun
+from langchain_core.utils.json_schema import dereference_refs
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.retrievers import BaseRetriever
-from langchain_core.callbacks import CallbackManagerForRetrieverRun
-from langchain_core.documents import Document
-from operator import itemgetter
-from typing import List
+from langchain_core.callbacks import CallbackManagerForRetrieverRun, Callbacks
+from langchain_experimental.tools import PythonAstREPLTool
+
+
+from langchain_community.utilities import BingSearchAPIWrapper
+from langchain_community.tools.bing_search import BingSearchResults
+from langchain_community.utilities.sql_database import SQLDatabase
+from langchain_community.utilities.requests import RequestsWrapper, TextRequestsWrapper
+from langchain_community.agent_toolkits import SQLDatabaseToolkit
+from langchain_community.agent_toolkits.openapi.toolkit import RequestsToolkit
+
+
+from langchain_openai import AzureChatOpenAI
+from langchain_openai import AzureOpenAIEmbeddings
+
+from langgraph.prebuilt import create_react_agent
+
 
 import logging
 logger = logging.getLogger(__name__)
 
 
-
 try:
-    from .prompts import (AGENT_DOCSEARCH_PROMPT, CSV_PROMPT_PREFIX, MSSQL_AGENT_PREFIX,
-                          CHATGPT_PROMPT, BINGSEARCH_PROMPT, APISEARCH_PROMPT)
+    from .prompts import (DOCSEARCH_PROMPT_TEXT, CSV_AGENT_PROMPT_TEXT, MSSQL_AGENT_PROMPT_TEXT,
+                           BING_PROMPT_TEXT, APISEARCH_PROMPT_TEXT)
 except Exception as e:
     print(e)
-    from prompts import (AGENT_DOCSEARCH_PROMPT, CSV_PROMPT_PREFIX, MSSQL_AGENT_PREFIX,
-                         CHATGPT_PROMPT, BINGSEARCH_PROMPT, APISEARCH_PROMPT)
+    from prompts import (DOCSEARCH_PROMPT_TEXT, CSV_AGENT_PROMPT_TEXT, MSSQL_AGENT_PROMPT_TEXT,
+                         BING_PROMPT_TEXT, APISEARCH_PROMPT_TEXT)
 
     
 # Function to upload a single file
@@ -102,34 +93,7 @@ def upload_directory_to_blob(local_directory, container_name, container_folder="
                 overall_progress.update(1)  # Update progress after each file is uploaded
 
 
-def text_to_base64(text):
-    # Convert text to bytes using UTF-8 encoding
-    bytes_data = text.encode('utf-8')
-
-    # Perform Base64 encoding
-    base64_encoded = base64.b64encode(bytes_data)
-
-    # Convert the result back to a UTF-8 string representation
-    base64_text = base64_encoded.decode('utf-8')
-
-    return base64_text
-
-def table_to_html(table):
-    table_html = "<table>"
-    rows = [sorted([cell for cell in table.cells if cell.row_index == i], key=lambda cell: cell.column_index) for i in range(table.row_count)]
-    for row_cells in rows:
-        table_html += "<tr>"
-        for cell in row_cells:
-            tag = "th" if (cell.kind == "columnHeader" or cell.kind == "rowHeader") else "td"
-            cell_spans = ""
-            if cell.column_span > 1: cell_spans += f" colSpan={cell.column_span}"
-            if cell.row_span > 1: cell_spans += f" rowSpan={cell.row_span}"
-            table_html += f"<{tag}{cell_spans}>{html.escape(cell.content)}</{tag}>"
-        table_html +="</tr>"
-    table_html += "</table>"
-    return table_html
-
-
+# Function that uses PyPDF of Azure Form Recognizer to parse PDFs
 def parse_pdf(file, form_recognizer=False, formrecognizer_endpoint=None, formrecognizerkey=None, model="prebuilt-document", from_url=False, verbose=False):
     """Parses PDFs using PyPDF or Azure Document Intelligence SDK (former Azure Form Recognizer)"""
     offset = 0
@@ -212,13 +176,6 @@ def num_tokens_from_string(string: str) -> int:
     num_tokens = len(encoding.encode(string))
     return num_tokens
 
-# Returns num of toknes used on a list of Documents objects
-def num_tokens_from_docs(docs: List[Document]) -> int:
-    num_tokens = 0
-    for i in range(len(docs)):
-        num_tokens += num_tokens_from_string(docs[i].page_content)
-    return num_tokens
-
 
 @dataclass(frozen=True)
 class ReducedOpenAPISpec:
@@ -292,7 +249,7 @@ def reduce_openapi_spec(spec: dict, dereference: bool = True) -> ReducedOpenAPIS
 def get_search_results(query: str, indexes: list, 
                        search_filter: str = "",
                        k: int = 5,
-                       reranker_threshold: int = 1,
+                       reranker_threshold: float = 1,
                        sas_token: str = "") -> List[dict]:
     """Performs multi-index hybrid search and returns ordered dictionary with the combined results"""
     
@@ -362,21 +319,24 @@ class CustomAzureSearchRetriever(BaseRetriever):
     
     indexes: List
     topK : int
-    reranker_threshold : int
+    reranker_threshold : float
     sas_token : str = ""
     search_filter : str = ""
     
     
     def _get_relevant_documents(
         self, input: str, *, run_manager: CallbackManagerForRetrieverRun
-    ) -> List[Document]:
+    ) -> List[dict]:
         
         ordered_results = get_search_results(input, self.indexes, k=self.topK, reranker_threshold=self.reranker_threshold, sas_token=self.sas_token, search_filter=self.search_filter)
         
         top_docs = []
         for key,value in ordered_results.items():
             location = value["location"] if value["location"] is not None else ""
-            top_docs.append(Document(page_content=value["chunk"], metadata={"source": location, "score":value["score"]}))
+            document = {"source": location,
+                        "score": value["score"],
+                        "page_content": value["chunk"]}
+            top_docs.append(document)
 
         return top_docs
 
@@ -384,12 +344,19 @@ class CustomAzureSearchRetriever(BaseRetriever):
 def get_answer(llm: AzureChatOpenAI,
                retriever: CustomAzureSearchRetriever, 
                query: str,
-               memory: ConversationBufferMemory = None
-              ) -> Dict[str, Any]:
+               ) -> Dict[str, Any]:
     
     """Gets an answer to a question from a list of Documents."""
 
     # Get the answer
+    
+    # Define prompt template
+    DOCSEARCH_PROMPT = ChatPromptTemplate.from_messages(
+            [
+                ("system", DOCSEARCH_PROMPT_TEXT + "\n\nCONTEXT:\n{context}\n\n"),
+                ("human", "{question}"),
+            ]
+        )
         
     chain = (
         {
@@ -410,7 +377,7 @@ def get_answer(llm: AzureChatOpenAI,
 #####################################################################################################
 ############################### AGENTS AND TOOL CLASSES #############################################
 #####################################################################################################
-    
+
 class SearchInput(BaseModel):
     query: str = Field(description="should be a search query")
     return_direct: bool = Field(
@@ -418,18 +385,19 @@ class SearchInput(BaseModel):
         default=False,
     )
 
+
+
 class GetDocSearchResults_Tool(BaseTool):
-    name = "docsearch"
-    description = "useful when the questions includes the term: docsearch"
+    name: str = "documents_retrieval"
+    description: str = "Retrieves documents from knowledge base"
     args_schema: Type[BaseModel] = SearchInput
     
     indexes: List[str] = []
     k: int = 10
-    reranker_th: int = 1
+    reranker_th: float = 1
     sas_token: str = "" 
 
-    def _run(
-        self, query: str,  return_direct = False, run_manager: Optional[CallbackManagerForToolRun] = None
+    def _run(self, query: str,  return_direct = False,  run_manager: Optional[CallbackManagerForToolRun] = None
     ) -> str:
 
         retriever = CustomAzureSearchRetriever(indexes=self.indexes, topK=self.k, reranker_threshold=self.reranker_th, 
@@ -438,9 +406,7 @@ class GetDocSearchResults_Tool(BaseTool):
         
         return results
 
-    async def _arun(
-        self, query: str, return_direct = False, run_manager: Optional[AsyncCallbackManagerForToolRun] = None
-    ) -> str:
+    async def _arun(self, query: str, return_direct = False, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
         """Use the tool asynchronously."""
         
         retriever = CustomAzureSearchRetriever(indexes=self.indexes, topK=self.k, reranker_threshold=self.reranker_th, 
@@ -453,385 +419,107 @@ class GetDocSearchResults_Tool(BaseTool):
         return results
 
 
-class DocSearchAgent(BaseTool):
-    """Agent to interact with for Azure AI Search """
-    
-    name = "docsearch"
-    description = "useful when the questions includes the term: docsearch.\n"
-    args_schema: Type[BaseModel] = SearchInput
+def create_docsearch_agent(
+        llm:AzureChatOpenAI,
+        indexes: List, k:int, reranker_th:float,
+        prompt:str,
+        sas_token:str=""
+    ):
 
-    llm: AzureChatOpenAI
-    indexes: List[str] = []
-    k: int = 10
-    reranker_th: int = 1
-    sas_token: str = ""   
-    
-    class Config:
-        extra = Extra.allow  # Allows setting attributes not declared in the model
-    
-    def __init__(self, **data):
-        super().__init__(**data)
-        tools = [GetDocSearchResults_Tool(indexes=self.indexes, k=self.k, reranker_th=self.reranker_th, sas_token=self.sas_token)]
 
-        agent = create_openai_tools_agent(self.llm, tools, AGENT_DOCSEARCH_PROMPT)
+    docsearch_tool = GetDocSearchResults_Tool(indexes=indexes,
+                                              k=k,
+                                              reranker_th=reranker_th, 
+                                              sas_token=sas_token)
 
-        self.agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=self.verbose, callback_manager=self.callbacks, handle_parsing_errors=True)
-        
+    docsearch_agent = create_react_agent(llm, tools=[docsearch_tool], state_modifier=prompt)
     
-    def _run(self, query: str,  return_direct = False, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
-        try:
-            result = self.agent_executor.invoke({"question": query})
-            return result['output']
-        except Exception as e:
-            print(e)
-            return str(e)  # Return an empty string or some error indicator
-
-    async def _arun(self, query: str,  return_direct = False, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
-        try:
-            result = await self.agent_executor.ainvoke({"question": query})
-            return result['output']
-        except Exception as e:
-            print(e)
-            return str(e)  # Return an empty string or some error indicator
+    return docsearch_agent
     
 
-
-class CSVTabularAgent(BaseTool):
-    """Agent to interact with CSV files"""
+def create_csvsearch_agent(
+        llm:AzureChatOpenAI,
+        prompt:str,
+    ):
+    csvsearch_agent = create_react_agent(llm,tools=[PythonAstREPLTool()], state_modifier=prompt)
     
-    name = "csvfile"
-    description = "useful when the questions includes the term: csvfile.\n"
-    args_schema: Type[BaseModel] = SearchInput
+    return csvsearch_agent  
+ 
 
-    path: str
-    llm: AzureChatOpenAI
-
-    class Config:
-        extra = Extra.allow  # Allows setting attributes not declared in the model
-
-    def __init__(self, **data):
-        super().__init__(**data)
-        # Create the agent_executor within the __init__ method as requested
-        self.agent_executor = create_csv_agent(self.llm, self.path, 
-                                               agent_type="openai-tools",
-                                               prefix=CSV_PROMPT_PREFIX,
-                                               verbose=self.verbose, 
-                                               allow_dangerous_code=True,
-                                               callback_manager=self.callbacks,
-                                               )
-
-    def _run(self, query: str, return_direct = False, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
-        try:
-            # Use the initialized agent_executor to invoke the query
-            result = self.agent_executor.invoke(query)
-            return result['output']
-        except Exception as e:
-            print(e)
-            return str(e)  # Return an error indicator
-
-    async def _arun(self, query: str, return_direct = False, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
-        # Note: Implementation assumes the agent_executor and its methods support async operations
-        try:
-            # Use the initialized agent_executor to asynchronously invoke the query
-            result = await self.agent_executor.ainvoke(query)
-            return result['output']
-        except Exception as e:
-            print(e)
-            return str(e)  # Return an error indicator
-
-
-
-class SQLSearchAgent(BaseTool):
-    """Agent to interact with SQL databases"""
+def create_sqlsearch_agent(
+        llm:AzureChatOpenAI,
+        prompt:str,
+    ):
     
-    name = "sqlsearch"
-    description = "useful when the questions includes the term: sqlsearch.\n"
-    args_schema: Type[BaseModel] = SearchInput
+    # Configuration for the database connection
+    db_config = {
+        'drivername': 'mssql+pyodbc',
+        'username': os.environ["SQL_SERVER_USERNAME"] + '@' + os.environ["SQL_SERVER_NAME"],
+        'password': os.environ["SQL_SERVER_PASSWORD"],
+        'host': os.environ["SQL_SERVER_NAME"],
+        'port': 1433,
+        'database': os.environ["SQL_SERVER_DATABASE"],
+        'query': {'driver': 'ODBC Driver 17 for SQL Server'},
+    }
 
-    llm: AzureChatOpenAI
-    k: int = 30
-
-    class Config:
-        extra = Extra.allow  # Allows setting attributes not declared in the model
-
-    def __init__(self, **data):
-        super().__init__(**data)
-        db_config = self.get_db_config()
-        db_url = URL.create(**db_config)
-        db = SQLDatabase.from_uri(db_url)
-        toolkit = SQLDatabaseToolkit(db=db, llm=self.llm)
-
-        self.agent_executor = create_sql_agent(
-            prefix=MSSQL_AGENT_PREFIX,
-            llm=self.llm,
-            toolkit=toolkit,
-            top_k=self.k,
-            agent_type="openai-tools",
-            callback_manager=self.callbacks,
-            verbose=self.verbose,
-        )
-
-    def get_db_config(self):
-        """Returns the database configuration."""
-        return {
-            'drivername': 'mssql+pyodbc',
-            'username': os.environ["SQL_SERVER_USERNAME"] + '@' + os.environ["SQL_SERVER_NAME"],
-            'password': os.environ["SQL_SERVER_PASSWORD"],
-            'host': os.environ["SQL_SERVER_NAME"],
-            'port': 1433,
-            'database': os.environ["SQL_SERVER_DATABASE"],
-            'query': {'driver': 'ODBC Driver 17 for SQL Server'}
-        }
-
-    def _run(self, query: str, return_direct = False, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
-        try:
-            # Use the initialized agent_executor to invoke the query
-            result = self.agent_executor.invoke(query)
-            return result['output']
-        except Exception as e:
-            print(e)
-            return str(e)  # Return an error indicator
-
-    async def _arun(self, query: str, return_direct = False, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
-        # Note: Implementation assumes the agent_executor and its methods support async operations
-        try:
-            # Use the initialized agent_executor to asynchronously invoke the query
-            result = await self.agent_executor.ainvoke(query)
-            return result['output']
-        except Exception as e:
-            print(e)
-            return str(e)  # Return an error indicator
-
-        
-
-class ChatGPTTool(BaseTool):
-    """Tool for a ChatGPT clone"""
+    # Create a URL object for connecting to the database
+    db_url = URL.create(**db_config)
     
-    name = "chatgpt"
-    description = "default tool for general questions, profile or greeting like questions.\n"
-    args_schema: Type[BaseModel] = SearchInput
-
-    llm: AzureChatOpenAI
-
-    class Config:
-        extra = Extra.allow  # Allows setting attributes not declared in the model
-
-    def __init__(self, **data):
-        super().__init__(**data)
-
-        output_parser = StrOutputParser()
-        self.chatgpt_chain = CHATGPT_PROMPT | self.llm | output_parser
-
-    def _run(self, query: str, return_direct = False, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
-        try:
-            response = self.chatgpt_chain.invoke({"question": query})
-            return response
-        except Exception as e:
-            print(e)
-            return str(e)  # Return an error indicator
-
-    async def _arun(self, query: str, return_direct = False, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
-        """Implement the tool to be used asynchronously."""
-        try:
-            response = await self.chatgpt_chain.ainvoke({"question": query})
-            return response
-        except Exception as e:
-            print(e)
-            return str(e)  # Return an error indicator
-               
+    toolkit = SQLDatabaseToolkit(db=SQLDatabase.from_uri(db_url), llm=llm)
     
+    sqlsearch_agent = create_react_agent(llm, 
+                                     tools=toolkit.get_tools(), 
+                                     state_modifier=prompt)
     
-class GetBingSearchResults_Tool(BaseTool):
-    """Tool for a Bing Search Wrapper"""
+    return sqlsearch_agent  
 
-    name = "Searcher"
-    description = "useful to search the internet.\n"
-    args_schema: Type[BaseModel] = SearchInput
 
-    k: int = 5
+def create_websearch_agent(
+        llm:AzureChatOpenAI,
+        prompt:str,
+        k:int=10
+    ):
     
-    def _run(self, query: str,  return_direct = False, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
-        bing = BingSearchAPIWrapper(k=self.k)
-        try:
-            return bing.results(query,num_results=self.k)
-        except:
-            return "No Results Found"
-    
-    async def _arun(self, query: str, return_direct = False, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
-        bing = BingSearchAPIWrapper(k=self.k)
-        loop = asyncio.get_event_loop()
-        try:
-            results = await loop.run_in_executor(ThreadPoolExecutor(), bing.results, query, self.k)
-            return results
-        except:
-            return "No Results Found"
-            
+    bing_tool = BingSearchResults(api_wrapper=BingSearchAPIWrapper(), 
+                              num_results=k,
+                              name="Searcher",
+                              description="useful to search the internet")
 
-
-class BingSearchAgent(BaseTool):
-    """Agent to interact with Bing"""
-    
-    name = "bing"
-    description = "useful when the questions includes the term: bing.\n"
-    args_schema: Type[BaseModel] = SearchInput
-
-    llm: AzureChatOpenAI
-    k: int = 5
-    
-    class Config:
-        extra = Extra.allow  # Allows setting attributes not declared in the model
-
-    def __init__(self, **data):
-        super().__init__(**data)
-        
-        web_fetch_tool = Tool.from_function(
-            func=self.fetch_web_page,
-            name="WebFetcher",
-            description="useful to fetch the content of a url"
-        )
-
-        # tools = [GetBingSearchResults_Tool(k=self.k)]
-        tools = [GetBingSearchResults_Tool(k=self.k), web_fetch_tool] # Uncomment if using GPT-4
-        
-        agent = create_openai_tools_agent(self.llm, tools, BINGSEARCH_PROMPT)
-
-        self.agent_executor = AgentExecutor(agent=agent, tools=tools,
-                                            return_intermediate_steps=True,
-                                            callback_manager=self.callbacks,
-                                            verbose=self.verbose,
-                                            handle_parsing_errors=True)
-
-    def parse_html(self, content) -> str:
-        """Parses HTML content to text."""
+    def parse_html(content) -> str:
         soup = BeautifulSoup(content, 'html.parser')
         text_content_with_links = soup.get_text()
-        return text_content_with_links
+        # Split the text into words and limit to the first 10,000
+        limited_text_content = ' '.join(text_content_with_links.split()[:10000])
+        return limited_text_content
 
-    def fetch_web_page(self, url: str) -> str:
-        """Fetches a webpage and returns its text content."""
+    def fetch_web_page(url: str) -> str:
         HEADERS = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:90.0) Gecko/20100101 Firefox/90.0'}
         response = requests.get(url, headers=HEADERS)
-        return self.parse_html(response.content)
+        return parse_html(response.content)
 
-    def _run(self, query: str,  return_direct = False, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
-        try:
-            response = self.agent_executor.invoke({"question": query})
-            return response['output']
-        except Exception as e:
-            print(e)
-            return str(e)  # Return an error indicator
-
-    async def _arun(self, query: str, return_direct = False, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
-        """Implements the tool to be used asynchronously."""
-        try:
-            response = await self.agent_executor.ainvoke({"question": query})
-            return response['output']
-        except Exception as e:
-            print(e)
-            return str(e)  # Return an error indicator
-
-        
-
-class GetAPISearchResults_Tool(BaseTool):
-    """APIChain as a tool"""
+    web_fetch_tool = StructuredTool.from_function(
+        func=fetch_web_page,
+        name="WebFetcher",
+        description="useful to fetch the content of a url"
+    )
     
-    name = "apisearch"
-    description = "useful when the questions includes the term: apisearch.\n"
-    args_schema: Type[BaseModel] = SearchInput
-
-    llm: AzureChatOpenAI
-    api_spec: str
-    headers: dict = {}
-    limit_to_domains: list = None
-    verbose: bool = False
+    websearch_agent = create_react_agent(llm, 
+                                     tools=[bing_tool, web_fetch_tool], 
+                                     state_modifier=prompt)
     
-    class Config:
-        extra = Extra.allow  # Allows setting attributes not declared in the model
+    return websearch_agent
 
-    def __init__(self, **data):
-        super().__init__(**data)
-        self.chain = APIChain.from_llm_and_api_docs(
-            llm=self.llm,
-            api_docs=self.api_spec,
-            headers=self.headers,
-            verbose=self.verbose,
-            limit_to_domains=self.limit_to_domains
-        )
 
-    def _run(self, query: str, return_direct = False, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
-        try:
-            # Optionally sleep to avoid possible TPM rate limits
-            sleep(2)
-            response = self.chain.invoke(query)
-        except Exception as e:
-            response = str(e)  # Ensure the response is always a string
-
-        return response
-
-    async def _arun(self, query: str, return_direct = False, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
-        """Use the tool asynchronously."""
-        loop = asyncio.get_event_loop()
-        try:
-            # Optionally sleep to avoid possible TPM rate limits, handled differently in async context
-            await asyncio.sleep(2)
-            # Execute the synchronous function in a separate thread
-            response = await loop.run_in_executor(ThreadPoolExecutor(), self.chain.invoke, query)
-        except Exception as e:
-            response = str(e)  # Ensure the response is always a string
-
-        return response
-
-        
-        
-class APISearchAgent(BaseTool):
-    """Agent to interact with any API given a OpenAPI 3.0 spec"""
+def create_apisearch_agent(
+        llm:AzureChatOpenAI,
+        prompt:str,
+    ):
     
-    name = "apisearch"
-    description = "useful when the questions includes the term: apisearch.\n"
-    args_schema: Type[BaseModel] = SearchInput
+    toolkit = RequestsToolkit(requests_wrapper=RequestsWrapper(),allow_dangerous_requests=True)
 
-    llm: AzureChatOpenAI
-    llm_search: AzureChatOpenAI
-    api_spec: str
-    headers: dict = {}
-    limit_to_domains: list = None
     
-    class Config:
-        extra = Extra.allow  # Allows setting attributes not declared in the model
-
-    def __init__(self, **data):
-        super().__init__(**data)
-        tools = [GetAPISearchResults_Tool(llm=self.llm,
-                                          llm_search=self.llm_search,
-                                          api_spec=str(self.api_spec),
-                                          headers=self.headers,
-                                          verbose=self.verbose,
-                                          limit_to_domains=self.limit_to_domains)]
-        
-        agent = create_openai_tools_agent(llm=self.llm, tools=tools, prompt=APISEARCH_PROMPT)
-        self.agent_executor = AgentExecutor(agent=agent, tools=tools, 
-                                            verbose=self.verbose, 
-                                            return_intermediate_steps=True,
-                                            callback_manager=self.callbacks)
-
-    def _run(self, query: str, return_direct = False, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
-        try:
-            # Use the initialized agent_executor to invoke the query
-            response = self.agent_executor.invoke({"question":query})
-            return response['output']
-        except Exception as e:
-            print(e)
-            return str(e)  # Return an error indicator
-
-    async def _arun(self, query: str, return_direct = False, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:
-        # Note: Implementation assumes the agent_executor and its methods support async operations
-        try:
-            # Use the initialized agent_executor to asynchronously invoke the query
-            response = await self.agent_executor.ainvoke({"question":query})
-            return response['output']
-        except Exception as e:
-            print(e)
-            return str(e)  # Return an error indicator
-
-
-
+    apisearch_agent = create_react_agent(llm, 
+                                     tools=toolkit.get_tools(), 
+                                     state_modifier=prompt)
+    
+    return apisearch_agent 

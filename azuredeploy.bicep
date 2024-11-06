@@ -77,7 +77,7 @@ param location string = resourceGroup().location
 
 var cognitiveServiceSKU = 'S0'
 
-resource azureSearch 'Microsoft.Search/searchServices@2024-07-01' = {
+resource azureSearch 'Microsoft.Search/searchServices@2021-04-01-preview' = {
   name: azureSearchName
   location: location
   sku: {

@@ -3,8 +3,6 @@ langchain
 langchain-openai
 langchain-community
 langchain-experimental
-langchain_mistralai
-langchain_cohere==0.1.5
 langgraph
 langserve[all]
 langchain-cli
