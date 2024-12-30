@@ -21,6 +21,19 @@
         "description": "Required. Active Directory App Secret Value."
       }
     },
+    "appType": {
+      "type": "string",
+      "defaultValue": "SingleTenant",
+      "metadata": {
+        "description": "Required. App Registration type SingleTenant, MultiTenant"
+      }
+    },
+    "TenantId": {
+      "type": "string",
+      "metadata": {
+        "description": "Required. Microsoft Tenant ID"
+      }
+    },
     "blobSASToken": {
       "type": "securestring",
       "metadata": {
@@ -31,7 +44,7 @@
       "type": "string",
       "defaultValue": "[resourceGroup().name]",
       "metadata": {
-        "description": "Optional. The name of the resource group where the resources (Azure Search etc.) where deployed previously. Defaults to current resource group."
+        "description": "Required. The name of the resource group where the resources (Azure Search etc.) where deployed previously. Defaults to current resource group."
       }
     },
     "azureSearchName": {
@@ -42,9 +55,9 @@
     },
     "azureSearchAPIVersion": {
       "type": "string",
-      "defaultValue": "2024-07-01",
+      "defaultValue": "2024-11-01-preview",
       "metadata": {
-        "description": "Optional. The API version for the Azure Search service."
+        "description": "Required. The API version for the Azure Search service."
       }
     },
     "azureOpenAIName": {
@@ -59,25 +72,39 @@
         "description": "Required. The API key of the Azure OpenAI resource deployed previously."
       }
     },
-    "azureOpenAIModelName": {
+    "azureOpenAIAPIVersion": {
+      "type": "string",
+      "defaultValue": "2024-10-01-preview",
+      "metadata": {
+        "description": "Required. The API version for the Azure OpenAI service."
+      }
+    },
+    "azureOpenAIGPT4oMiniModelName": {
       "type": "string",
       "defaultValue": "gpt-4o-mini",
       "metadata": {
-        "description": "Optional. The model name for the Azure OpenAI service."
+        "description": "Required. The deployment name for the GPT-4o-mini model."
       }
     },
-    "azureOpenAIAPIVersion": {
+    "azureOpenAIGPT4oModelName": {
       "type": "string",
-      "defaultValue": "2024-07-01-preview",
+      "defaultValue": "gpt-4o",
       "metadata": {
-        "description": "Optional. The API version for the Azure OpenAI service."
+        "description": "Required. The deployment name for the GPT-4o model."
+      }
+    },
+    "azureOpenAIEmbeddingModelName": {
+      "type": "string",
+      "defaultValue": "text-embedding-3-large",
+      "metadata": {
+        "description": "Required. The deployment name for the Embedding model."
       }
     },
     "bingSearchUrl": {
       "type": "string",
       "defaultValue": "https://api.bing.microsoft.com/v7.0/search",
       "metadata": {
-        "description": "Optional. The URL for the Bing Search service."
+        "description": "Required. The URL for the Bing Search service."
       }
     },
     "bingSearchName": {
@@ -127,7 +154,7 @@
       "type": "string",
       "defaultValue": "[format('BotId-{0}', uniqueString(resourceGroup().id))]",
       "metadata": {
-        "description": "Optional. The globally unique and immutable bot ID. Also used to configure the displayName of the bot, which is mutable."
+        "description": "Required. The globally unique and immutable bot ID. Also used to configure the displayName of the bot, which is mutable."
       }
     },
     "botSKU": {
@@ -138,14 +165,14 @@
         "S1"
       ],
       "metadata": {
-        "description": "Optional, defaults to F0. The pricing tier of the Bot Service Registration. Acceptable values are F0 and S1."
+        "description": "Required, defaults to F0. The pricing tier of the Bot Service Registration. Acceptable values are F0 and S1."
       }
     },
     "appServicePlanName": {
       "type": "string",
       "defaultValue": "[format('AppServicePlan-Backend-{0}', uniqueString(resourceGroup().id))]",
       "metadata": {
-        "description": "Optional. The name of the new App Service Plan."
+        "description": "Required. The name of the new App Service Plan."
       }
     },
     "appServicePlanSKU": {
@@ -157,7 +184,7 @@
         "P2v3"
       ],
       "metadata": {
-        "description": "Optional, defaults to S3. The SKU of the App Service Plan. Acceptable values are B3, S3 and P2v3."
+        "description": "Required, defaults to S3. The SKU of the App Service Plan. Acceptable values are B3, S3 and P2v3."
       }
     },
     "location": {
@@ -255,8 +282,16 @@
               "value": "[parameters('azureOpenAIAPIKey')]"
             },
             {
-              "name": "AZURE_OPENAI_MODEL_NAME",
-              "value": "[parameters('azureOpenAIModelName')]"
+              "name": "GPT4oMINI_DEPLOYMENT_NAME",
+              "value": "[parameters('azureOpenAIGPT4oMiniModelName')]"
+            },
+            {
+              "name": "GPT4o_DEPLOYMENT_NAME",
+              "value": "[parameters('azureOpenAIGPT4oModelName')]"
+            },
+            {
+              "name": "EMBEDDING_DEPLOYMENT_NAME",
+              "value": "[parameters('azureOpenAIEmbeddingModelName')]"
             },
             {
               "name": "AZURE_OPENAI_API_VERSION",
@@ -299,8 +334,8 @@
               "value": "[parameters('cosmosDBContainerName')]"
             },
             {
-              "name": "AZURE_COMOSDB_CONNECTION_STRING",
-              "value": "[listConnectionStrings(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupSearch')), 'Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBAccountName')), '2023-04-15').connectionStrings[0].connectionString]"
+            "name": "AZURE_COSMOSDB_KEY",
+            "value": "[listKeys(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupSearch')), 'Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBAccountName')), '2023-04-15').primaryMasterKey]"
             },
             {
               "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
@@ -377,7 +412,7 @@
     },
     {
       "type": "Microsoft.BotService/botServices",
-      "apiVersion": "2022-09-15",
+      "apiVersion": "2023-09-15-preview",
       "name": "[parameters('botId')]",
       "location": "global",
       "kind": "azurebot",
@@ -389,7 +424,8 @@
         "iconUrl": "https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png",
         "endpoint": "[variables('botEndpoint')]",
         "msaAppId": "[parameters('appId')]",
-        "luisAppIds": [],
+        "msaAppTenantId": "[parameters('TenantId')]",
+        "msaAppType": "[parameters('appType')]",
         "schemaTransformationVersion": "1.3",
         "isCmekEnabled": false
       },
@@ -401,8 +437,9 @@
   "outputs": {
     "botServiceName": {
       "type": "string",
-      "value": "[parameters('botId')]"
-    },
+      "value": "[format('{0}', parameters('botId'))]"
+    }
+    ,
     "webAppName": {
       "type": "string",
       "value": "[variables('webAppName')]"

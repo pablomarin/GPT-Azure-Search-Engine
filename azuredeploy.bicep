@@ -69,6 +69,9 @@ param cosmosDBContainerName string = 'cosmosdb-container-${uniqueString(resource
 @description('Optional. The name of the Form Recognizer service')
 param formRecognizerName string = 'form-recognizer-${uniqueString(resourceGroup().id)}'
 
+@description('Optional. The name of the Azure Speech service')
+param speechServiceName string = 'speechservice-${uniqueString(resourceGroup().id)}'
+
 @description('Optional. The name of the Blob Storage account')
 param blobStorageAccountName string = 'blobstorage${uniqueString(resourceGroup().id)}'
 
@@ -208,6 +211,23 @@ resource formRecognizerAccount 'Microsoft.CognitiveServices/accounts@2023-05-01'
   }
 }
 
+resource speechService 'Microsoft.CognitiveServices/accounts@2024-06-01-preview' = {
+  name: speechServiceName
+  location: location
+  sku: {
+    name: 'S0'
+  }
+  kind: 'SpeechServices'
+  properties: {
+    networkAcls: {
+      defaultAction: 'Allow'
+      virtualNetworkRules: []
+      ipRules: []
+    }
+    publicNetworkAccess: 'Enabled'
+  }
+}
+
 resource blobStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   name: blobStorageAccountName
   location: location
@@ -220,6 +240,12 @@ resource blobStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
 resource blobServices 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01' = {
   parent: blobStorageAccount
   name: 'default'
+  properties: {
+    deleteRetentionPolicy: {
+      enabled: true
+      days: 7
+    }
+  }
 }
 
 resource blobStorageContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = [for containerName in ['books', 'cord19', 'friends'] : {
@@ -230,20 +256,23 @@ resource blobStorageContainer 'Microsoft.Storage/storageAccounts/blobServices/co
 
 output azureSearchName string = azureSearchName
 output azureSearchEndpoint string = 'https://${azureSearchName}.search.windows.net'
+output azureSearchKey string = azureSearch.listAdminKeys().primaryKey
 output SQLServerName string = SQLServerName
 output SQLDatabaseName string = SQLDBName
 output cosmosDBAccountName string = cosmosDBAccountName
 output cosmosDBDatabaseName string = cosmosDBDatabaseName
 output cosmosDBContainerName string = cosmosDBContainerName
-output bingSearchAPIName string = bingSearchAPIName
-output formRecognizerName string = formRecognizerName
-output blobStorageAccountName string = blobStorageAccountName
-output formrecognizerEndpoint string = 'https://${formRecognizerName}.cognitiveservices.azure.com'
-output formRecognizerKey string = formRecognizerAccount.listKeys().key1
-output azureSearchKey string = azureSearch.listAdminKeys().primaryKey
 output cosmosDBAccountEndpoint string = cosmosDBAccount.properties.documentEndpoint
 output cosmosDBConnectionString string = 'AccountEndpoint=${cosmosDBAccount.properties.documentEndpoint};AccountKey=${cosmosDBAccount.listKeys().primaryMasterKey}' 
+output bingSearchAPIName string = bingSearchAPIName
 output bingServiceSearchKey string = bingSearchAccount.listKeys().key1
+output formRecognizerName string = formRecognizerName
+output formRecognizerEndpoint string = 'https://${formRecognizerName}.cognitiveservices.azure.com'
+output formRecognizerKey string = formRecognizerAccount.listKeys().key1
+output speechServiceName string = speechService.name
+output speechServiceEndpoint string = format('https://{0}.cognitiveservices.azure.com', speechService.name)
+output speechServiceKey string = listKeys(speechService.id, '2024-06-01-preview').key1
 output cognitiveServiceName string = cognitiveServiceName
 output cognitiveServiceKey string = cognitiveService.listKeys().key1
+output blobStorageAccountName string = blobStorageAccountName
 output blobConnectionString string = 'DefaultEndpointsProtocol=https;AccountName=${blobStorageAccountName};AccountKey=${blobStorageAccount.listKeys().keys[0].value};EndpointSuffix=core.windows.net'

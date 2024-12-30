@@ -23,26 +23,23 @@ The Bot Interface is just a window to a Bot Service app hosted in Azure.
 
 It has access to the following tools/pluggins:
 
-- Bing Search (***use @bing in your question***)
-- ChatGPT for common knowledge (***use @chatgpt in your question***)
+- Bing Search (***use @websearch in your question***)
 - Azure SQL for covid statistics data (***use @sqlsearch in your question***)
-- Azure Search for documents knowledge - Arxiv papers and Covid Articles (***use @docsearch in your question***)
-- Azure Search for books knowledge - 5 PDF books (***use @booksearch in your question***)
-- API Search for real-time covid statistics for US States, Countries and Continents (***use @apisearch in your question***)
+- Azure Search for documents knowledge - Friends Dialogs, Covid Papers, Books(***use @docsearch in your question***)
+- API Search for real-time currency and digital coins pricing (***use @apisearch in your question***)
+- CSV Analysis for covid statistics data  (***use @csvsearch in your question***)
 
-Note: If you don't use any of the tool names beginning with @, the bot will try to use it's own knowledge or tool available to answer the question.
+Note: If you don't use any of the tool names beginning with @, the bot will try to use it's own knowledge or the websearch to answer the question.
 
 Example questions:
 
 - Hello, my name is Bob, what's yours?
-- bing, What's the main economic news of today?
-- chatgpt, How do I cook a chocolate cake?
-- booksearch, what normally rich dad do that is different from poor dad?
-- docsearch, Why Covid doesn't affect kids that much compared to adults?
-- sqlsearch, How many people where hospitalized in Arkansas in June 2020?
-- docsearch, List the authors that talk about Boosting Algorithms
-- bing, what movies are showing tonight in Seattle?
-- Please tell me a joke
+- @websearch, What's the main economic news of today?
+- @docsearch, what normally rich dad do that is different from poor dad?
+- @docsearch, Why Covid doesn't affect kids that much compared to adults?
+- @sqlsearch, How many people where hospitalized in Arkansas in June 2020?
+- @docsearch, Tell me about the "PIVOT" scene
+- @websearch, what movies are showing tonight in Seattle?
     """)
 
 st.markdown("""

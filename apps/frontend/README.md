@@ -14,7 +14,7 @@ Also includes a Search experience.
 2. Zip the code of the bot by executing the following command in the terminal (you have to be inside the folder: apps/frontend/ ):
 
 ```bash
-zip frontend.zip ./* && zip frontend.zip ./pages/* && zip -j frontend.zip ../../common/*
+(zip frontend.zip ./app/* ./app/pages/* ./app/helpers/* && zip -j frontend.zip ../../common/*)
 ```
 3. Using the Azure CLI deploy the frontend code to the Azure App Service created on Step 2
 
@@ -27,19 +27,30 @@ az webapp deployment source config-zip --resource-group "<resource-group-name>" 
 
 4. In a few minutes (5-10) your App should be working now. Go to the Azure Portal and get the URL.
 
+## (Optional) Running the Frontend app Locally
+
+- Run the followin comand on the console to export the env variables
+```bash
+export $(grep -v '^#' ../../credentials.env | sed -E '/^\s*$/d;s/#.*//' | xargs)
+```
+- Run the stramlit server on port 8500
+```bash
+python -m streamlit run app/Home.py --server.port 8500 --server.address 0.0.0.0
+```
+- If you are working on an AML compute instance you can accces the frontend here:
+```bash
+https://<your_compute_name>-8500.<your_region>.instances.azureml.ms/
+```
+
+
 ## Troubleshoot
 
 1. If WebApp deployed succesfully but the Application didn't start
    1. Go to Azure portal -> Your Webapp -> Settings -> Configuration -> General Settings
    2. Make sure that StartUp Command has:  python -m streamlit run Home.py --server.port 8000 --server.address 0.0.0.0
 
-2. If running locally fails with error "TypeError: unsupported operand type(s) for |: 'type' and '_GenericAlias'"
-Check your list of conda environments and activate one with Python 3.10 or higher
-For example, if you are running the app on an Azure ML compute instance:
-    ```
-    conda env list
-    conda activate azureml_py310_sdkv2
-    ```
+
+
 
 
 

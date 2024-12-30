@@ -137,6 +137,13 @@
         "description": "Optional. The name of the Form Recognizer service"
       }
     },
+     "speechServiceName": {
+      "type": "string",
+      "defaultValue": "[format('speechservice-{0}', uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "Optional. The name of the Azure Speech Service."
+      }
+    },
     "blobStorageAccountName": {
       "type": "string",
       "defaultValue": "[format('blobstorage{0}', uniqueString(resourceGroup().id))]",
@@ -306,6 +313,24 @@
       }
     },
     {
+        "type": "Microsoft.CognitiveServices/accounts",
+        "apiVersion": "2024-06-01-preview",
+        "name": "[parameters('speechServiceName')]",
+        "location": "[parameters('location')]",
+        "sku": {
+            "name": "S0"
+        },
+        "kind": "SpeechServices",
+        "properties": {
+            "networkAcls": {
+                "defaultAction": "Allow",
+                "virtualNetworkRules": [],
+                "ipRules": []
+            },
+            "publicNetworkAccess": "Enabled"
+            }
+    },
+    {
       "type": "Microsoft.Storage/storageAccounts",
       "apiVersion": "2023-01-01",
       "name": "[parameters('blobStorageAccountName')]",
@@ -332,7 +357,7 @@
     {
       "copy": {
         "name": "blobStorageContainer",
-        "count": "[length(createArray('books', 'cord19', 'mixed'))]"
+        "count": "[length(createArray('books', 'cord19', 'friends'))]"
       },
       "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
       "apiVersion": "2023-01-01",
@@ -350,6 +375,10 @@
     "azureSearchEndpoint": {
       "type": "string",
       "value": "[format('https://{0}.search.windows.net', parameters('azureSearchName'))]"
+    },
+    "azureSearchKey": {
+      "type": "string",
+      "value": "[listAdminKeys(resourceId('Microsoft.Search/searchServices', parameters('azureSearchName')), '2021-04-01-preview').primaryKey]"
     },
     "SQLServerName": {
       "type": "string",
@@ -371,30 +400,6 @@
       "type": "string",
       "value": "[parameters('cosmosDBContainerName')]"
     },
-    "bingSearchAPIName": {
-      "type": "string",
-      "value": "[parameters('bingSearchAPIName')]"
-    },
-    "formRecognizerName": {
-      "type": "string",
-      "value": "[parameters('formRecognizerName')]"
-    },
-    "blobStorageAccountName": {
-      "type": "string",
-      "value": "[parameters('blobStorageAccountName')]"
-    },
-    "formrecognizerEndpoint": {
-      "type": "string",
-      "value": "[format('https://{0}.cognitiveservices.azure.com', parameters('formRecognizerName'))]"
-    },
-    "formRecognizerKey": {
-      "type": "string",
-      "value": "[listKeys(resourceId('Microsoft.CognitiveServices/accounts', parameters('formRecognizerName')), '2023-05-01').key1]"
-    },
-    "azureSearchKey": {
-      "type": "string",
-      "value": "[listAdminKeys(resourceId('Microsoft.Search/searchServices', parameters('azureSearchName')), '2021-04-01-preview').primaryKey]"
-    },
     "cosmosDBAccountEndpoint": {
       "type": "string",
       "value": "[reference(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBAccountName')), '2023-04-15').documentEndpoint]"
@@ -403,9 +408,37 @@
       "type": "secureString",
       "value": "[format('AccountEndpoint={0};AccountKey={1}', reference(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBAccountName')), '2023-04-15').documentEndpoint, listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBAccountName')), '2023-04-15').primaryMasterKey)]"
     },
+    "bingSearchAPIName": {
+      "type": "string",
+      "value": "[parameters('bingSearchAPIName')]"
+    },
     "bingServiceSearchKey": {
       "type": "string",
       "value": "[listKeys(resourceId('Microsoft.Bing/accounts', parameters('bingSearchAPIName')), '2020-06-10').key1]"
+    },
+    "formRecognizerName": {
+      "type": "string",
+      "value": "[parameters('formRecognizerName')]"
+    },
+    "formRecognizerEndpoint": {
+      "type": "string",
+      "value": "[format('https://{0}.cognitiveservices.azure.com', parameters('formRecognizerName'))]"
+    },
+    "formRecognizerKey": {
+      "type": "string",
+      "value": "[listKeys(resourceId('Microsoft.CognitiveServices/accounts', parameters('formRecognizerName')), '2023-05-01').key1]"
+    },
+    "speechServiceName": {
+      "type": "string",
+      "value": "[parameters('speechServiceName')]"
+    },
+    "speechServiceEndpoint": {
+      "type": "string",
+      "value": "[format('https://{0}.cognitiveservices.azure.com', parameters('speechServiceName'))]"
+    },
+    "speechServiceKey": {
+      "type": "string",
+      "value": "[listKeys(resourceId('Microsoft.CognitiveServices/accounts', parameters('speechServiceName')), '2024-06-01-preview').key1]"
     },
     "cognitiveServiceName": {
       "type": "string",
@@ -414,6 +447,10 @@
     "cognitiveServiceKey": {
       "type": "string",
       "value": "[listKeys(resourceId('Microsoft.CognitiveServices/accounts', parameters('cognitiveServiceName')), '2023-05-01').key1]"
+    },
+    "blobStorageAccountName": {
+      "type": "string",
+      "value": "[parameters('blobStorageAccountName')]"
     },
     "blobConnectionString": {
       "type": "secureString",

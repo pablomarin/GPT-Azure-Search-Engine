@@ -430,26 +430,46 @@ class CosmosDBSaver(BaseCosmosDBSaver, AbstractContextManager):
         )
         self.client = CosmosClient(endpoint, credential=key)
         self.lock = threading.Lock()
-
+        self._initialized = False  # Track if setup was run
+        
+        
     def __enter__(self) -> Self:
-        try:
-            self.database = self.client.create_database_if_not_exists(self.database_name)
-            logger.debug(f"Database '{self.database_name}' is ready.")
-        except exceptions.CosmosHttpResponseError as e:
-            logger.error(f"Error creating database '{self.database_name}': {e}")
-            raise
-        try:
-            self.container = self.database.create_container_if_not_exists(
-                id=self.container_name,
-                partition_key=PartitionKey(path=f"/{THREAD_ID}"),
-                indexing_policy=self.setup_indexing_policy()
-            )
-            logger.debug(f"Container '{self.container_name}' is ready.")
-        except exceptions.CosmosHttpResponseError as e:
-            logger.error(f"Error creating container '{self.container_name}': {e}")
-            raise
         self.setup()
         return self
+    
+    
+    def setup(self):
+        """
+        Initializes the database and container if not already done.
+        You must call this method if you're not using the `with` statement.
+        """
+        if not self._initialized:
+            try:
+                self.database = self.client.create_database_if_not_exists(self.database_name)
+                logger.debug(f"Database '{self.database_name}' is ready.")
+            except exceptions.CosmosHttpResponseError as e:
+                logger.error(f"Error creating database '{self.database_name}': {e}")
+                raise
+            try:
+                self.container = self.database.create_container_if_not_exists(
+                    id=self.container_name,
+                    partition_key=PartitionKey(path=f"/{THREAD_ID}"),
+                    indexing_policy=self.setup_indexing_policy()
+                )
+                logger.debug(f"Container '{self.container_name}' is ready.")
+            except exceptions.CosmosHttpResponseError as e:
+                logger.error(f"Error creating container '{self.container_name}': {e}")
+                raise
+
+            self._initialized = True
+            # If there's any additional setup logic, add it here
+            self.setup_additional()
+            
+
+    def setup_additional(self):
+        # Implement any additional setup logic if necessary
+        pass    
+            
 
     def __exit__(
         self,
@@ -457,11 +477,21 @@ class CosmosDBSaver(BaseCosmosDBSaver, AbstractContextManager):
         exc_value: Optional[BaseException],
         traceback: Optional[TracebackType],
     ) -> Optional[bool]:
-        # No resource to clean up in synchronous client
-        return None
+        self.close()
+    
+    def close(self):
+        """
+        Cleans up resources. Call this if you're not using 'with' statement.
+        """
+        # Client does not need explicit close in synchronous mode, but if you had resources,
+        # this is where you'd close them. Placeholder for future resource cleanup.
+        pass
 
     def upsert_item(self, doc: Dict[str, Any]) -> None:
         """Upsert an item into the database with retry logic."""
+        if not self._initialized:
+            raise RuntimeError("CosmosDBSaver not initialized. Call setup() first.")
+
         max_retries = 3
         for attempt in range(max_retries):
             try:
@@ -480,6 +510,9 @@ class CosmosDBSaver(BaseCosmosDBSaver, AbstractContextManager):
                     
     def upsert_items(self, docs: List[Dict[str, Any]]) -> None:
         """Upsert multiple items individually."""
+        if not self._initialized:
+            raise RuntimeError("CosmosDBSaver not initialized. Call setup() first.")
+
         max_retries = 3
         for doc in docs:
             for attempt in range(max_retries):
@@ -543,37 +576,65 @@ class AsyncCosmosDBSaver(BaseCosmosDBSaver, AbstractAsyncContextManager):
         )
         self.client = AsyncCosmosClient(endpoint, credential=key)
         self.lock = asyncio.Lock()
-
+        self._initialized = False  # Track if setup was run
+        
     async def __aenter__(self) -> Self:
-        try:
-            self.database = await self.client.create_database_if_not_exists(self.database_name)
-            logger.debug(f"Database '{self.database_name}' is ready.")
-        except exceptions.CosmosHttpResponseError as e:
-            logger.error(f"Error creating database '{self.database_name}': {e}")
-            raise
-        try:
-            self.container = await self.database.create_container_if_not_exists(
-                id=self.container_name,
-                partition_key=PartitionKey(path=f"/{THREAD_ID}"),
-                indexing_policy=self.setup_indexing_policy()
-            )
-            logger.debug(f"Container '{self.container_name}' is ready.")
-        except exceptions.CosmosHttpResponseError as e:
-            logger.error(f"Error creating container '{self.container_name}': {e}")
-            raise
-        self.setup()
+        await self.setup()
         return self
-
+    
     async def __aexit__(
         self,
         exc_type: Optional[type],
         exc_value: Optional[BaseException],
         traceback: Optional[TracebackType],
     ) -> Optional[bool]:
+        await self.close()
+        
+        
+    async def setup(self):
+        """
+        Initializes the database and container if not already done.
+        Call this if not using 'async with'.
+        """
+        if not self._initialized:
+            try:
+                self.database = await self.client.create_database_if_not_exists(self.database_name)
+                logger.debug(f"Database '{self.database_name}' is ready.")
+            except exceptions.CosmosHttpResponseError as e:
+                logger.error(f"Error creating database '{self.database_name}': {e}")
+                raise
+            try:
+                self.container = await self.database.create_container_if_not_exists(
+                    id=self.container_name,
+                    partition_key=PartitionKey(path=f"/{THREAD_ID}"),
+                    indexing_policy=self.setup_indexing_policy()
+                )
+                logger.debug(f"Container '{self.container_name}' is ready.")
+            except exceptions.CosmosHttpResponseError as e:
+                logger.error(f"Error creating container '{self.container_name}': {e}")
+                raise
+
+            self._initialized = True
+            # If there's any additional setup logic, add it here
+            self.setup_additional()
+
+    def setup_additional(self):
+        # Implement any additional setup logic if necessary
+        pass
+
+    async def close(self):
+        """
+        Cleans up resources. Call this if you're not using 'async with'.
+        """
+        # Close the asynchronous client
         await self.client.close()
+
 
     async def upsert_item(self, doc: Dict[str, Any]) -> None:
         """Upsert an item into the database asynchronously with retry logic."""
+        if not self._initialized:
+            raise RuntimeError("AsyncCosmosDBSaver not initialized. Call setup() first.")
+
         max_retries = 3
         for attempt in range(max_retries):
             try:
@@ -591,6 +652,9 @@ class AsyncCosmosDBSaver(BaseCosmosDBSaver, AbstractAsyncContextManager):
 
     async def upsert_items(self, docs: List[Dict[str, Any]]) -> None:
             """Asynchronously upsert multiple items individually."""
+            if not self._initialized:
+                raise RuntimeError("AsyncCosmosDBSaver not initialized. Call setup() first.")
+
             max_retries = 3
             for doc in docs:
                 for attempt in range(max_retries):
@@ -613,6 +677,9 @@ class AsyncCosmosDBSaver(BaseCosmosDBSaver, AbstractAsyncContextManager):
         parameters: Optional[List[Dict[str, Any]]] = None,
     ) -> AsyncIterator[Dict[str, Any]]:
         """Query items from the database asynchronously with retry logic."""
+        if not self._initialized:
+            raise RuntimeError("AsyncCosmosDBSaver not initialized. Call setup() first.")
+
         async def fetch_items():
             max_retries = 3
             for attempt in range(max_retries):
@@ -638,6 +705,9 @@ class AsyncCosmosDBSaver(BaseCosmosDBSaver, AbstractAsyncContextManager):
     # Implement the asynchronous versions of the checkpoint methods
     async def aget_tuple(self, config: RunnableConfig) -> Optional[CheckpointTuple]:
         """Asynchronously retrieve a checkpoint tuple from the database."""
+        if not self._initialized:
+            raise RuntimeError("AsyncCosmosDBSaver not initialized. Call setup() first.")
+        
         thread_id = config.get(CONFIGURABLE, {}).get(THREAD_ID)
         if not thread_id:
             raise ValueError(f"'{THREAD_ID}' is required in config['{CONFIGURABLE}']")
@@ -700,6 +770,9 @@ class AsyncCosmosDBSaver(BaseCosmosDBSaver, AbstractAsyncContextManager):
         limit: Optional[int] = None,
     ) -> AsyncIterator[CheckpointTuple]:
         """Asynchronously list checkpoints from the database."""
+        if not self._initialized:
+            raise RuntimeError("AsyncCosmosDBSaver not initialized. Call setup() first.")
+        
         parameters = []
         conditions = []
         if config is not None:
@@ -764,6 +837,9 @@ class AsyncCosmosDBSaver(BaseCosmosDBSaver, AbstractAsyncContextManager):
         new_versions: ChannelVersions,
     ) -> RunnableConfig:
         """Asynchronously save a checkpoint to the database."""
+        if not self._initialized:
+            raise RuntimeError("AsyncCosmosDBSaver not initialized. Call setup() first.")
+        
         thread_id = config.get(CONFIGURABLE, {}).get(THREAD_ID)
         if not thread_id:
             raise ValueError(f"'{THREAD_ID}' is required in config['{CONFIGURABLE}']")
@@ -806,6 +882,9 @@ class AsyncCosmosDBSaver(BaseCosmosDBSaver, AbstractAsyncContextManager):
         task_id: str,
     ) -> None:
         """Asynchronously store intermediate writes linked to a checkpoint."""
+        if not self._initialized:
+            raise RuntimeError("AsyncCosmosDBSaver not initialized. Call setup() first.")
+        
         thread_id = config.get(CONFIGURABLE, {}).get(THREAD_ID)
         checkpoint_id = config.get(CONFIGURABLE, {}).get(CHECKPOINT_ID)
         if not thread_id or not checkpoint_id:

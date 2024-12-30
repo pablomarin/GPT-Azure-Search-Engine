@@ -4,14 +4,14 @@
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/MSUSAzureAccelerators/Azure-Cognitive-Search-Azure-OpenAI-Accelerator?quickstart=1)
 [![Open in VS Code Dev Containers](https://img.shields.io/static/v1?style=for-the-badge&label=Remote%20-%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/MSUSAzureAccelerators/Azure-Cognitive-Search-Azure-OpenAI-Accelerator)
 
-Your organization requires a Multi-Channel Smart Chatbot and a search engine capable of comprehending diverse types of data scattered across various locations. Additionally, the conversational chatbot should be able to provide answers to inquiries, along with the source and an explanation of how and where the answer was obtained. In other words, you want **private and secured ChatGPT for your organization that can interpret, comprehend, and answer questions about your business data**.
+Your organization requires a Multi-Channel Smart Agent and a search engine capable of comprehending diverse types of data scattered across various locations. Additionally, the conversational Agent should be able to provide answers to inquiries, along with the source and an explanation of how and where the answer was obtained. In other words, you want **private and secured ChatGPT for your organization that can interpret, comprehend, and answer questions about your business data**.
 
-The goal of the POC is to show/prove the value of a GPT Virtual Assistant built with Azure Services, with your own data in your own environment. The deliverables are:
+The goal of the POC is to show/prove the value of a Generative AI Agent built with Azure Services, with your own data in your own environment. The deliverables are:
 
-1. Backend Bot API built with Bot Framework and exposed to multiple channels (Web Chat, MS Teams, SMS, Email, Slack, etc)
+1. Backends API built with Bot Framework and FastAPI(LangServe) and exposed to multiple channels (Web Chat, MS Teams, SMS, Email, Slack, etc)
 2. Frontend web application with a Search and a Bot UI.
 
-The repo is made to teach you step-by-step on how to build a OpenAI-based Smart Search Engine. Each Notebook builds on top of each other and ends in building the two applications.
+The repo is made to teach you step-by-step on how to build a OpenAI-based RAG-based Multi-Agent architecture. Each Notebook builds on top of each other and ends in building the two applications.
 
 **For Microsoft FTEs:** This is a customer funded VBD, below the assets for the delivery.
 
@@ -27,14 +27,12 @@ The repo is made to teach you step-by-step on how to build a OpenAI-based Smart 
 ---
 **Prerequisites Client 3-5 Days POC**
 * Azure subscription
-* Accepted Application to Azure Open AI, including GPT-4o. If customer does not have GPT-4o approved, Microsoft CSAs can lend theirs during the workshop
 * Microsoft members preferably to be added as Guests in clients Azure AD. If not possible, then customers can issue corporate IDs to Microsoft members
 * A Resource Group (RG)  needs to be set for this Workshop POC, in the customer Azure tenant
 * The customer team and the Microsoft team must have Contributor permissions to this resource group so they can set everything up 2 weeks prior to the workshop
-* A storage account must be set in place in the RG.
 * Customer Data/Documents must be uploaded to the blob storage account, at least two weeks prior to the workshop date
 * A Multi-Tenant App Registration (Service Principal) must be created by the customer (save the Client Id and Secret Value).
-* Customer must provide the Microsoft Team , 10-20 questions (easy to hard) that they want the bot to respond correctly.
+* Customer must provide the Microsoft Team , 10-20 questions (easy to hard) that they want the Agent/Bot to respond correctly.
 * For IDE collaboration and standarization during workshop, AML compute instances with Jupyper Lab will be used, for this, Azure Machine Learning Workspace must be deployed in the RG
    * Note: Please ensure you have enough core compute quota in your Azure Machine Learning workspace 
 
@@ -44,24 +42,24 @@ The repo is made to teach you step-by-step on how to build a OpenAI-based Smart 
 
 ## Flow
 1. The user asks a question.
-2. In the app, an OpenAI LLM uses a clever prompt to determine which source to use based on the user input
+2. In the backend app, an Agent determines which source to use based on the user input
 3. Five types of sources are available:
    * 3a. Azure SQL Database - contains COVID-related statistics in the US.
-   * 3b. API Endpoints - RESTful OpenAPI 3.0 API containing up-to-date statistics about Covid.
+   * 3b. API Endpoints - RESTful OpenAPI 3.0 API from a online currency broker.
    * 3c. Azure Bing Search API - provides access to the internet allowing scenerios like: QnA on public websites .
    * 3d. Azure AI Search - contains AI-enriched documents from Blob Storage:
        - Transcripts of the dialogue of all the episodes of the TV Show: FRIENDS  
        - 90,000 Covid publication abstracts
        - 4 lenghty PDF books
    * 3f. CSV Tabular File - contains COVID-related statistics in the US.
-4. The app retrieves the result from the source and crafts the answer.
+4. The Agent retrieves the result from the correct source and crafts the answer.
 5. The tuple (Question and Answer) is saved to CosmosDB as persistent memory and for further analysis.
 6. The answer is delivered to the user.
 
 ---
 ## Demo
 
-https://gptsmartsearchapp.azurewebsites.net/
+(COMING SOON)
 
 
 ---
@@ -72,6 +70,7 @@ https://gptsmartsearchapp.azurewebsites.net/
    - Uses [Azure Cognitive Services](https://azure.microsoft.com/en-us/products/cognitive-services/) to index and enrich unstructured documents: OCR over images, Chunking and automated vectorization.
    - Uses Hybrid Search Capabilities of Azure AI Search to provide the best semantic answer (Text and Vector search combined).
    - Uses [LangChain](https://langchain.readthedocs.io/en/latest/) as a wrapper for interacting with Azure OpenAI , vector stores, constructing prompts and creating agents.
+   - Multi-Agentic Architecture using LangGraph.
    - Multi-Lingual (ingests, indexes and understand any language)
    - Multi-Index -> multiple search indexes
    - Tabular Data Q&A with CSV files and SQL flavor Databases
@@ -103,7 +102,7 @@ Note: (Pre-requisite) You need to have an Azure OpenAI service already created
       **Note**: If you have never created a `Azure AI Services Multi-Service account` before, please create one manually in the azure portal to read and accept the Responsible AI terms. Once this is deployed, delete this and then use the above deployment button.
 
 5. Clone your Forked repo to your AML Compute Instance. If your repo is private, see below in Troubleshooting section how to clone a private repo.
-6. Make sure you run the notebooks on a **Python 3.12 conda enviroment** or newer
+6. Make sure you run the notebooks on a **Python 3.12 conda enviroment**.
 7. Install the dependencies on your machine (make sure you do the below pip comand on the same conda environment that you are going to run the notebooks. For example, in AZML compute instance run:
     ```bash
     conda create -n GPTSearch python=3.12
@@ -118,22 +117,6 @@ Note: (Pre-requisite) You need to have an Azure OpenAI service already created
 9. **Run the Notebooks in order** using the "GPTSearch (Python 3.12)" kernel. They build up on top of each other.
 
 ---
-
-<details>
-
-<summary>FAQs</summary>
-  
-## **FAQs**
-
-1. **Why use Azure AI Search engine to provide the context for the LLM and not fine tune the LLM instead?**
-
-A: Quoting the [OpenAI documentation](https://platform.openai.com/docs/guides/fine-tuning): "GPT-3 has been pre-trained on a vast amount of text from the open internet. When given a prompt with just a few examples, it can often intuit what task you are trying to perform and generate a plausible completion. This is often called "few-shot learning.
-Fine-tuning improves on few-shot learning by training on many more examples than can fit in the prompt, letting you achieve better results on a wide number of tasks. Once a model has been fine-tuned, you won't need to provide examples in the prompt anymore. This **saves costs and enables lower-latency requests**"
-
-However, fine-tuning the model requires providing hundreds or thousands of Prompt and Completion tuples, which are essentially query-response samples. The purpose of fine-tuning is not to give the LLM knowledge of the company's data but to provide it with examples so it can perform tasks really well without requiring examples on every prompt.
-
-There are cases where fine-tuning is necessary, such as when the examples contain proprietary data that should not be exposed in prompts or when the language used is highly specialized, as in healthcare, pharmacy, or other industries or use cases where the language used is not commonly found on the internet.
-</details>
 
 <details>
 

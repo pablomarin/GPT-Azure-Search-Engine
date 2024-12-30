@@ -70,7 +70,7 @@
     },
     "azureSearchAPIVersion": {
       "type": "string",
-      "defaultValue": "2023-10-01-preview",
+      "defaultValue": "2024-11-01-preview",
       "metadata": {
         "description": "Optional. The API version of the Azure Search."
       }
@@ -89,16 +89,16 @@
     },
     "azureOpenAIModelName": {
       "type": "string",
-      "defaultValue": "gpt-35-turbo-1106",
+      "defaultValue": "gpt-4o",
       "metadata": {
-        "description": "Optional. The model name of the Azure OpenAI."
+        "description": "Required. The model name of the Azure OpenAI."
       }
     },
     "azureOpenAIAPIVersion": {
       "type": "string",
-      "defaultValue": "2023-12-01-preview",
+      "defaultValue": "2024-10-01-preview",
       "metadata": {
-        "description": "Optional. The API version of the Azure OpenAI."
+        "description": "Required. The API version of the Azure OpenAI."
       }
     },
     "location": {
@@ -191,9 +191,9 @@
       "apiVersion": "2022-09-01",
       "name": "[format('{0}/{1}', parameters('webAppName'), 'web')]",
       "properties": {
-        "linuxFxVersion": "PYTHON|3.10",
+        "linuxFxVersion": "PYTHON|3.12",
         "alwaysOn": true,
-        "appCommandLine": "python -m streamlit run Home.py --server.port 8000 --server.address 0.0.0.0"
+        "appCommandLine": "python -m streamlit run app/Home.py --server.port 8000 --server.address 0.0.0.0"
       },
       "dependsOn": [
         "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"

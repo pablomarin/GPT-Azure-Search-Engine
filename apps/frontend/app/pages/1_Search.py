@@ -9,9 +9,10 @@ from collections import OrderedDict
 from langchain_core.documents import Document
 from langchain_openai import AzureChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
 
 from utils import get_search_results
-from prompts import DOCSEARCH_PROMPT
+from prompts import DOCSEARCH_PROMPT_TEXT
 
 st.set_page_config(page_title="GPT Smart Search", page_icon="📖", layout="wide")
 # Add custom CSS styles to adjust padding
@@ -34,17 +35,14 @@ def clear_submit():
 with st.sidebar:
     st.markdown("""# Instructions""")
     st.markdown("""
-Ask a question that you think can be answered with the information in about 10k Arxiv Computer Science publications from 2020-2021 or in 90k Medical Covid-19 Publications.
 
-For example:
-- What are markov chains?
-- List the authors that talk about Boosting Algorithms
-- How does random forest work?
-- What kind of problems can I solve with reinforcement learning? Give me some real life examples
-- What kind of problems Turing Machines solve?
+Example questions:
+- Why Ross faked his death?
+- Who proposed first, Chandler or Monica?
 - What are the main risk factors for Covid-19?
 - What medicine reduces inflammation in the lungs?
 - Why Covid doesn't affect kids that much compared to adults?
+- What is the acronim of the book "Made to Stick" and what does it mean? give a short explanation of each letter.
     
     \nYou will notice that the answers to these questions are diferent from the open ChatGPT, since these papers are the only possible context. This search engine does not look at the open internet to answer these questions. If the context doesn't contain information, the engine will respond: I don't know.
     """)
@@ -81,9 +79,9 @@ else:
             # Azure Search
 
             try:
-                indexes = ["srch-index-files", "srch-index-csv"]
-                k = 6  
-                ordered_results = get_search_results(query, indexes, k=k, reranker_threshold=1, sas_token=os.environ['BLOB_SAS_TOKEN'])            
+                indexes = ["srch-index-files", "srch-index-csv", "srch-index-books"]
+                k = 10  
+                ordered_results = get_search_results(query, indexes, k=k, reranker_threshold=1, sas_token=os.environ['BLOB_SAS_TOKEN'])
 
                 st.session_state["submit"] = True
                 # Output Columns
@@ -98,19 +96,33 @@ else:
                     top_docs = []
                     for key,value in ordered_results.items():
                         location = value["location"] if value["location"] is not None else ""
-                        top_docs.append(Document(page_content=value["chunk"], metadata={"source": location, "score":value["score"]}))
+                        document = {"source": location,
+                                    "score": value["score"],
+                                    "page_content": value["chunk"]}
+                        top_docs.append(document)
+            
                         add_text = "Reading the source documents to provide the best answer... ⏳"
 
                     if "add_text" in locals():
                         with st.spinner(add_text):
                             if(len(top_docs)>0):
+                                
+                                # Define prompt template
+                                DOCSEARCH_PROMPT = ChatPromptTemplate.from_messages(
+                                        [
+                                            ("system", DOCSEARCH_PROMPT_TEXT + "\n\Retrieved Documents:\n{context}\n\n"),
+                                            ("human", "{question}"),
+                                        ]
+                                    )
+                                
                                 chain = (
-                                    DOCSEARCH_PROMPT  # Passes the 4 variables above to the prompt template
+                                    DOCSEARCH_PROMPT 
                                     | llm   # Passes the finished prompt to the LLM
                                     | StrOutputParser()  # converts the output (Runnable object) to the desired output (string)
                                 )
+                                
     
-                                answer = chain.invoke({"question": query, "context":top_docs})
+                                answer = chain.invoke({"question": query, "context":str(top_docs)})
                                 
                             else:
                                 answer = {"output_text":"No results found" }

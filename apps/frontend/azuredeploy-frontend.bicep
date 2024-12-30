@@ -32,7 +32,7 @@ param resourceGroupSearch string = resourceGroup().name
 param azureSearchName string 
 
 @description('Optional. The API version of the Azure Search.')
-param azureSearchAPIVersion string = '2023-10-01-preview'
+param azureSearchAPIVersion string = '2024-11-01-preview'
 
 @description('Required. The name of the Azure OpenAI resource deployed previously.')
 param azureOpenAIName string 
@@ -42,10 +42,10 @@ param azureOpenAIName string
 param azureOpenAIAPIKey string 
 
 @description('Optional. The model name of the Azure OpenAI.')
-param azureOpenAIModelName string = 'gpt-35-turbo-1106'
+param azureOpenAIModelName string = 'gpt-4o'
 
 @description('Optional. The API version of the Azure OpenAI.')
-param azureOpenAIAPIVersion string = '2023-12-01-preview'
+param azureOpenAIAPIVersion string = '2024-10-01-preview'
 
 @description('Optional, defaults to resource group location. The location of the resources.')
 param location string = resourceGroup().location
@@ -131,9 +131,9 @@ resource webAppConfig 'Microsoft.Web/sites/config@2022-09-01' = {
   parent: webApp
   name: 'web'
   properties: {
-    linuxFxVersion: 'PYTHON|3.10'
+    linuxFxVersion: 'PYTHON|3.12'
     alwaysOn: true
-    appCommandLine: 'python -m streamlit run Home.py --server.port 8000 --server.address 0.0.0.0'
+    appCommandLine: 'python -m streamlit run app/Home.py --server.port 8000 --server.address 0.0.0.0'
   }
 }
 

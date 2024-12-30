@@ -21,7 +21,7 @@ Below are the steps to run the Bot API as an Azure Wep App, connected with the A
 
 3. Zip the code of the bot by executing the following command in the terminal (**you have to be inside the apps/backend/botservice/ folder**):
 ```bash
-(cd ../../../ && zip -r apps/backend/botservice/backend.zip common) && zip -j backend.zip ./* && zip -j backend.zip ../../../common/requirements.txt
+(cd ../../../ && zip -r apps/backend/botservice/backend.zip common data/openapi_kraken.json data/all-states-history.csv) && zip -j backend.zip ../../../common/requirements.txt app/* 
 ```
 4. Using the Azure CLI deploy the bot code to the Azure App Service created on Step 2
 ```bash

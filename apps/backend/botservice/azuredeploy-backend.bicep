@@ -5,18 +5,24 @@ param appId string
 @secure()
 param appPassword string
 
+@description('Required. App Registration type SingleTenant, MultiTenant.')
+param appType string = 'SingleTenant'
+
+@description('Required. Microsoft Tenant ID.')
+param TenantId string
+
 @description('Required. The SAS token for the blob hosting your data.')
 @secure()
 param blobSASToken string 
 
-@description('Optional. The name of the resource group where the resources (Azure Search etc.) where deployed previously. Defaults to current resource group.')
+@description('Required. The name of the resource group where the resources (Azure Search etc.) where deployed previously. Defaults to current resource group.')
 param resourceGroupSearch string = resourceGroup().name
 
 @description('Required. The name of the Azure Search service deployed previously.')
 param azureSearchName string 
 
-@description('Optional. The API version for the Azure Search service.')
-param azureSearchAPIVersion string = '2023-10-01-preview'
+@description('Required. The API version for the Azure Search service.')
+param azureSearchAPIVersion string = '2024-11-01-preview'
 
 @description('Required. The name of the Azure OpenAI resource deployed previously.')
 param azureOpenAIName string
@@ -25,13 +31,19 @@ param azureOpenAIName string
 @secure()
 param azureOpenAIAPIKey string 
 
-@description('Optional. The model name for the Azure OpenAI service.')
-param azureOpenAIModelName string = 'gpt-35-turbo-1106'
-
 @description('Optional. The API version for the Azure OpenAI service.')
-param azureOpenAIAPIVersion string = '2023-12-01-preview'
+param azureOpenAIAPIVersion string = '2024-10-01-preview'
 
-@description('Optional. The URL for the Bing Search service.')
+@description('Required. The deployment name for the GPT-4o-mini model.')
+param azureOpenAIGPT4oMiniModelName string = 'gpt-4o-mini'
+
+@description('Required. The deployment name for the GPT-4o-mini model..')
+param azureOpenAIGPT4oModelName string = 'gpt-4o'
+
+@description('Required. The deployment name for the Embedding model.')
+param azureOpenAIEmbeddingModelName string = 'text-embedding-3-large'
+
+@description('Required. The URL for the Bing Search service.')
 param bingSearchUrl string = 'https://api.bing.microsoft.com/v7.0/search'
 
 @description('Required. The name of the Bing Search service deployed previously.')
@@ -56,20 +68,20 @@ param cosmosDBAccountName string
 @description('Required. The name of the Azure CosmosDB container.')
 param cosmosDBContainerName string
 
-@description('Optional. The globally unique and immutable bot ID. Also used to configure the displayName of the bot, which is mutable.')
+@description('Required. The globally unique and immutable bot ID. Also used to configure the displayName of the bot, which is mutable.')
 param botId string = 'BotId-${uniqueString(resourceGroup().id)}'
 
-@description('Optional, defaults to F0. The pricing tier of the Bot Service Registration. Acceptable values are F0 and S1.')
+@description('Required, defaults to F0. The pricing tier of the Bot Service Registration. Acceptable values are F0 and S1.')
 @allowed([
   'F0'
   'S1'
 ])
 param botSKU string = 'F0'
 
-@description('Optional. The name of the new App Service Plan.')
+@description('Required. The name of the new App Service Plan.')
 param appServicePlanName string = 'AppServicePlan-Backend-${uniqueString(resourceGroup().id)}'
 
-@description('Optional, defaults to S3. The SKU of the App Service Plan. Acceptable values are B3, S3 and P2v3.')
+@description('Required, defaults to S3. The SKU of the App Service Plan. Acceptable values are B3, S3 and P2v3.')
 @allowed([
   'B3'
   'S3'
@@ -77,7 +89,7 @@ param appServicePlanName string = 'AppServicePlan-Backend-${uniqueString(resourc
 ])
 param appServicePlanSKU string = 'S3'
 
-@description('Optional, defaults to resource group location. The location of the resources.')
+@description('Required, defaults to resource group location. The location of the resources.')
 param location string = resourceGroup().location
 
 var publishingUsername = '$${botId}'
@@ -180,12 +192,20 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
           value: azureOpenAIAPIKey
         }
         {
-          name: 'AZURE_OPENAI_MODEL_NAME'
-          value: azureOpenAIModelName
-        }
-        {
           name: 'AZURE_OPENAI_API_VERSION'
           value: azureOpenAIAPIVersion
+        }
+        {
+          name: 'GPT4oMINI_DEPLOYMENT_NAME'
+          value: azureOpenAIGPT4oMiniModelName
+        }
+        {
+          name: 'GPT4o_DEPLOYMENT_NAME'
+          value: azureOpenAIGPT4oModelName
+        }
+        {
+          name: 'EMBEDDING_DEPLOYMENT_NAME'
+          value: azureOpenAIEmbeddingModelName
         }
         {
           name: 'BING_SEARCH_URL'
@@ -212,10 +232,6 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
           value: SQLServerPassword
         }
         {
-          name: 'AZURE_COSMOSDB_ENDPOINT'
-          value: 'https://${cosmosDBAccountName}.documents.azure.com:443/'
-        }
-        {
           name: 'AZURE_COSMOSDB_NAME'
           value: cosmosDBAccountName
         }
@@ -224,8 +240,12 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
           value: cosmosDBContainerName
         }
         {
-          name: 'AZURE_COMOSDB_CONNECTION_STRING'
-          value: cosmosDB.listConnectionStrings().connectionStrings[0].connectionString
+          name: 'AZURE_COSMOSDB_ENDPOINT'
+          value: cosmosDB.properties.documentEndpoint
+        }
+        {
+          name: 'AZURE_COSMOSDB_KEY'
+          value: cosmosDB.listKeys().primaryMasterKey
         }
         {
           name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
@@ -295,7 +315,7 @@ resource webAppConfig 'Microsoft.Web/sites/config@2022-09-01' = {
   }
 }
 
-resource bot 'Microsoft.BotService/botServices@2022-09-15' = {
+resource bot 'Microsoft.BotService/botServices@2023-09-15-preview' = {
   name: botId
   location: 'global'
   kind: 'azurebot'
@@ -307,7 +327,8 @@ resource bot 'Microsoft.BotService/botServices@2022-09-15' = {
     iconUrl: 'https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png'
     endpoint: botEndpoint
     msaAppId: appId
-    luisAppIds: []
+    msaAppTenantId: TenantId
+    msaAppType: appType
     schemaTransformationVersion: '1.3'
     isCmekEnabled: false
   }

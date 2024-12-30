@@ -1,33 +1,36 @@
-# Copyright (c) Microsoft Corporation. All rights reserved.
+# app.py
+# -----------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
+# -----------------------------------------------------------------------------
 
+import os
 import sys
+import asyncio
 import traceback
 from datetime import datetime
 
 from aiohttp import web
 from aiohttp.web import Request, Response, json_response
-from botbuilder.core import (
-    BotFrameworkAdapterSettings,
-    TurnContext,
-    BotFrameworkAdapter,
-    ShowTypingMiddleware,
-)
+from botbuilder.core import TurnContext
+from botbuilder.integration.aiohttp import CloudAdapter, ConfigurationBotFrameworkAuthentication
 from botbuilder.core.integration import aiohttp_error_middleware
 from botbuilder.schema import Activity, ActivityTypes
 
 from bot import MyBot
 from config import DefaultConfig
 
+# ---- Imports for CosmosDB checkpointer usage
+from common.cosmosdb_checkpointer import AsyncCosmosDBSaver
+from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
+
 CONFIG = DefaultConfig()
 
 # Create adapter.
 # See https://aka.ms/about-bot-adapter to learn more about how bots work.
-SETTINGS = BotFrameworkAdapterSettings(CONFIG.APP_ID, CONFIG.APP_PASSWORD)
-ADAPTER = BotFrameworkAdapter(SETTINGS)
+ADAPTER = CloudAdapter(ConfigurationBotFrameworkAuthentication(CONFIG))
 
-
-# Catch-all for errors.
+# Catch-all for errors
 async def on_error(context: TurnContext, error: Exception):
     # This check writes out errors to console log .vs. app insights.
     # NOTE: In production environment, you should consider logging this to Azure
@@ -54,28 +57,32 @@ async def on_error(context: TurnContext, error: Exception):
         # Send a trace activity, which will be displayed in Bot Framework Emulator
         await context.send_activity(trace_activity)
 
-
 ADAPTER.on_turn_error = on_error
 
-# Create the Bot
-BOT = MyBot()
+# -----------------------------------------------------------------------------
+# 1) Create a single, shared AsyncCosmosDBSaver instance for the entire service.
+# -----------------------------------------------------------------------------
 
+checkpointer_async = AsyncCosmosDBSaver(
+    endpoint=os.environ.get("AZURE_COSMOSDB_ENDPOINT"),
+    key=os.environ.get("AZURE_COSMOSDB_KEY"),
+    database_name=os.environ.get("AZURE_COSMOSDB_NAME"),
+    container_name=os.environ.get("AZURE_COSMOSDB_CONTAINER_NAME"),
+    serde=JsonPlusSerializer(),
+)
+
+# Setup the checkpointer (async). We can do so using run_until_complete here:
+loop = asyncio.get_event_loop()
+loop.run_until_complete(checkpointer_async.setup())
+
+# -----------------------------------------------------------------------------
+# 2) Pass that single checkpointer to the bot.
+# -----------------------------------------------------------------------------
+BOT = MyBot(cosmos_checkpointer=checkpointer_async)
 
 # Listen for incoming requests on /api/messages
 async def messages(req: Request) -> Response:
-    # Main bot message handler.
-    if "application/json" in req.headers["Content-Type"]:
-        body = await req.json()
-    else:
-        return Response(status=415)
-
-    activity = Activity().deserialize(body)
-    auth_header = req.headers["Authorization"] if "Authorization" in req.headers else ""
-
-    response = await ADAPTER.process_activity(activity, auth_header, BOT.on_turn)
-    if response:
-        return json_response(data=response.body, status=response.status)
-    return Response(status=201)
+    return await ADAPTER.process(req, BOT)
 
 
 APP = web.Application(middlewares=[aiohttp_error_middleware])

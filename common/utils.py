@@ -7,6 +7,7 @@ import base64
 import shutil
 import zipfile
 import time
+import html
 import tiktoken
 
 from time import sleep
@@ -92,7 +93,33 @@ def upload_directory_to_blob(local_directory, container_name, container_folder="
                 upload_file_to_blob(file_path, blob_name, container_name)
                 overall_progress.update(1)  # Update progress after each file is uploaded
 
+def text_to_base64(text):
+    # Convert text to bytes using UTF-8 encoding
+    bytes_data = text.encode('utf-8')
 
+    # Perform Base64 encoding
+    base64_encoded = base64.b64encode(bytes_data)
+
+    # Convert the result back to a UTF-8 string representation
+    base64_text = base64_encoded.decode('utf-8')
+
+    return base64_text
+
+def table_to_html(table):
+    table_html = "<table>"
+    rows = [sorted([cell for cell in table.cells if cell.row_index == i], key=lambda cell: cell.column_index) for i in range(table.row_count)]
+    for row_cells in rows:
+        table_html += "<tr>"
+        for cell in row_cells:
+            tag = "th" if (cell.kind == "columnHeader" or cell.kind == "rowHeader") else "td"
+            cell_spans = ""
+            if cell.column_span > 1: cell_spans += f" colSpan={cell.column_span}"
+            if cell.row_span > 1: cell_spans += f" rowSpan={cell.row_span}"
+            table_html += f"<{tag}{cell_spans}>{html.escape(cell.content)}</{tag}>"
+        table_html +="</tr>"
+    table_html += "</table>"
+    return table_html
+                
 # Function that uses PyPDF of Azure Form Recognizer to parse PDFs
 def parse_pdf(file, form_recognizer=False, formrecognizer_endpoint=None, formrecognizerkey=None, model="prebuilt-document", from_url=False, verbose=False):
     """Parses PDFs using PyPDF or Azure Document Intelligence SDK (former Azure Form Recognizer)"""

@@ -6,12 +6,9 @@ langchain-experimental
 langgraph
 langserve[all]
 langchain-cli
-botbuilder-integration-aiohttp>=4.14.4
+botbuilder-integration-aiohttp
 tiktoken
-docx2txt
-pillow
 pypdf
-tenacity
 sqlalchemy
 pyodbc
 tabulate
@@ -22,6 +19,10 @@ azure-ai-formrecognizer
 azure-storage-blob
 beautifulsoup4
 pydantic
+azure-cognitiveservices-speech
 fastapi
+sse_starlette
+sseclient-py
+
 
 
