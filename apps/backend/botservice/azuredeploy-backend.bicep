@@ -62,7 +62,7 @@ param SQLServerUsername string
 @secure()
 param SQLServerPassword string
 
-@description('Required. The name of the Azure CosmosDB.')
+@description('Required. The name of the Azure CosmosDB Account.')
 param cosmosDBAccountName string
 
 @description('Required. The name of the Azure CosmosDB container.')
@@ -166,6 +166,14 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
         {
           name: 'MicrosoftAppPassword'
           value: appPassword
+        }
+        {
+          name: 'MicrosoftAppTenantId'
+          value: TenantId
+        }
+        {
+          name: 'MicrosoftAppType'
+          value: appType
         }
         {
           name: 'BLOB_SAS_TOKEN'
@@ -282,7 +290,7 @@ resource webAppConfig 'Microsoft.Web/sites/config@2022-09-01' = {
     phpVersion: ''
     pythonVersion: ''
     nodeVersion: ''
-    linuxFxVersion: 'PYTHON|3.10'
+    linuxFxVersion: 'PYTHON|3.12'
     requestTracingEnabled: false
     remoteDebuggingEnabled: false
     remoteDebuggingVersion: 'VS2022'

@@ -141,7 +141,7 @@
     "cosmosDBAccountName": {
       "type": "string",
       "metadata": {
-        "description": "Required. The name of the Azure CosmosDB."
+        "description": "Required. The name of the Azure CosmosDB Account."
       }
     },
     "cosmosDBContainerName": {
@@ -256,6 +256,14 @@
             {
               "name": "MicrosoftAppPassword",
               "value": "[parameters('appPassword')]"
+            },
+            {
+              "name": "MicrosoftAppTenantId",
+              "value": "[parameters('TenantId')]"
+            },
+            {
+              "name": "MicrosoftAppType",
+              "value": "[parameters('appType')]"
             },
             {
               "name": "BLOB_SAS_TOKEN",
@@ -375,7 +383,7 @@
         "phpVersion": "",
         "pythonVersion": "",
         "nodeVersion": "",
-        "linuxFxVersion": "PYTHON|3.10",
+        "linuxFxVersion": "PYTHON|3.12",
         "requestTracingEnabled": false,
         "remoteDebuggingEnabled": false,
         "remoteDebuggingVersion": "VS2022",

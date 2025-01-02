@@ -13,7 +13,7 @@ Services and tools used:
 
 Below are the steps to run the Bot API as an Azure Wep App, connected with the Azure Bot Service that will expose the bot to multiple channels including: Web Chat, MS Teams, Twilio, SMS, Email, Slack, etc..
 
-1. In Azure Portal: In Azure Active Directory->App Registrations, Create an Multi-Tenant App Registration (Service Principal), create a Secret (and take note of the value)
+1. In Azure Portal: In Azure Active Directory->App Registrations, Create an Single-Tenant App Registration (Service Principal), create a Secret (and take note of the value)
 
 2. Deploy the Bot Web App and the Bot Service by clicking the Button below and type the App Registration ID and Secret Value that you got in Step 1 along with all the other ENV variables you used in the Notebooks
 

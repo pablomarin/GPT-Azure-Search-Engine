@@ -200,8 +200,12 @@
               "value": "[parameters('azureOpenAIAPIKey')]"
             },
             {
-              "name": "AZURE_OPENAI_MODEL_NAME",
-              "value": "[parameters('azureOpenAIModelName')]"
+              "name": "GPT4o_DEPLOYMENT_NAME",
+              "value": "[parameters('gpt4oDeploymentName')]"
+            },
+            {
+              "name": "GPT4oMINI_DEPLOYMENT_NAME",
+              "value": "[parameters('gpt4oMiniDeploymentName')]"
             },
             {
               "name": "AZURE_OPENAI_API_VERSION",
