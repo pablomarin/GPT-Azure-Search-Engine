@@ -31,7 +31,7 @@ The repo is made to teach you step-by-step on how to build a OpenAI-based RAG-ba
 * A Resource Group (RG)  needs to be set for this Workshop POC, in the customer Azure tenant
 * The customer team and the Microsoft team must have Contributor permissions to this resource group so they can set everything up 2 weeks prior to the workshop
 * Customer Data/Documents must be uploaded to the blob storage account, at least two weeks prior to the workshop date
-* A Multi-Tenant App Registration (Service Principal) must be created by the customer (save the Client Id and Secret Value).
+* A Single-Tenant App Registration (Service Principal) must be created by the customer (save the Client Id and Secret Value).
 * Customer must provide the Microsoft Team , 10-20 questions (easy to hard) that they want the Agent/Bot to respond correctly.
 * For IDE collaboration and standarization during workshop, AML compute instances with Jupyper Lab will be used, for this, Azure Machine Learning Workspace must be deployed in the RG
    * Note: Please ensure you have enough core compute quota in your Azure Machine Learning workspace 
@@ -53,7 +53,7 @@ The repo is made to teach you step-by-step on how to build a OpenAI-based RAG-ba
        - 4 lenghty PDF books
    * 3f. CSV Tabular File - contains COVID-related statistics in the US.
 4. The Agent retrieves the result from the correct source and crafts the answer.
-5. The tuple (Question and Answer) is saved to CosmosDB as persistent memory and for further analysis.
+5. The Agent state is saved to CosmosDB as persistent memory and for further analysis.
 6. The answer is delivered to the user.
 
 ---
@@ -73,6 +73,7 @@ The repo is made to teach you step-by-step on how to build a OpenAI-based RAG-ba
    - Multi-Agentic Architecture using LangGraph.
    - Multi-Lingual (ingests, indexes and understand any language)
    - Multi-Index -> multiple search indexes
+   - Multi-modal input and output (text and audio)
    - Tabular Data Q&A with CSV files and SQL flavor Databases
    - Uses [Azure AI Document Intelligence SDK (former Form Recognizer)](https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/overview?view=doc-intel-3.0.0) to parse complex/large PDF documents
    - Uses [Bing Search API](https://www.microsoft.com/en-us/bing/apis) to power internet searches and Q&A over public websites.
@@ -80,7 +81,7 @@ The repo is made to teach you step-by-step on how to build a OpenAI-based RAG-ba
    - Uses CosmosDB as persistent memory to save user's conversations.
    - Uses [Streamlit](https://streamlit.io/) to build the Frontend web application in python.
    - Uses [Bot Framework](https://dev.botframework.com/) and [Bot Service](https://azure.microsoft.com/en-us/products/bot-services/) to Host the Bot API Backend and to expose it to multiple channels including MS Teams.
-   - Uses also LangServe/FastAPI to deploy an alternative backend API with streaming capabilites
+   - Uses also FastAPI to deploy an alternative backend API with streaming capabilites
    
 
 ---
@@ -93,7 +94,9 @@ Note: (Pre-requisite) You need to have an Azure OpenAI service already created
 2. In Azure OpenAI studio, deploy these models (older models than the ones stated below won't work):
    - "gpt-4o" 
    - "gpt-4o-mini"
-   - "text-embedding-ada-002 (or newer)"
+   - "text-embedding-3-large"
+   - "tts"
+   - "whisper"
 3. Create a Resource Group where all the assets of this accelerator are going to be. Azure OpenAI can be in different RG or a different Subscription.
 4. ClICK BELOW to create all the Azure Infrastructure needed to run the Notebooks (Azure AI Search, Cognitive Services, etc):
 
