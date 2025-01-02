@@ -14,7 +14,7 @@
 - All Notebooks has been updated to use agents with LangGraph
 - Added CosmosDB Checkpointer for LangGraph (in process to be added to Langchain official repo)
 - Bot Framework code updated to the latest version
-- Bot Service is now SingleTenant (based on user's feedback regarding security)
+- Bot Service is now Single-Tenant (based on user's feedback regarding security)
 - Multi-Modality Notebook 11 Added. 
   - audio_utils.py contains all the functions to add Whisper, TTS and Azure Speech Service capabilities
   - Images and Audio input are now included on the notebooks and on the supervisor architecture
