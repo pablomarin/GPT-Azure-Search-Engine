@@ -4,8 +4,6 @@ langchain-openai
 langchain-community
 langchain-experimental
 langgraph
-langserve[all]
-langchain-cli
 botbuilder-integration-aiohttp
 tiktoken
 pypdf
@@ -14,6 +12,7 @@ pyodbc
 tabulate
 azure-cosmos
 streamlit
+audio-recorder-streamlit
 python-dotenv
 azure-ai-formrecognizer
 azure-storage-blob
@@ -23,6 +22,7 @@ azure-cognitiveservices-speech
 fastapi
 sse_starlette
 sseclient-py
+uvicorn
 
 
 

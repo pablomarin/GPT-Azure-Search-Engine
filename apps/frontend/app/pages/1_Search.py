@@ -1,6 +1,7 @@
 import streamlit as st
 import urllib
 import os
+import sys
 import re
 import time
 import random
@@ -11,8 +12,16 @@ from langchain_openai import AzureChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 
-from utils import get_search_results
-from prompts import DOCSEARCH_PROMPT_TEXT
+
+try:
+    from utils import get_search_results
+    from prompts import DOCSEARCH_PROMPT_TEXT
+except Exception as e:
+    # Add the path four levels up
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../')))
+    from common.utils import get_search_results
+    from common.prompts import DOCSEARCH_PROMPT_TEXT
+
 
 st.set_page_config(page_title="GPT Smart Search", page_icon="📖", layout="wide")
 # Add custom CSS styles to adjust padding
@@ -69,7 +78,7 @@ elif (not os.environ.get("BLOB_SAS_TOKEN")) or (os.environ.get("BLOB_SAS_TOKEN")
 else: 
     os.environ["OPENAI_API_VERSION"] = os.environ["AZURE_OPENAI_API_VERSION"]
     
-    MODEL = os.environ.get("AZURE_OPENAI_MODEL_NAME")
+    MODEL = os.environ["GPT4o_DEPLOYMENT_NAME"]
     llm = AzureChatOpenAI(deployment_name=MODEL, temperature=0.5, max_tokens=1000)
                            
     if button or st.session_state.get("submit"):

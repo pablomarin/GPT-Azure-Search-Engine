@@ -87,11 +87,18 @@
         "description": "Required. The API key of the Azure OpenAI resource deployed previously."
       }
     },
-    "azureOpenAIModelName": {
+    "gpt4oDeploymentName": {
       "type": "string",
       "defaultValue": "gpt-4o",
       "metadata": {
-        "description": "Required. The model name of the Azure OpenAI."
+        "description": "Required. The deployment name of the Azure OpenAI GPT-4o model."
+      }
+    },
+    "gpt4oMiniDeploymentName": {
+      "type": "string",
+      "defaultValue": "gpt-4o-mini",
+      "metadata": {
+        "description": "Required. The deployment name of the Azure OpenAI GPT-4o-mini model."
       }
     },
     "azureOpenAIAPIVersion": {
@@ -101,6 +108,27 @@
         "description": "Required. The API version of the Azure OpenAI."
       }
     },
+    "speechEngine": {
+      "type": "string",
+      "defaultValue": "openai",
+      "metadata": {
+        "description": "Required. Select the Speech engine: openai or azure"
+      }
+    },
+    "openAIWhisperModelName": {
+      "type": "string",
+      "defaultValue": "whisper",
+      "metadata": {
+        "description": "Required. Select deployment name for the AOAI whisper model"
+      }
+    },
+    "openAITTSModelName": {
+      "type": "string",
+      "defaultValue": "tts",
+      "metadata": {
+        "description": "Required. Select deployment name for the AOAI TTS model"
+      }
+    },
     "location": {
       "type": "string",
       "defaultValue": "[resourceGroup().location]",
@@ -108,6 +136,10 @@
         "description": "Optional, defaults to resource group location. The location of the resources."
       }
     }
+  },
+  "variables": {
+    "backendWebAppName": "[format('webApp-Backend-{0}', parameters('botServiceName'))]",
+    "fastAPIsiteHost": "[format('https://{0}-staging.azurewebsites.net', variables('backendWebAppName'))]"
   },
   "resources": [
     {
@@ -174,6 +206,22 @@
             {
               "name": "AZURE_OPENAI_API_VERSION",
               "value": "[parameters('azureOpenAIAPIVersion')]"
+            },
+            {
+              "name": "SPEECH_ENGINE",
+              "value": "[parameters('speechEngine')]"
+            },
+            {
+              "name": "AZURE_OPENAI_WHISPER_MODEL_NAME",
+              "value": "[parameters('openAIWhisperModelName')]"
+            },
+            {
+              "name": "AZURE_OPENAI_TTS_MODEL_NAME",
+              "value": "[parameters('openAITTSModelName')]"
+            },
+            {
+              "name": "FAST_API_SERVER",
+              "value": "[variables('fastAPIsiteHost')]"
             },
             {
               "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",

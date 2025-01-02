@@ -41,14 +41,30 @@ param azureOpenAIName string
 @secure()
 param azureOpenAIAPIKey string 
 
-@description('Optional. The model name of the Azure OpenAI.')
-param azureOpenAIModelName string = 'gpt-4o'
+@description('Required. The deployment name of the Azure OpenAI GPT-4o model.')
+param gpt4oDeploymentName string = 'gpt-4o'
 
-@description('Optional. The API version of the Azure OpenAI.')
+@description('Required. The deployment name of the Azure OpenAI GPT-4o-mini model.')
+param gpt4oMiniDeploymentName string = 'gpt-4o-mini'
+
+@description('Required. The API version of the Azure OpenAI.')
 param azureOpenAIAPIVersion string = '2024-10-01-preview'
+
+@description('Required. Select the Speech engine: openai or azure.')
+param speechEngine string = 'openai'
+
+@description('Required. Select deployment name for the AOAI whisper model')
+param openAIWhisperModelName string = 'whisper'
+
+@description('Required. Select deployment name for the AOAI TTS model')
+param openAITTSModelName string = 'tts'
 
 @description('Optional, defaults to resource group location. The location of the resources.')
 param location string = resourceGroup().location
+
+// Define Variables
+var backendWebAppName = 'webApp-Backend-${botServiceName}'
+var fastAPIsiteHost = 'https://${backendWebAppName}-staging.azurewebsites.net'
 
 // Existing Azure Search service.
 resource azureSearch 'Microsoft.Search/searchServices@2021-04-01-preview' existing = {
@@ -111,12 +127,32 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
           value: azureOpenAIAPIKey
         }
         {
-          name: 'AZURE_OPENAI_MODEL_NAME'
-          value: azureOpenAIModelName
+          name: 'GPT4o_DEPLOYMENT_NAME'
+          value: gpt4oDeploymentName
+        }
+        {
+          name: 'GPT4oMINI_DEPLOYMENT_NAME'
+          value: gpt4oMiniDeploymentName
         }
         {
           name: 'AZURE_OPENAI_API_VERSION'
           value: azureOpenAIAPIVersion
+        }
+        {
+          name: 'SPEECH_ENGINE'
+          value: speechEngine
+        }
+        {
+          name: 'AZURE_OPENAI_WHISPER_MODEL_NAME'
+          value: openAIWhisperModelName
+        }
+        {
+          name: 'AZURE_OPENAI_TTS_MODEL_NAME'
+          value: openAITTSModelName
+        }
+        {
+          name: 'FAST_API_SERVER'
+          value: fastAPIsiteHost
         }
         {
           name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'

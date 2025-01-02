@@ -67,34 +67,3 @@ This will run the backend server API in localhost port 8000.
     https://pabmar1-8000.australiaeast.instances.azureml.ms/
 
 
-<br><br>
-
-
-## (optional) Running in Docker
-
-This project folder includes a Dockerfile that allows you to easily build and host your LangServe app.
-
-### Building the Image
-
-To build the image, you simply:
-
-```shell
-docker build . -t my-fastapi-app
-```
-
-If you tag your image with something other than `my-fastapi-app`,
-note it for use in the next step.
-
-### Running the Image Locally
-
-To run the image, you'll need to include any environment variables
-necessary for your application.
-
-In the below example, we inject the environment variables in `credentials.env`
-
-We also expose port 8080 with the `-p 8080:8080` option.
-
-```shell
-docker run $(cat ../../../credentials.env | sed 's/^/-e /') -p 8080:8080 my-fastapi-app
-
-```

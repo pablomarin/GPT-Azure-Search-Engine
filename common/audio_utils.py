@@ -115,10 +115,9 @@ def speech_to_text_from_bytes(audio_bytes: BytesIO, temp_filename: str = "temp_a
     Write a BytesIO object to disk, then call `speech_to_text_from_file`.
     """
     with open(temp_filename, "wb") as audio_file:
-        audio_file.write(audio_bytes.getbuffer())
+        audio_file.write(audio_bytes)
 
     return speech_to_text_from_file(temp_filename)
-
 
 
 ###############################################################################
@@ -166,7 +165,7 @@ def summarize_text(input_text: str) -> str:
         return summary.strip()
 
     except Exception as e:
-        logging.error("Error summarizing text with GPT-4o mini via LangChain: %s", str(e))
+        logging.error("Error summarizing text with GPT-4o mini via LangChain: %s", str(e), exc_info=True)
         traceback.print_exc()
         # If summarization fails, just return the original text
         return input_text
@@ -184,12 +183,20 @@ def text_to_speech_azure(input_text: str, output_filename="temp_audio_play.wav")
     try:
         summarized_text = summarize_text(input_text)
         result = speech_synthesizer.speak_text_async(summarized_text).get()
+        
+        if result.reason != speechsdk.ResultReason.SynthesizingAudioCompleted:
+            if result.reason == speechsdk.ResultReason.Canceled:
+                cancellation_details = result.cancellation_details
+                logging.error(f"Speech synthesis canceled: {cancellation_details.reason}")
+                if cancellation_details.reason == speechsdk.CancellationReason.Error:
+                    logging.error(f"Error details: {cancellation_details.error_details}")
+            raise Exception(f"Speech synthesis failed with reason: {result.reason}")
+        
         audio_stream = speechsdk.AudioDataStream(result)
         audio_stream.save_to_wav_file(output_filename)
         return output_filename
     except Exception as e:
-        print("Azure TTS error:", e)
-        traceback.print_exc()
+        logging.error("Azure TTS error: %s", e, exc_info=True)
         return None
 
 def text_to_speech_openai(input_text: str, output_filename="temp_audio_play.wav"):
@@ -206,20 +213,25 @@ def text_to_speech_openai(input_text: str, output_filename="temp_audio_play.wav"
             response.stream_to_file(output_filename)
         return output_filename
     except Exception as e:
-        print("OpenAI TTS error:", e)
-        traceback.print_exc()
+        logging.error("OpenAI TTS error: %s", e, exc_info=True)
         return None
+
 
 def text_to_speech(input_text: str, engine=SPEECH_ENGINE, output_filename="temp_audio_play.wav"):
     """
     High-level function to pick the correct TTS engine based on environment or parameter.
+
+    :param input_text: Text to synthesize into speech
+    :param engine: Which speech engine to use ("azure" or "openai")
+    :param output_filename: Filename to save the synthesized speech
+    :return: Path to the audio file or None if failed
     """
     if engine == "azure":
         return text_to_speech_azure(input_text, output_filename=output_filename)
     elif engine == "openai":
         return text_to_speech_openai(input_text, output_filename=output_filename)
     else:
-        print("No valid speech engine specified.")
+        logging.error("No valid speech engine specified.")
         return None
     
 

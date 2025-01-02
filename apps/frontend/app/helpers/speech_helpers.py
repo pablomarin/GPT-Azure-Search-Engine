@@ -25,6 +25,7 @@ logger = get_logger(__name__)
 
 tts_temp_filename = "temp_audio_play.wav"
 stt_temp_filename = "temp_audio_listen.wav"
+
 openai_client = AzureOpenAI()
 
 def recognize_whisper_api(audio_file):

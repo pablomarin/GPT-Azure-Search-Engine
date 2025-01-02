@@ -14,8 +14,9 @@ Also includes a Search experience.
 2. Zip the code of the bot by executing the following command in the terminal (you have to be inside the folder: apps/frontend/ ):
 
 ```bash
-(zip frontend.zip ./app/* ./app/pages/* ./app/helpers/* && zip -j frontend.zip ../../common/*)
+(zip frontend.zip ./app/* ./app/pages/* ./app/helpers/* && zip -j frontend.zip ../../common/*) && (cd ../../ && zip -r apps/frontend/frontend.zip common)
 ```
+
 3. Using the Azure CLI deploy the frontend code to the Azure App Service created on Step 2
 
 ```bash
@@ -29,8 +30,9 @@ az webapp deployment source config-zip --resource-group "<resource-group-name>" 
 
 ## (Optional) Running the Frontend app Locally
 
-- Run the followin comand on the console to export the env variables
+- Run the followin comand on the console to export the env variables (at the /frontend folder level)
 ```bash
+export $FAST_API_SERVER = "<your-fastAPI-server-url>"
 export $(grep -v '^#' ../../credentials.env | sed -E '/^\s*$/d;s/#.*//' | xargs)
 ```
 - Run the stramlit server on port 8500
