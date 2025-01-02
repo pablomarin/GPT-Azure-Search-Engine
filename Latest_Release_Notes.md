@@ -1,5 +1,5 @@
 ## Release Notes
-### Version: 3.0
+### Version: 4.0.0
 
 - Updated API versions:
   - Azure AI Search: 2024-11-01-preview
