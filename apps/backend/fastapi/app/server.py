@@ -21,13 +21,13 @@ api_file_path = "data/openapi_kraken.json"
 
 ##########################################################
 ## Uncomment this section to run locally
-current_file = Path(__file__).resolve()
-library_path = current_file.parents[4]
-data_path = library_path / "data"
-sys.path.append(str(library_path))   # ensure we can import "common" etc.
-load_dotenv(str(library_path) + "/credentials.env")
-csv_file_path = data_path / "all-states-history.csv"
-api_file_path = data_path / "openapi_kraken.json"
+# current_file = Path(__file__).resolve()
+# library_path = current_file.parents[4]
+# data_path = library_path / "data"
+# sys.path.append(str(library_path))   # ensure we can import "common" etc.
+# load_dotenv(str(library_path) + "/credentials.env")
+# csv_file_path = data_path / "all-states-history.csv"
+# api_file_path = data_path / "openapi_kraken.json"
 ##########################################################
 
 # from the graph module
