@@ -59,7 +59,7 @@ The repo is made to teach you step-by-step on how to build a OpenAI-based RAG-ba
 ---
 ## Demo
 
-(COMING SOON)
+[https://gptsmartsearch-frontend.azurewebsites.net](https://gptsmartsearch-frontend.azurewebsites.net)
 
 
 ---

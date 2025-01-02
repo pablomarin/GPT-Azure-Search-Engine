@@ -23,6 +23,8 @@ fastapi
 sse_starlette
 sseclient-py
 uvicorn
+gunicorn
+
 
 
 

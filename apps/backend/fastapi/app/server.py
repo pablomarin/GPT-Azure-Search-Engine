@@ -21,13 +21,13 @@ api_file_path = "data/openapi_kraken.json"
 
 ##########################################################
 ## Uncomment this section to run locally
-# current_file = Path(__file__).resolve()
-# library_path = current_file.parents[4]
-# data_path = library_path / "data"
-# sys.path.append(str(library_path))   # ensure we can import "common" etc.
-# load_dotenv(str(library_path) + "/credentials.env")
-# csv_file_path = data_path / "all-states-history.csv"
-# api_file_path = data_path / "openapi_kraken.json"
+current_file = Path(__file__).resolve()
+library_path = current_file.parents[4]
+data_path = library_path / "data"
+sys.path.append(str(library_path))   # ensure we can import "common" etc.
+load_dotenv(str(library_path) + "/credentials.env")
+csv_file_path = data_path / "all-states-history.csv"
+api_file_path = data_path / "openapi_kraken.json"
 ##########################################################
 
 # from the graph module
@@ -90,7 +90,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Multi-Agent GPT Assistant (FastAPI)",
     version="1.0",
-    description="Demonstration with logging at each step.",
+    description="GPT Smart Search Engine - FastAPI Backend",
     lifespan=lifespan,
 )
 
