@@ -73,12 +73,16 @@ with st.sidebar:
 display_chat_history()
 logger.debug("Displayed existing chat history.")
 
+
 # -----------------------------------------------------------------------------
-# Input for text messages (bottom of the page)
+# Handle User Input (Text & Audio)
 # -----------------------------------------------------------------------------
 user_query = st.chat_input("Type your message here...")
 
-# If we have audio input, transcribe and add to chat
+# Track whether a new user message was added
+new_user_message = False
+
+# Handle audio input
 if audio_bytes:
     transcript = speech_to_text(audio_bytes)
     logger.debug(f"Transcript from STT: {transcript}")
@@ -87,26 +91,25 @@ if audio_bytes:
         with st.chat_message("Human"):
             st.write(transcript)
         logger.info("Transcript added to chat history.")
+        new_user_message = True
 
-# If there's a typed user query, add it to chat history
-if user_query is not None and user_query.strip():
+# Handle text input (st.chat_input)
+if user_query is not None and user_query.strip() and not new_user_message:
     st.session_state.chat_history.append(HumanMessage(content=user_query))
     with st.chat_message("Human"):
         st.markdown(user_query)
     logger.info("User query added to chat history: %s", user_query)
+    new_user_message = True
 
 # -----------------------------------------------------------------------------
 # Generate AI response if the last message is from a Human
 # -----------------------------------------------------------------------------
-if not isinstance(st.session_state.chat_history[-1], AIMessage):
+if new_user_message and not isinstance(st.session_state.chat_history[-1], AIMessage):
     with st.chat_message("AI"):
         try:
-            # SSE streaming: We read partial chunks from consume_api()
             logger.info("Sending request to SSE /stream endpoint with user query.")
-            # The last message in chat_history is the user's question
             user_text = st.session_state.chat_history[-1].content
 
-            # st.write_stream is a Streamlit function that streams from a generator
             ai_response = st.write_stream(
                 consume_api(api_url, user_text, session_id, user_id)
             )
@@ -116,19 +119,20 @@ if not isinstance(st.session_state.chat_history[-1], AIMessage):
             st.error("Failed to get a response from the AI.")
             ai_response = None
 
-        # If we got a response, store it in chat_history as an AIMessage
+        # Append AI response to chat history
         if ai_response:
             st.session_state.chat_history.append(AIMessage(content=ai_response))
 
-            # If voice is enabled, convert AI response to speech
+            # Voice Output (if enabled)
             if voice_enabled:
                 try:
                     audio_file_path = text_to_speech(ai_response)
                     if audio_file_path:
                         autoplay_audio(audio_file_path)
                         logger.info("Audio response generated and played.")
-                        # Remove the temporary file to avoid clutter
                         os.remove(audio_file_path)
                         logger.info("Temporary audio file removed.")
                 except Exception as ex:
                     logger.error(f"Error generating or playing audio: {ex}", exc_info=True)
+
+

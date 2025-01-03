@@ -32,7 +32,7 @@ az webapp deployment source config-zip --resource-group "<resource-group-name>" 
 
 - Run the followin comand on the console to export the env variables (at the /frontend folder level)
 ```bash
-export $FAST_API_SERVER = "<your-fastAPI-server-url>"
+export FAST_API_SERVER = "<your-fastAPI-server-url>"
 export $(grep -v '^#' ../../credentials.env | sed -E '/^\s*$/d;s/#.*//' | xargs)
 ```
 - Run the stramlit server on port 8500
