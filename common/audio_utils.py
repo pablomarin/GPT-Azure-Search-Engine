@@ -128,14 +128,10 @@ import traceback
 
 def summarize_text(input_text: str) -> str:
     """
-    Summarize the text using the Azure GPT-4o mini model if it exceeds 500 characters.
-    Otherwise, return the text as-is.
+    Converts the input text to a voice-ready short answer.
 
     This uses LangChain's AzureChatOpenAI with your custom summarization instructions.
     """
-    # If text is short, no need to summarize
-    if len(input_text) <= 500:
-        return input_text
 
     # For example, define how many tokens we allow for the completion
     COMPLETION_TOKENS = 1000
