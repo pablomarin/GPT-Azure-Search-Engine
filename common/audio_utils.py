@@ -82,12 +82,71 @@ def recognize_whisper_api_from_file(file_name: str, whisper_model: str):
         transcript = recognize_whisper_api(audio_file, whisper_model)
     return transcript
 
+
 def recognize_azure_speech_to_text_from_file(file_path: str, key: str, region: str):
-    speech_config = speechsdk.SpeechConfig(subscription=key, region=region)
-    audio_config = speechsdk.AudioConfig(filename=file_path)
-    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
-    result = speech_recognizer.recognize_once_async().get()
-    return result.text
+    """
+    Recognize speech from an audio file with automatic language detection 
+    across the top 6 spoken languages globally.
+    
+    Args:
+        file_path (str): Path to the audio file.
+        key (str): Azure Speech Service subscription key.
+        region (str): Azure service region.
+
+    Returns:
+        string: Transcribed text.
+    
+    Raises:
+        RuntimeError: If an error occurs during speech recognition.
+    """
+    try:
+        # Create a speech configuration with your subscription key and region
+        speech_config = speechsdk.SpeechConfig(subscription=key, region=region)
+        
+        # Create an audio configuration pointing to the audio file
+        audio_config = speechsdk.AudioConfig(filename=file_path)
+        
+        # Top 4 most spoken languages (ISO language codes)
+        # SDK only supports 4 languages as options
+        languages = ["en-US", "zh-CN", "hi-IN", "es-ES"]
+        
+        # Configure auto language detection with the specified languages
+        auto_detect_source_language_config = speechsdk.languageconfig.AutoDetectSourceLanguageConfig(languages=languages)
+        
+        # Create a speech recognizer with the auto language detection configuration
+        speech_recognizer = speechsdk.SpeechRecognizer(
+            speech_config=speech_config,
+            audio_config=audio_config,
+            auto_detect_source_language_config=auto_detect_source_language_config
+        )
+        
+        # Perform speech recognition
+        result = speech_recognizer.recognize_once_async().get()
+        
+        # Check the result
+        if result.reason == speechsdk.ResultReason.RecognizedSpeech:
+            # Retrieve the detected language
+            detected_language = result.properties.get(
+                speechsdk.PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult,
+                "Unknown"
+            )
+            logging.debug("Detected Language %s", detected_language, exc_info=True)
+            return result.text
+        
+        elif result.reason == speechsdk.ResultReason.NoMatch:
+            raise RuntimeError("No speech could be recognized from the audio.")
+        
+        elif result.reason == speechsdk.ResultReason.Canceled:
+            cancellation_details = speechsdk.CancellationDetails(result)
+            raise RuntimeError(f"Speech Recognition canceled: {cancellation_details.reason}. "
+                               f"Error details: {cancellation_details.error_details}")
+        
+        else:
+            raise RuntimeError("Unknown error occurred during speech recognition.")
+    
+    except Exception as e:
+        raise RuntimeError(f"An error occurred during speech recognition: {e}")
+
 
 def speech_to_text_from_file(file_path: str):
     """
