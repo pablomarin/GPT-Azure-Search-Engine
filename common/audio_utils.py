@@ -140,13 +140,13 @@ def summarize_text(input_text: str) -> str:
     output_parser = StrOutputParser()
     prompt = ChatPromptTemplate.from_messages([
         ("system", SUMMARIZER_TEXT),
-        ("user", "{input}")
+        ("human", "Input Text: \n{input}")
     ])
     
     try:
         # Create the LLM with AzureChatOpenAI using your deployment name
         llm = AzureChatOpenAI(
-            deployment_name=os.environ["GPT4oMINI_DEPLOYMENT_NAME"],
+            deployment_name=os.environ["GPT4o_DEPLOYMENT_NAME"],
             temperature=0.5,
             max_tokens=COMPLETION_TOKENS 
         )
@@ -161,7 +161,7 @@ def summarize_text(input_text: str) -> str:
         return summary.strip()
 
     except Exception as e:
-        logging.error("Error summarizing text with GPT-4o mini via LangChain: %s", str(e), exc_info=True)
+        logging.error("Error summarizing text with GPT-4o via LangChain: %s", str(e), exc_info=True)
         traceback.print_exc()
         # If summarization fails, just return the original text
         return input_text
