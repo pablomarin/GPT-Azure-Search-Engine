@@ -5,14 +5,14 @@ import uvicorn
 import asyncio
 import uuid
 import logging
-from typing import List
+import json
+from typing import List, Optional
 
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, JSONResponse
 from pydantic import BaseModel
-
 from pathlib import Path
 from dotenv import load_dotenv
 
