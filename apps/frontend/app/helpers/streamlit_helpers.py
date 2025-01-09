@@ -71,28 +71,21 @@ def get_or_create_ids():
 
 def consume_api(url, user_query, session_id, user_id):
     """
-    Send a POST request to the FastAPI backend at `url` (the SSE /stream endpoint),
+    Send a POST request to the FastAPI backend at `url` (/stream endpoint),
     and consume the SSE stream using sseclient-py.
 
     The server is expected to return events like:
-        {"event": "partial", "data": "..."}
+        {"event": "metadata", "data": "..."}
+        {"event": "data", "data": "..."}
+        {"event": "on_tool_start", "data": "..."}
+        {"event": "on_tool_end", "data": "..."}
         {"event": "end", "data": "..."}
-        {"event": "tool_start", "data": "..."}
-        {"event": "tool_end", "data": "..."}
-        {"event": "error", "data": "some error text"}
-
-    This function yields text chunks (e.g., partial content) as they arrive.
-
-    :param url: SSE /stream endpoint
-    :param user_query: The user query text to send
-    :param session_id: A unique ID representing the conversation
-    :param user_id: The user ID (not strictly used in this minimal example)
-    :yield: Text chunks that Streamlit can display incrementally
+        {"event": "error", "data": "..."}
     """
     headers = {"Content-Type": "application/json"}
     payload = {
         "user_input": user_query,
-        "thread_id": session_id  # Typically reusing session_id as conversation ID
+        "thread_id": session_id
     }
 
     logger.info(
@@ -104,43 +97,50 @@ def consume_api(url, user_query, session_id, user_id):
     try:
         with requests.post(url, json=payload, headers=headers, stream=True) as resp:
             resp.raise_for_status()
-            logger.info("SSE stream opened successfully with status code %d.", resp.status_code)
+            logger.info("SSE stream opened with status code: %d", resp.status_code)
 
-            # Use SSEClient to parse the stream
             client = SSEClient(resp)
             for event in client.events():
-                if not event.data.strip():
-                    # Skip keep-alive messages or empty lines
+                if not event.data:
+                    # Skip empty lines
                     continue
 
                 evt_type = event.event
                 evt_data = event.data
                 logger.debug("Received SSE event: %s, data: %s", evt_type, evt_data)
 
-                # Switch on event type from the server
-                if evt_type == "partial":
-                    # Yield partial text; can be streamed in real-time
+                if evt_type == "metadata":
+                    # Possibly parse run_id from the JSON
+                    # e.g. { "run_id": "...some uuid..." }
+                    info = json.loads(evt_data)
+                    run_id = info.get("run_id", "")
+                    # For streamlit, you might store it as session state, etc.
+                    # st.write(f"New run_id: {run_id}")
+
+                elif evt_type == "data":
+                    # The server is sending partial tokens as "data"
+                    # We can yield them so Streamlit can display incrementally
                     yield evt_data
-                
-                elif evt_type == "tool_start":
-                    # Display tool start
-                    # e.g. [Tool Start] Starting documents_retrieval
-                    # yield f"\n[Tool Start] {evt_data}\n"
+
+                elif evt_type == "on_tool_start":
+                    # Optionally display: yield or do a Streamlit update
+                    # yield f"[Tool Start] {evt_data}"
                     pass
 
-                elif evt_type == "tool_end":
-                    # Display tool end
-                    # e.g. [Tool End] Done documents_retrieval
-                    # yield f"\n[Tool End] {evt_data}\n"
+                elif evt_type == "on_tool_end":
+                    # yield f"[Tool End] {evt_data}"
                     pass
-                    
+
                 elif evt_type == "end":
-                    # Yield final accumulated text without leading newline
+                    # This is the final text. 
+                    # Typically you might do a final display or update the UI
                     yield evt_data
+
                 elif evt_type == "error":
+                    # The server had an error
                     yield f"[SSE Error] {evt_data}"
+
                 else:
-                    # Unrecognized event
                     yield f"[Unrecognized event: {evt_type}] {evt_data}"
 
     except requests.exceptions.HTTPError as err:

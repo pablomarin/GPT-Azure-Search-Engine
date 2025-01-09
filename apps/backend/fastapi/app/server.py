@@ -19,8 +19,7 @@ from dotenv import load_dotenv
 csv_file_path = "data/all-states-history.csv"
 api_file_path = "data/openapi_kraken.json"
 
-##########################################################
-## Uncomment this section to run locally
+######### Uncomment this section to run locally##########
 # current_file = Path(__file__).resolve()
 # library_path = current_file.parents[4]
 # data_path = library_path / "data"
@@ -181,37 +180,73 @@ async def batch(req: BatchRequest):
 # Streaming Endpoint
 # -----------------------------------------------------------------------------
 @app.post("/stream")
-async def stream(req: AskRequest):
+async def stream_endpoint(req: AskRequest):
+    """
+    Stream partial chunks from the chain in SSE format.
+    
+    SSE event structure:
+    - event: "metadata" (OPTIONAL) – any run-specific metadata
+    - event: "data" – a chunk of text
+    - event: "end" – signals no more data
+    - event: "on_tool_start" - signals the begin of use of a tool
+    - event: "on_tool_end" - signals the end of use of a tool
+    - event: "error" – signals an error
+    """
     logger.info("[/stream] Called with user_input=%s, thread_id=%s", req.user_input, req.thread_id)
 
     if not graph_async:
         logger.error("Graph not compiled yet.")
         raise HTTPException(status_code=500, detail="Graph not compiled yet.")
 
-    config = {"configurable": {"thread_id": req.thread_id or str(uuid.uuid4())}}
+    run_id = req.thread_id or str(uuid.uuid4())
+    config = {"configurable": {"thread_id": run_id}}
     inputs = {"messages": [("human", req.user_input)]}
 
     async def event_generator():
-        accumulated_text = ""
         try:
+            yield {
+                "event": "metadata",
+                "data": json.dumps({"run_id": run_id})
+            }
+
+            accumulated_text = ""
             async for event in graph_async.astream_events(inputs, config, version="v2"):
-                if event["event"] == "on_chat_model_stream" and event["metadata"].get("langgraph_node") == "agent":
-                    chunk_text = event["data"]["chunk"].content
-                    accumulated_text += chunk_text
-                    yield {"event": "partial", "data": chunk_text}
+                if event["event"] == "on_chat_model_stream":
+                    if event["metadata"].get("langgraph_node") == "agent":
+                        chunk_text = event["data"]["chunk"].content
+                        accumulated_text += chunk_text
+
+                        yield {
+                            "event": "data",
+                            "data": chunk_text  # partial chunk
+                        }
+
                 elif event["event"] == "on_tool_start":
-                    yield {"event": "tool_start", "data": f"Starting {event.get('name','')}"}
+                    yield {"event": "on_tool_start", "data": f"Tool Start: {event.get('name', '')}"}
+
                 elif event["event"] == "on_tool_end":
-                    yield {"event": "tool_end", "data": f"Done {event.get('name','')}"}
+                    yield {"event": "on_tool_end", "data": f"Tool End: {event.get('name', '')}"}
+
                 elif event["event"] == "on_chain_end" and event.get("name") == "LangGraph":
+                    # If "FINISH" is the next step
                     if event["data"]["output"].get("next") == "FINISH":
                         yield {"event": "end", "data": accumulated_text}
-                    return
+                    return  # Stop iteration
+
         except Exception as ex:
             logger.exception("[/stream] Error streaming events")
-            yield {"event": "error", "data": str(ex)}
+            # SSE "error" event
+            yield {
+                "event": "error",
+                "data": json.dumps({
+                    "status_code": 500,
+                    "message": str(ex)
+                })
+            }
+            raise
 
     return EventSourceResponse(event_generator(), media_type="text/event-stream")
+
 
 
 # -----------------------------------------------------------------------------
