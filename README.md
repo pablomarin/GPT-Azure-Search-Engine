@@ -1,19 +1,52 @@
 ![image](https://user-images.githubusercontent.com/113465005/226238596-cc76039e-67c2-46b6-b0bb-35d037ae66e1.png)
 
-# 3 or 5 days POC VBD powered by: Azure AI Search + Azure OpenAI + Bot Framework + Langchain + Azure SQL + CosmosDB + Bing Search API + Document Intelligence SDK
+# AI Multi-Agent Architecture 3 or 5 days POC: Build Intelligent Agents with Azure Services
+
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/MSUSAzureAccelerators/Azure-Cognitive-Search-Azure-OpenAI-Accelerator?quickstart=1)
 [![Open in VS Code Dev Containers](https://img.shields.io/static/v1?style=for-the-badge&label=Remote%20-%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/MSUSAzureAccelerators/Azure-Cognitive-Search-Azure-OpenAI-Accelerator)
 
-Your organization requires a Multi-Channel Smart Agent and a search engine capable of comprehending diverse types of data scattered across various locations. Additionally, the conversational Agent should be able to provide answers to inquiries, along with the source and an explanation of how and where the answer was obtained. In other words, you want **private and secured ChatGPT for your organization that can interpret, comprehend, and answer questions about your business data**.
 
-The goal of the POC is to show/prove the value of a Generative AI Agent built with Azure Services, with your own data in your own environment. The deliverables are:
+Welcome to the **AI Multi-Agent Architecture Workshop**, designed for organizations seeking to unlock the power of AI-driven intelligent agents. Over this 3-to-5-day interactive workshop, Microsoft architects will guide you step-by-step to build a private, secure AI system tailored to your business needs.
 
-1. Backends API built with Bot Framework and FastAPI(LangServe) and exposed to multiple channels (Web Chat, MS Teams, SMS, Email, Slack, etc)
-2. Frontend web application with a Search and a Bot UI.
+This workshop will teach you how to develop a **multi-agent system** capable of comprehending diverse datasets across various locations. These intelligent agents can answer questions with detailed explanations and source references, providing your organization with a powerful, ChatGPT-like experience designed for enterprise use.
 
-The repo is made to teach you step-by-step on how to build a OpenAI-based RAG-based Multi-Agent architecture. Each Notebook builds on top of each other and ends in building the two applications.
+## What You'll Build
 
-**For Microsoft FTEs:** This is a customer funded VBD, below the assets for the delivery.
+This hands-on workshop will walk you through creating a Proof of Concept (POC) for a **Generative AI Multi-Agent Architecture** using Azure Services. By the end of the workshop, you'll have built:
+
+1. **A Scalable Backend**  
+   Developed with Bot Framework and FastAPI, the backend serves as the engine connecting AI logic to multiple communication channels, including:
+   - Web Chat
+   - Microsoft Teams
+   - SMS
+   - Email
+   - Slack, and more!
+
+2. **A User-Friendly Frontend**  
+   Build a web application that combines:
+   - A **search engine** capable of querying your data intelligently.
+   - A **bot UI** for seamless conversational experiences.
+
+3. **A RAG-Based Multi-Agent Architecture**  
+   Leverage Retrieval-Augmented Generation (RAG) to enable your agents to retrieve precise information and generate accurate responses.
+
+## Workshop Highlights
+
+- **Step-by-Step Guidance**: Each module builds upon the previous one, progressively introducing you to real-world AI architecture concepts.
+- **Custom Enterprise AI**: Create intelligent agents that understand your organization’s data while maintaining privacy and security.
+- **Multi-Channel Capabilities**: Deploy your agents across various platforms for broad accessibility.
+- **Practical Experience**: Learn by doing, with notebooks and code samples tailored for an enterprise setting.
+
+## Why Attend?
+
+By the end of the workshop, you'll have a working knowledge of how to design, build, and deploy AI agents in a multi-agentic architecture. This hands-on experience will help you understand the value of Azure-powered Generative AI in solving real-world business problems.
+
+---
+
+## For Microsoft Employees
+
+This is a **customer-funded Value-Based Delivery (VBD)**. Below, you'll find all the assets and resources needed for a successful workshop delivery.
+
 
 | **Item**                   | **Description**                                                                                                     | **Link**                                                                                                                                                |
 |----------------------------|---------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -25,7 +58,7 @@ The repo is made to teach you step-by-step on how to build a OpenAI-based RAG-ba
 
 
 ---
-**Prerequisites Client 3-5 Days POC**
+## **Prerequisites Client 3-5 Days POC**
 * Azure subscription
 * Microsoft members preferably to be added as Guests in clients Azure AD. If not possible, then customers can issue corporate IDs to Microsoft members
 * A Resource Group (RG)  needs to be set for this Workshop POC, in the customer Azure tenant
@@ -37,7 +70,7 @@ The repo is made to teach you step-by-step on how to build a OpenAI-based RAG-ba
    * Note: Please ensure you have enough core compute quota in your Azure Machine Learning workspace 
 
 ---
-# Architecture 
+## Architecture 
 ![Architecture](./images/GPT-Smart-Search-Architecture.jpg "Architecture")
 
 ## Flow
