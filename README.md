@@ -137,20 +137,37 @@ Note: (Pre-requisite) You need to have an Azure OpenAI service already created
 
       **Note**: If you have never created a `Azure AI Services Multi-Service account` before, please create one manually in the azure portal to read and accept the Responsible AI terms. Once this is deployed, delete this and then use the above deployment button.
 
-5. Clone your Forked repo to your AML Compute Instance. If your repo is private, see below in Troubleshooting section how to clone a private repo.
-6. Make sure you run the notebooks on a **Python 3.12 conda enviroment**.
-7. Install the dependencies on your machine (make sure you do the below pip comand on the same conda environment that you are going to run the notebooks. For example, in AZML compute instance run:
-    ```bash
-    conda create -n GPTSearch python=3.12
-    conda activate GPTSearch
-    pip install -r ./common/requirements.txt
-    conda install ipykernel
-    python -m ipykernel install --user --name=GPTSearch --display-name "GPTSearch (Python 3.12)"
-    ```
-    <br>
-8. Edit the file `credentials.env` with your own values from the services created in step 4.
+      ## Preferred Development Environment - Azure Machine Learning      
+
+         1. Clone your Forked repo to your AML Compute Instance. If your repo is private, see below in Troubleshooting section how to clone a private repo.
+         2. Make sure you run the notebooks on a **Python 3.12 conda enviroment**.
+         3. Install the dependencies on your machine (make sure you do the below pip comand on the same conda environment that you are going to run the notebooks.) For example, in AZML compute instance run:
+   
+          ```bash
+          conda create -n GPTSearch python=3.12
+          conda activate GPTSearch
+          pip install -r ./common/requirements.txt
+          conda install ipykernel
+          python -m ipykernel install --user --name=GPTSearch --display-name "GPTSearch (Python 3.12)"
+          ```
+          <br>
+
+      ## Alternate Development Environment - Visual Studio Code
+
+         1. Create a python virtual environment (.venv)
+            a. When you create the virtual environment, select the /common/requirements.txt
+         
+            Or manually
+            
+            pip install -r ./common/requirements.txt
+
+         2. .venv\scripts\activate
+            
+         3. Pip install ipykernel
+
+5. Edit the file `credentials.env` with your own values from the services created in step 4.
     - For BLOB_SAS_TOKEN and BLOB_CONNECTION_STRING. Go to Storage Account>Security + networking>Shared access signature>Generate SAS
-9. **Run the Notebooks in order** using the "GPTSearch (Python 3.12)" kernel. They build up on top of each other.
+6. **Run the Notebooks in order** using the "GPTSearch (Python 3.12)" kernel(AML) or .venv kernel(vscode). They build up on top of each other.
 
 ---
 
