@@ -116,60 +116,90 @@ This is a **customer-funded Value-Based Delivery (VBD)**. Below, you'll find all
    - Uses [Bot Framework](https://dev.botframework.com/) and [Bot Service](https://azure.microsoft.com/en-us/products/bot-services/) to Host the Bot API Backend and to expose it to multiple channels including MS Teams.
    - Uses also FastAPI to deploy an alternative backend API with streaming capabilites
    
-
 ---
 
 ## **Steps to Run the POC/Accelerator**
 
-Note: (Pre-requisite) You need to have an Azure OpenAI service already created
+### **Pre-requisite**
+You must have an **Azure OpenAI Service** already created.
 
-1. Fork this repo to your Github account.
-2. In Azure OpenAI studio, deploy these models (older models than the ones stated below won't work):
-   - "gpt-4o" 
-   - "gpt-4o-mini"
-   - "text-embedding-3-large"
-   - "tts"
-   - "whisper"
-3. Create a Resource Group where all the assets of this accelerator are going to be. Azure OpenAI can be in different RG or a different Subscription.
-4. ClICK BELOW to create all the Azure Infrastructure needed to run the Notebooks (Azure AI Search, Cognitive Services, etc):
+### **1. Fork the Repository**
+- Fork this repository to your GitHub account.
 
-      [![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fpablomarin%2FGPT-Azure-Search-Engine%2Fmain%2Fazuredeploy.json) 
+### **2. Deploy Required Models**
+In **Azure OpenAI Studio**, deploy the following models:  
+*(Note: Older versions of these models will not work)*
 
-      **Note**: If you have never created a `Azure AI Services Multi-Service account` before, please create one manually in the azure portal to read and accept the Responsible AI terms. Once this is deployed, delete this and then use the above deployment button.
+- `gpt-4o`  
+- `gpt-4o-mini`  
+- `text-embedding-3-large`  
+- `tts`  
+- `whisper`  
 
-      ## Preferred Development Environment - Azure Machine Learning      
+### **3. Create a Resource Group**
+- Create a **Resource Group (RG)** to house all the assets for this accelerator.  
+  - Note: Azure OpenAI services can exist in a different RG or even a different subscription.
 
-         1. Clone your Forked repo to your AML Compute Instance. If your repo is private, see below in Troubleshooting section how to clone a private repo.
-         2. Install the dependencies on your machine (make sure you do the below pip comand on the same Python 3.12 conda environment that you are going to run the notebooks.) For example, in AZML compute instance run:
-   
-          ```bash
-          conda create -n GPTSearch python=3.12
-          conda activate GPTSearch
-          pip install -r ./common/requirements.txt
-          conda install ipykernel
-          python -m ipykernel install --user --name=GPTSearch --display-name "GPTSearch (Python 3.12)"
-          ```
-          <br>
+### **4. Deploy Azure Infrastructure**
+Click the button below to deploy all necessary Azure infrastructure (e.g., Azure AI Search, Cognitive Services, etc.):
 
-      ## Alternate Development Environment - Visual Studio Code
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fpablomarin%2FGPT-Azure-Search-Engine%2Fmain%2Fazuredeploy.json)  
 
-         1. Create a python virtual environment (.venv)
-            a. When you create the virtual environment, select the /common/requirements.txt
-         
-            Or manually
-            
-            pip install -r ./common/requirements.txt
+**Important:**  
+If this is your first time creating an **Azure AI Services Multi-Service Account**, do the following manually:
+1. Go to the Azure portal.
+2. Create the account.
+3. Read and accept the **Responsible AI Terms**.  
+Once done, delete this manually created account and then use the above deployment button.
 
-         2. .venv\scripts\activate
-            
-         3. Pip install ipykernel
+### **5. Choose Your Development Environment**
 
-5. Edit the file `credentials.env` with your own values from the services created in step 4.
-    - For BLOB_SAS_TOKEN and BLOB_CONNECTION_STRING. Go to Storage Account -> Security + networking -> Shared access signature>Generate SAS
-6. **Run the Notebooks in order** using the "GPTSearch (Python 3.12)" kernel(AML) or .venv kernel(vscode). They build up on top of each other.
+#### **Option A: Azure Machine Learning (Preferred)**  
+1. **Clone** your forked repository to your AML Compute Instance.  
+   - If your repository is private, refer to the **Troubleshooting** section for guidance on cloning private repos.  
+2. Install the dependencies in a Conda environment. Run the following commands on the **Python 3.12 Conda environment** you plan to use for the notebooks:
 
+   ```bash
+   conda create -n GPTSearch python=3.12
+   conda activate GPTSearch
+   pip install -r ./common/requirements.txt
+   conda install ipykernel
+   python -m ipykernel install --user --name=GPTSearch --display-name "GPTSearch (Python 3.12)"
+   ```
+
+#### **Option B: Visual Studio Code**  
+1. **Create a Python virtual environment (.venv):**
+   - When creating the virtual environment, select the `./common/requirements.txt` file.
+   - Alternatively, install dependencies manually:
+     ```bash
+     pip install -r ./common/requirements.txt
+     ```
+2. **Activate the virtual environment:**
+   ```bash
+   .venv\scripts\activate
+   ```
+3. Install `ipykernel`:
+   ```bash
+   pip install ipykernel
+   ```
+
+### **6. Configure Credentials**
+Edit the `credentials.env` file with the appropriate values from the services created in Step 4.  
+- To obtain `BLOB_SAS_TOKEN` and `BLOB_CONNECTION_STRING`, navigate to:  
+  **Storage Account > Security + Networking > Shared Access Signature > Generate SAS**
+
+### **7. Run the Notebooks**
+- Execute the notebooks **in order**, as they build on top of each other.  
+- Use the appropriate kernel:
+  - For **AML**, select: `GPTSearch (Python 3.12)`
+  - For **VS Code**, select the `.venv` kernel.
+
+### **Troubleshooting**
+- If cloning a private repository: Refer to the detailed guide [here](#).
+- For issues with dependency installation: Ensure your Python version matches the required version.
 
 ---
+
 
 <details>
 
