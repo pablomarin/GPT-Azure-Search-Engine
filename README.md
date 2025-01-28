@@ -54,7 +54,7 @@ This is a **customer-funded Value-Based Delivery (VBD)**. Below, you'll find all
 | VBD Accreditation for CSAs     | Links for CSAs to get the Accreditation needed to deliver the workshop                                                                      | [Link 1](https://learningplayer.microsoft.com/activity/s9261799/launch) , [Link 2](https://learningplayer.microsoft.com/activity/s9264662/launch) |
 | VBD 3-5 day POC Asset (IP)  | The MVP to be delivered  (this GitHub repo)                                     | [Azure-Cognitive-Search-Azure-OpenAI-Accelerator](https://github.com/MSUSAzureAccelerators/Azure-Cognitive-Search-Azure-OpenAI-Accelerator)                |
 | VBD Workshop Deck          | The deck introducing and explaining the workshop                                                                    | [Intro AOAI GPT Azure Smart Search Engine Accelerator.pptx](https://github.com/MSUSAzureAccelerators/Azure-Cognitive-Search-Azure-OpenAI-Accelerator/blob/main/Intro%20AOAI%20GPT%20Azure%20Smart%20Search%20Engine%20Accelerator.pptx) |
-| CSA Training Video         | 2 Hour Training for Microsoft CSA's                                                                    | POC VBD Training Recording (New video coming soon!) |
+| CSA Training Video         | 2 Hour Training for Microsoft CSA's                                                                    | [POC VBD Training Recording](https://microsoft-my.sharepoint.com/:v:/p/annagross/ETONCWUYCa5EtpmnYjYy9eABK1JV1yo49HDoYjnry1C8-A) |
 
 
 ---
@@ -140,8 +140,7 @@ Note: (Pre-requisite) You need to have an Azure OpenAI service already created
       ## Preferred Development Environment - Azure Machine Learning      
 
          1. Clone your Forked repo to your AML Compute Instance. If your repo is private, see below in Troubleshooting section how to clone a private repo.
-         2. Make sure you run the notebooks on a **Python 3.12 conda enviroment**.
-         3. Install the dependencies on your machine (make sure you do the below pip comand on the same conda environment that you are going to run the notebooks.) For example, in AZML compute instance run:
+         2. Install the dependencies on your machine (make sure you do the below pip comand on the same Python 3.12 conda environment that you are going to run the notebooks.) For example, in AZML compute instance run:
    
           ```bash
           conda create -n GPTSearch python=3.12
@@ -166,8 +165,9 @@ Note: (Pre-requisite) You need to have an Azure OpenAI service already created
          3. Pip install ipykernel
 
 5. Edit the file `credentials.env` with your own values from the services created in step 4.
-    - For BLOB_SAS_TOKEN and BLOB_CONNECTION_STRING. Go to Storage Account>Security + networking>Shared access signature>Generate SAS
+    - For BLOB_SAS_TOKEN and BLOB_CONNECTION_STRING. Go to Storage Account -> Security + networking -> Shared access signature>Generate SAS
 6. **Run the Notebooks in order** using the "GPTSearch (Python 3.12)" kernel(AML) or .venv kernel(vscode). They build up on top of each other.
+
 
 ---
 
@@ -217,4 +217,3 @@ trademarks or logos is subject to and must follow
 [Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general).
 Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
 Any use of third-party trademarks or logos are subject to those third-party's policies.
-
